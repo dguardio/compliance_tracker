@@ -1,0 +1,206 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex justify-between items-center">
+        <div>
+          <nav class="flex" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-4">
+              <li>
+                <%= link_to organization_permissions_path(current_user.organization), 
+                            class: "text-gray-400 hover:text-gray-500" do %>
+                  <svg class="flex-shrink-0 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+                  </svg>
+                  <span class="sr-only">Back to Permissions</span>
+                <% end %>
+              </li>
+              <li>
+                <%= link_to "Permissions", organization_permissions_path(current_user.organization), 
+                            class: "text-gray-500 hover:text-gray-700" %>
+              </li>
+              <li>
+                <div class="flex items-center">
+                  <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <span class="ml-4 text-sm font-medium text-gray-500">New Permission</span>
+                </div>
+              </li>
+            </ol>
+          </nav>
+          <h1 class="mt-4 text-3xl font-bold text-gray-900">Create New Permission</h1>
+          <p class="mt-2 text-gray-600">Define a new permission for users or roles in your organization</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+      <%= form_with model: [current_user.organization, @permission], local: true, class: "space-y-8", 
+                    data: { controller: "permission-form", organization_id: current_user.organization.id } do |f| %>
+        <% if @permission.errors.any? %>
+          <div class="px-6 py-4 bg-red-50 border-b border-red-200">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">
+                  There were <%= pluralize(@permission.errors.count, 'error') %> with your submission:
+                </h3>
+                <div class="mt-2 text-sm text-red-700">
+                  <ul class="list-disc pl-5 space-y-1">
+                    <% @permission.errors.full_messages.each do |message| %>
+                      <li><%= message %></li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Basic Information -->
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-medium text-gray-900">Basic Information</h3>
+          <p class="mt-1 text-sm text-gray-500">Define the core details of this permission</p>
+        </div>
+        
+        <div class="px-6 space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Permission Name -->
+            <div>
+              <%= f.label :name, "Permission Name", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.text_field :name, placeholder: "e.g., Manage Users", 
+                              class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+              <p class="mt-1 text-xs text-gray-500">A descriptive name for this permission</p>
+            </div>
+
+            <!-- Action -->
+            <div>
+              <%= f.label :action, "Action", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.select :action, options_for_select(@actions.map { |a| [a.titleize, a] }, @permission.action), 
+                          { prompt: "Select an action..." }, 
+                          class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+              <p class="mt-1 text-xs text-gray-500">What action this permission allows</p>
+            </div>
+          </div>
+
+          <!-- Grantee Section -->
+          <div class="border-t border-gray-200 pt-6">
+            <h4 class="text-md font-medium text-gray-900 mb-4">Grantee (Who gets this permission)</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Grantee Type -->
+              <div>
+                <%= f.label :grantee_type, "Grantee Type", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= f.select :grantee_type, options_for_select([['User', 'User'], ['Role', 'Role']], @permission.grantee_type), 
+                            { prompt: "Select grantee type..." }, 
+                            { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", 
+                              data: { permission_form_target: "granteeType", action: "change->permission-form#updateGranteeOptions" } } %>
+              </div>
+
+              <!-- Grantee Selection -->
+              <div>
+                <%= f.label :grantee_id, "Grantee", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= f.select :grantee_id, [], 
+                            { prompt: "Select grantee type first..." }, 
+                            { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                              data: { permission_form_target: "granteeId" } } %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Resource Section -->
+          <div class="border-t border-gray-200 pt-6">
+            <h4 class="text-md font-medium text-gray-900 mb-4">Resource (What this permission applies to)</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Resource Type -->
+              <div>
+                <%= f.label :resource_type, "Resource Type", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= f.select :resource_type, options_for_select(@resource_types.map { |rt| [rt.titleize, rt] }, @permission.resource_type), 
+                            { prompt: "Select resource type..." }, 
+                            { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", 
+                              data: { permission_form_target: "resourceType", action: "change->permission-form#updateResourceOptions" } } %>
+              </div>
+
+              <!-- Resource Selection -->
+              <div>
+                <%= f.label :resource_id, "Specific Resource (Optional)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= f.select :resource_id, [], 
+                            { prompt: "Select resource type first...", include_blank: "All resources of this type" }, 
+                            { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                              data: { permission_form_target: "resourceId" } } %>
+                <p class="mt-1 text-xs text-gray-500">Leave blank to apply to all resources of this type</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Conditions Section -->
+          <div class="border-t border-gray-200 pt-6">
+            <h4 class="text-md font-medium text-gray-900 mb-4">Conditions (Optional)</h4>
+            <p class="text-sm text-gray-500 mb-4">Define additional conditions that must be met for this permission to apply</p>
+            
+            <div class="space-y-4">
+              <!-- User Conditions -->
+              <div>
+                <%= f.label :user_conditions, "User Conditions (JSON)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= f.text_area :user_conditions, 
+                               value: @permission.conditions&.dig('user_conditions')&.to_json, 
+                               placeholder: '{"department_id": 1, "role": "manager"}', 
+                               rows: 3,
+                               class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono" %>
+                <p class="mt-1 text-xs text-gray-500">JSON conditions that must be true about the user</p>
+              </div>
+
+              <!-- Time Conditions -->
+              <div>
+                <%= f.label :time_conditions, "Time Conditions (JSON)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= f.text_area :time_conditions, 
+                               value: @permission.conditions&.dig('time_conditions')&.to_json, 
+                               placeholder: '{"start_time": "09:00", "end_time": "17:00", "days": ["monday", "tuesday"]}', 
+                               rows: 3,
+                               class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono" %>
+                <p class="mt-1 text-xs text-gray-500">Time-based conditions for when this permission applies</p>
+              </div>
+
+              <!-- Data Conditions -->
+              <div>
+                <%= f.label :data_conditions, "Data Conditions (JSON)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= f.text_area :data_conditions, 
+                               value: @permission.conditions&.dig('data_conditions')&.to_json, 
+                               placeholder: '{"status": "active", "priority": "high"}', 
+                               rows: 3,
+                               class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono" %>
+                <p class="mt-1 text-xs text-gray-500">Conditions based on the resource data</p>
+              </div>
+
+              <!-- Custom Rules -->
+              <div>
+                <%= f.label :custom_rules, "Custom Rules (JSON)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= f.text_area :custom_rules, 
+                               value: @permission.conditions&.dig('custom_rules')&.to_json, 
+                               placeholder: '{"custom_field": "value", "complex_condition": true}', 
+                               rows: 3,
+                               class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono" %>
+                <p class="mt-1 text-xs text-gray-500">Any additional custom conditions or rules</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+          <%= link_to organization_permissions_path(current_user.organization), 
+                      class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
+            Cancel
+          <% end %>
+          <%= f.submit "Create Permission", 
+                      class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

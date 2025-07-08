@@ -1,0 +1,219 @@
+<% content_for :title, "#{@role.name} - #{current_user.organization.name}" %>
+
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-6">
+        <div>
+          <nav class="flex" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-4">
+              <li>
+                <%= link_to organization_roles_path(current_user.organization), 
+                            class: "text-gray-400 hover:text-gray-500" do %>
+                  <svg class="flex-shrink-0 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+                  </svg>
+                <% end %>
+              </li>
+              <li>
+                <%= link_to "Roles", organization_roles_path(current_user.organization), 
+                            class: "text-gray-500 hover:text-gray-700" %>
+              </li>
+              <li>
+                <span class="text-gray-400">/</span>
+              </li>
+              <li>
+                <span class="text-gray-900 font-medium"><%= @role.name %></span>
+              </li>
+            </ol>
+          </nav>
+          <h1 class="mt-2 text-3xl font-bold text-gray-900"><%= @role.name %></h1>
+          <p class="mt-1 text-sm text-gray-500">
+            Role details and assigned users
+          </p>
+        </div>
+        <div class="flex space-x-3">
+          <%= link_to edit_organization_role_path(current_user.organization, @role), 
+                      class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
+            <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+            Edit Role
+          <% end %>
+          <%= link_to organization_role_path(current_user.organization, @role), 
+                      method: :delete,
+                      data: { confirm: "Are you sure you want to delete this role?" },
+                      class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" do %>
+            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+            Delete Role
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Role Details -->
+      <div class="lg:col-span-1">
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">Role Details</h3>
+          </div>
+          <div class="px-6 py-4">
+            <dl class="space-y-4">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Name</dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= @role.name %></dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Resource Type</dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= @role.resource_type %></dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Resource</dt>
+                <dd class="mt-1 text-sm text-gray-900">
+                  <% if @role.resource %>
+                    <%= @role.resource.name %>
+                  <% else %>
+                    <span class="text-gray-400">All resources of this type</span>
+                  <% end %>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Created</dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= @role.created_at.strftime("%B %d, %Y") %></dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= @role.updated_at.strftime("%B %d, %Y") %></dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <!-- Assigned Users -->
+      <div class="lg:col-span-2">
+        <div class="bg-white shadow rounded-lg">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+              <h3 class="text-lg font-medium text-gray-900">Assigned Users</h3>
+              <span class="text-sm text-gray-500"><%= @users_with_role.count %> users</span>
+            </div>
+          </div>
+          <div class="px-6 py-4">
+            <% if @users_with_role.any? %>
+              <ul class="divide-y divide-gray-200">
+                <% @users_with_role.each do |user| %>
+                  <li class="py-4">
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-10 w-10">
+                          <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                            <span class="text-sm font-medium text-indigo-600">
+                              <%= user.first_name&.first&.upcase %><%= user.last_name&.first&.upcase %>
+                            </span>
+                          </div>
+                        </div>
+                        <div class="ml-4">
+                          <div class="text-sm font-medium text-gray-900">
+                            <%= user.full_name %>
+                          </div>
+                          <div class="text-sm text-gray-500">
+                            <%= user.email %>
+                          </div>
+                          <div class="text-xs text-gray-400">
+                            <% if user.department %>
+                              <%= user.department.name %>
+                            <% end %>
+                            <% if user.team %>
+                              → <%= user.team.name %>
+                            <% end %>
+                            <% if user.unit %>
+                              → <%= user.unit.name %>
+                            <% end %>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="flex items-center space-x-2">
+                        <%= link_to "View Profile", organization_user_path(current_user.organization, user), 
+                                    class: "text-indigo-600 hover:text-indigo-900 text-sm font-medium" %>
+                        <%= link_to "Remove from Role", 
+                                    organization_role_remove_user_path(current_user.organization, @role, user_id: user.id),
+                                    method: :delete,
+                                    data: { confirm: "Are you sure you want to remove #{user.full_name} from this role?" },
+                                    class: "text-red-600 hover:text-red-900 text-sm font-medium" %>
+                      </div>
+                    </div>
+                  </li>
+                <% end %>
+              </ul>
+            <% else %>
+              <div class="text-center py-8">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No users assigned</h3>
+                <p class="mt-1 text-sm text-gray-500">
+                  This role doesn't have any users assigned yet.
+                </p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Permissions for this Role -->
+        <div class="mt-8 bg-white shadow rounded-lg">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+              <h3 class="text-lg font-medium text-gray-900">Permissions for this Role</h3>
+              <span class="text-sm text-gray-500"><%= @permissions_for_role.count %> permissions</span>
+            </div>
+          </div>
+          <div class="px-6 py-4">
+            <% if @permissions_for_role.any? %>
+              <ul class="divide-y divide-gray-200">
+                <% @permissions_for_role.each do |permission| %>
+                  <li class="py-4">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <div class="text-sm font-medium text-gray-900">
+                          <%= link_to permission.name, organization_permission_path(current_user.organization, permission), 
+                                      class: "hover:text-indigo-600" %>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                          <%= permission.action.titleize %> on <%= permission.resource_type %>
+                          <% if permission.resource %>
+                            - <%= permission.resource.name %>
+                          <% end %>
+                        </div>
+                      </div>
+                      <div class="flex items-center space-x-2">
+                        <%= link_to "View", organization_permission_path(current_user.organization, permission), 
+                                    class: "text-indigo-600 hover:text-indigo-900 text-sm font-medium" %>
+                      </div>
+                    </div>
+                  </li>
+                <% end %>
+              </ul>
+            <% else %>
+              <div class="text-center py-8">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No permissions found</h3>
+                <p class="mt-1 text-sm text-gray-500">
+                  This role doesn't have any specific permissions assigned.
+                </p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

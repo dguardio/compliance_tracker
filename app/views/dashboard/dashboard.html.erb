@@ -1,0 +1,226 @@
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="px-4 py-6 sm:px-0">
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p class="mt-1 text-sm text-gray-500">
+            Welcome to <%= @organization.name %> - Compliance Management Overview
+          </p>
+        </div>
+        <div class="flex space-x-3">
+          <%= link_to "Manage Organization", organization_path(@organization), class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+          <%= link_to "Add User", new_users_registration_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="px-4 py-6 sm:px-0">
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <!-- Departments -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Departments</dt>
+                  <dd class="text-lg font-medium text-gray-900"><%= @stats[:departments] %></dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Teams -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Teams</dt>
+                  <dd class="text-lg font-medium text-gray-900"><%= @stats[:teams] %></dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Units -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Units</dt>
+                  <dd class="text-lg font-medium text-gray-900"><%= @stats[:units] %></dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Users -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Users</dt>
+                  <dd class="text-lg font-medium text-gray-900"><%= @stats[:users] %></dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Organization Details -->
+    <div class="px-4 py-6 sm:px-0">
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Organization Details</h3>
+          
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div>
+              <h4 class="text-sm font-medium text-gray-500">Industry</h4>
+              <p class="mt-1 text-sm text-gray-900"><%= @organization.settings['industry'] || 'Not specified' %></p>
+            </div>
+            
+            <div>
+              <h4 class="text-sm font-medium text-gray-500">Jurisdiction</h4>
+              <p class="mt-1 text-sm text-gray-900"><%= @organization.settings['jurisdiction'] || 'Not specified' %></p>
+            </div>
+            
+            <div>
+              <h4 class="text-sm font-medium text-gray-500">Status</h4>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= @organization.active? ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                <%= @organization.status.titleize %>
+              </span>
+            </div>
+            
+            <div>
+              <h4 class="text-sm font-medium text-gray-500">Domain</h4>
+              <p class="mt-1 text-sm text-gray-900"><%= @organization.domain || 'Not specified' %></p>
+            </div>
+          </div>
+
+          <% if @organization.settings['compliance_keywords'].present? %>
+            <div class="mt-6">
+              <h4 class="text-sm font-medium text-gray-500">Compliance Keywords</h4>
+              <div class="mt-2 flex flex-wrap gap-2">
+                <% @organization.settings['compliance_keywords'].each do |keyword| %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <%= keyword %>
+                  </span>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Users -->
+    <div class="px-4 py-6 sm:px-0">
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Recent Users</h3>
+          
+          <% if @users.any? %>
+            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+              <table class="min-w-full divide-y divide-gray-300">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <% @users.limit(10).each do |user| %>
+                    <tr>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                          <div class="flex-shrink-0 h-10 w-10">
+                            <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center">
+                              <span class="text-white font-semibold text-sm">
+                                <%= user.first_name&.first&.upcase || user.email.first.upcase %>
+                              </span>
+                            </div>
+                          </div>
+                          <div class="ml-4">
+                            <div class="text-sm font-medium text-gray-900"><%= user.full_name %></div>
+                            <div class="text-sm text-gray-500"><%= user.email %></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">
+                          <% user.roles.each do |role| %>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                              <%= role.name.titleize %>
+                            </span>
+                          <% end %>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <%= user.department&.name || '-' %>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <%= user.team&.name || '-' %>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <%= user.unit&.name || '-' %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <div class="text-center py-8">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">No users yet</h3>
+              <p class="mt-1 text-sm text-gray-500">Get started by adding users to your organization.</p>
+              <div class="mt-6">
+                <%= link_to new_users_registration_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
+                  <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                  </svg>
+                  Add User
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

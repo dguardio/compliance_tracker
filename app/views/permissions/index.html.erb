@@ -1,0 +1,176 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Permissions Management</h1>
+          <p class="mt-2 text-gray-600">Manage user and role permissions across your organization</p>
+        </div>
+        <div class="flex space-x-3">
+          <%= link_to organization_roles_path(current_user.organization), 
+                      class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
+            <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            Manage Roles
+          <% end %>
+          <%= link_to new_organization_permission_path(current_user.organization), 
+                      class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
+            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            New Permission
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="bg-white shadow rounded-lg mb-6">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900">Search & Filters</h3>
+      </div>
+      <div class="px-6 py-4">
+        <%= form_with url: organization_permissions_path(current_user.organization), method: :get, local: true, class: "space-y-4" do |f| %>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Search -->
+            <div>
+              <%= f.label :search, "Search", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.text_field :search, value: params[:search], placeholder: "Search permissions...", 
+                              class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+            </div>
+
+            <!-- Grantee Type Filter -->
+            <div>
+              <%= f.label :grantee_type, "Grantee Type", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.select :grantee_type, options_for_select([['All', ''], ['User', 'User'], ['Role', 'Role']], params[:grantee_type]), 
+                          {}, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+            </div>
+
+            <!-- Action Filter -->
+            <div>
+              <%= f.label :permission_action, "Action", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.select :permission_action, options_for_select([["All", ""]] + @actions.map { |a| [a.titleize, a] }, params[:permission_action]), 
+                          {}, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+            </div>
+
+            <!-- Resource Type Filter -->
+            <div>
+              <%= f.label :resource_type, "Resource Type", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.select :resource_type, options_for_select([['All', '']] + @resource_types.map { |rt| [rt.titleize, rt] }, params[:resource_type]), 
+                          {}, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center">
+            <div class="flex space-x-3">
+              <%= f.submit "Apply Filters", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+              <%= link_to "Clear", organization_permissions_path(current_user.organization), 
+                          class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+            </div>
+            <div class="text-sm text-gray-500">
+              <% if @permissions.respond_to?(:total_count) %>
+                <%= pluralize(@permissions.total_count, 'permission') %> found
+              <% else %>
+                <%= pluralize(@permissions.count, 'permission') %> found
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Permissions Table -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+      <% if @permissions.any? %>
+        <ul class="divide-y divide-gray-200">
+          <% @permissions.each do |permission| %>
+            <li class="px-6 py-4 hover:bg-gray-50">
+              <div class="flex items-center justify-between">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0">
+                      <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                        <svg class="h-5 w-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center space-x-2">
+                        <h3 class="text-sm font-medium text-gray-900 truncate">
+                          <%= permission.name %>
+                        </h3>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <%= permission.action.titleize %>
+                        </span>
+                      </div>
+                      <div class="mt-1 flex items-center space-x-4 text-sm text-gray-500">
+                        <span>
+                          <span class="font-medium">Grantee:</span> 
+                          <%= permission.grantee_type %> - 
+                          <% if permission.grantee_type == 'User' %>
+                            <%= permission.grantee&.full_name || 'N/A' %>
+                          <% else %>
+                            <%= permission.grantee&.name || 'N/A' %>
+                          <% end %>
+                        </span>
+                        <span>
+                          <span class="font-medium">Resource:</span> 
+                          <%= permission.resource_type %> - <%= permission.resource&.name || 'All' %>
+                        </span>
+                        <span>
+                          <span class="font-medium">Created:</span> 
+                          <%= permission.created_at.strftime("%b %d, %Y") %>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <%= link_to organization_permission_path(current_user.organization, permission), 
+                              class: "text-indigo-600 hover:text-indigo-900 text-sm font-medium" do %>
+                    View
+                  <% end %>
+                  <%= link_to edit_organization_permission_path(current_user.organization, permission), 
+                              class: "text-gray-600 hover:text-gray-900 text-sm font-medium" do %>
+                    Edit
+                  <% end %>
+                  <%= link_to organization_permission_path(current_user.organization, permission), 
+                              method: :delete, 
+                              data: { confirm: 'Are you sure you want to delete this permission?' },
+                              class: "text-red-600 hover:text-red-900 text-sm font-medium" do %>
+                    Delete
+                  <% end %>
+                </div>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+
+        <!-- Pagination -->
+        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+          <%= paginate @permissions %>
+        </div>
+      <% else %>
+        <div class="text-center py-12">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No permissions found</h3>
+          <p class="mt-1 text-sm text-gray-500">Get started by creating a new permission.</p>
+          <div class="mt-6">
+            <%= link_to new_organization_permission_path(current_user.organization), 
+                        class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
+              <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+              </svg>
+              New Permission
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
