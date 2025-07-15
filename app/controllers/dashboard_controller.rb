@@ -4,7 +4,7 @@ class DashboardController < ApplicationController
 
   def index
     if user_signed_in?
-      if current_organization
+      if current_user.organization
         redirect_to dashboard_path
       else
         redirect_to new_organization_path, notice: 'Please create or join an organization to continue.'
@@ -15,7 +15,7 @@ class DashboardController < ApplicationController
   end
 
   def dashboard
-    @organization = current_organization
+    @organization = current_user.organization
     @departments = @organization.departments.includes(:teams, :units)
     @users = @organization.users.includes(:roles, :department, :team, :unit)
     @compliance_frameworks = @organization.compliance_frameworks.includes(:compliance_requirements)
@@ -43,7 +43,7 @@ class DashboardController < ApplicationController
   private
 
   def ensure_user_has_organization
-    return if current_organization
+    return if current_user.organization
 
     redirect_to new_organization_path, alert: 'You must be part of an organization to access the dashboard.'
   end

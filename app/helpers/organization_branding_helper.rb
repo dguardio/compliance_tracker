@@ -1,16 +1,16 @@
 module OrganizationBrandingHelper
   def organization_css_variables
-    return {} unless current_organization
+    return {} unless current_user.organization
     
-    current_organization.css_variables.map do |key, value|
+    current_user.organization.css_variables.map do |key, value|
       "#{key}: #{value};"
     end.join("\n")
   end
 
   def organization_brand_styles
-    return "" unless current_organization
+    return "" unless current_user.organization
     
-    org = current_organization
+    org = current_user.organization
     <<~CSS
       :root {
         #{organization_css_variables}
@@ -70,37 +70,37 @@ module OrganizationBrandingHelper
   end
 
   def organization_logo
-    return nil unless current_organization&.logo_url.present?
+    return nil unless current_user.organization&.logo_url.present?
     
-    image_tag current_organization.logo_url, 
-              alt: "#{current_organization.name} Logo", 
+    image_tag current_user.organization.logo_url, 
+              alt: "#{current_user.organization.name} Logo", 
               class: "h-8 w-auto"
   end
 
   def organization_favicon
-    return nil unless current_organization&.favicon_url.present?
-    favicon_link_tag current_organization.favicon_url
+    return nil unless current_user.organization&.favicon_url.present?
+    favicon_link_tag current_user.organization.favicon_url
   end
 
   def organization_welcome_message
-    current_organization&.welcome_message || "Welcome to #{current_organization&.name || 'Compliance Tracker'}"
+    current_user.organization&.welcome_message || "Welcome to #{current_user.organization&.name || 'Compliance Tracker'}"
   end
 
   def organization_timezone
-    current_organization&.timezone || 'UTC'
+    current_user.organization&.timezone || 'UTC'
   end
 
   def organization_locale
-    current_organization&.locale || 'en'
+    current_user.organization&.locale || 'en'
   end
 
   def organization_currency
-    current_organization&.currency || 'USD'
+    current_user.organization&.currency || 'USD'
   end
 
   def format_organization_date(date)
     return date unless date
-    format = current_organization&.date_format || 'MM/DD/YYYY'
+    format = current_user.organization&.date_format || 'MM/DD/YYYY'
     case format
     when 'MM/DD/YYYY'
       date.strftime('%m/%d/%Y')
@@ -115,7 +115,7 @@ module OrganizationBrandingHelper
 
   def format_organization_time(time)
     return time unless time
-    format = current_organization&.time_format || '12h'
+    format = current_user.organization&.time_format || '12h'
     case format
     when '12h'
       time.strftime('%I:%M %p')
@@ -127,8 +127,8 @@ module OrganizationBrandingHelper
   end
 
   def organization_privacy_badge
-    return "" unless current_organization
-    level = current_organization.privacy_level
+    return "" unless current_user.organization
+    level = current_user.organization.privacy_level
     case level
     when 'high'
       content_tag :span, "High Privacy", class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
@@ -142,16 +142,16 @@ module OrganizationBrandingHelper
   end
 
   def organization_compliance_badges
-    return [] unless current_organization&.compliance_keywords.present?
-    current_organization.compliance_keywords.map do |keyword|
+    return [] unless current_user.organization&.compliance_keywords.present?
+    current_user.organization.compliance_keywords.map do |keyword|
       content_tag :span, keyword, 
                   class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-1"
     end
   end
 
   def organization_retention_info
-    return "" unless current_organization
-    days = current_organization.data_retention_days
+    return "" unless current_user.organization
+    days = current_user.organization.data_retention_days
     years = (days / 365.0).round(1)
     content_tag :div, class: "text-sm text-gray-600" do
       "Data retention: #{years} years (#{days} days)"
@@ -159,8 +159,8 @@ module OrganizationBrandingHelper
   end
 
   def organization_2fa_status
-    return "" unless current_organization
-    if current_organization.require_2fa
+    return "" unless current_user.organization
+    if current_user.organization.require_2fa
       content_tag :span, "2FA Required", 
                   class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
     else
@@ -170,8 +170,8 @@ module OrganizationBrandingHelper
   end
 
   def organization_session_timeout
-    return "" unless current_organization
-    minutes = current_organization.session_timeout_minutes
+    return "" unless current_user.organization
+    minutes = current_user.organization.session_timeout_minutes
     hours = (minutes / 60.0).round(1)
     content_tag :div, class: "text-sm text-gray-600" do
       "Session timeout: #{hours} hours"

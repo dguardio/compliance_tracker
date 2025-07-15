@@ -5,7 +5,7 @@ class ProvidersController < ApplicationController
 
   def index
     # Show both platform-wide and organization-specific providers
-    @providers = Provider.available_for_organization(current_organization)
+    @providers = Provider.available_for_organization(current_user.organization)
                         .includes(:compliance_frameworks)
                         .order(:name)
                         .page(params[:page])
@@ -18,8 +18,8 @@ class ProvidersController < ApplicationController
     @providers = @providers.where(provider_type: params[:provider_type]) if params[:provider_type].present?
 
     # Get filter options
-    @jurisdictions = Provider.available_for_organization(current_organization).distinct.pluck(:jurisdiction).compact.sort
-    @countries = Provider.available_for_organization(current_organization).distinct.pluck(:country).compact.sort
+    @jurisdictions = Provider.available_for_organization(current_user.organization).distinct.pluck(:jurisdiction).compact.sort
+    @countries = Provider.available_for_organization(current_user.organization).distinct.pluck(:country).compact.sort
     @provider_types = Provider.provider_types.keys
   end
 
@@ -33,7 +33,7 @@ class ProvidersController < ApplicationController
 
   def new
     @provider = Provider.new
-    @provider.organization = current_organization unless current_user.super_admin?
+    @provider.organization = current_user.organization unless current_user.super_admin?
   end
 
   def create
@@ -41,7 +41,7 @@ class ProvidersController < ApplicationController
     
     # Set organization for non-super admins
     unless current_user.super_admin?
-      @provider.organization = current_organization
+      @provider.organization = current_user.organization
     end
 
     if @provider.save
@@ -86,14 +86,14 @@ class ProvidersController < ApplicationController
   end
 
   def recommendations
-    @recommendation_service = ProviderRecommendationService.new(current_organization)
+    @recommendation_service = ProviderRecommendationService.new(current_user.organization)
     @recommendations = @recommendation_service.recommendations_with_explanations
     @essential_providers = @recommendation_service.essential_providers
     @industry_providers = @recommendation_service.industry_specific_providers
   end
 
   def auto_assign
-    @recommendation_service = ProviderRecommendationService.new(current_organization)
+    @recommendation_service = ProviderRecommendationService.new(current_user.organization)
     
     begin
       assigned_count = @recommendation_service.auto_assign_providers
@@ -115,9 +115,9 @@ class ProvidersController < ApplicationController
     platform_providers = Provider.platform_wide.where(id: provider_ids)
     
     platform_providers.each do |platform_provider|
-      next if current_organization.providers.exists?(code: platform_provider.code)
+      next if current_user.organization.providers.exists?(code: platform_provider.code)
       
-      current_organization.providers.create!(
+      current_user.organization.providers.create!(
         name: platform_provider.name,
         code: platform_provider.code,
         description: platform_provider.description,
@@ -139,7 +139,7 @@ class ProvidersController < ApplicationController
   private
 
   def set_provider
-    @provider = Provider.available_for_organization(current_organization).find(params[:id])
+    @provider = Provider.available_for_organization(current_user.organization).find(params[:id])
   end
 
   def authorize_provider

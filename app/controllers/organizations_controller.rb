@@ -70,17 +70,7 @@ class OrganizationsController < ApplicationController
     end
   end
 
-  # POST /switch_organization
-  def switch_organization
-    org = current_user.organizations.find_by(id: params[:organization_id])
-    if org
-      self.current_organization = org
-      flash[:notice] = "Switched to organization: #{org.name}"
-    else
-      flash[:alert] = "You do not have access to that organization."
-    end
-    redirect_back fallback_location: root_path
-  end
+  # Switch organization logic is deprecated; use current_user.organization only
 
   private
 
