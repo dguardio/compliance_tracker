@@ -10,799 +10,703 @@
 
 # Clear existing data
 puts 'Clearing existing data...'
-Permission.destroy_all
 User.destroy_all
-Role.destroy_all
-Unit.destroy_all
-Team.destroy_all
-Department.destroy_all
 Organization.destroy_all
+Role.destroy_all
+Permission.destroy_all
+Provider.destroy_all
+ComplianceFramework.destroy_all
+ComplianceRequirement.destroy_all
+ComplianceControl.destroy_all
+Document.destroy_all
 
-# Helper method to create permissions
-def create_permission(organization, name, action, resource_type, resource, grantee, conditions = {})
-  puts "Creating permission: #{name}"
-  puts "  resource_type: #{resource_type.inspect}"
-  puts "  resource: #{resource.inspect}"
-  puts "  grantee: #{grantee.inspect}"
-
-  permission = Permission.create!(
-    organization: organization,
-    name: name,
-    action: action,
-    resource_type: resource_type,
-    resource_id: resource&.id,
-    grantee_type: grantee.class.name,
-    grantee_id: grantee.id,
-    conditions: conditions
-  )
-
-  puts "  Created successfully: #{permission.id}"
-  permission
-end
-
-# Create Organizations
+# Create organizations
 puts 'Creating organizations...'
-acme_corp = Organization.create!(
+organizations = []
+
+organizations << Organization.create!(
   name: 'Acme Corporation',
-  slug: 'acme-corp',
-  domain: 'acme.com',
+  slug: 'acme-corporation',
+  domain: 'acme-corp.com',
   status: 'active',
   settings: {
     industry: 'Technology',
     jurisdiction: 'US',
-    compliance_keywords: ['data privacy', 'cybersecurity', 'GDPR'],
-    exclusion_terms: %w[wildlife agriculture]
+    size: 'large',
+    description: 'A leading technology company specializing in software solutions',
+    website: 'https://acme-corp.com',
+    contact_email: 'info@acme-corp.com',
+    contact_phone: '+1-555-0123',
+    state: 'California',
+    country: 'United States',
+    timezone: 'America/Los_Angeles',
+    locale: 'en',
+    currency: 'USD',
+    primary_color: '#2563EB',
+    secondary_color: '#64748B',
+    accent_color: '#10B981',
+    brand_colors: {
+      primary: '#2563EB',
+      secondary: '#64748B',
+      accent: '#10B981',
+      text: '#1F2937',
+      background: '#FFFFFF',
+      success: '#10B981',
+      warning: '#F59E0B',
+      error: '#EF4444'
+    },
+    privacy_level: 'standard',
+    data_retention_days: 2555,
+    allow_external_sharing: true,
+    require_2fa: true,
+    session_timeout_minutes: 480,
+    auto_approval_enabled: false,
+    document_expiry_warning_days: 30,
+    compliance_keywords: ['SOX', 'GDPR', 'ISO 27001'],
+    exclusion_terms: %w[confidential internal],
+    notification_preferences: {
+      email: { document_approval: true, compliance_deadlines: true, risk_alerts: true },
+      in_app: { document_approval: true, compliance_deadlines: true, risk_alerts: true },
+      frequency: 'immediate'
+    },
+    ai_settings: { content_analysis: true, risk_assessment: true, auto_tagging: true },
+    show_analytics: true,
+    show_recommendations: true,
+    api_enabled: true
   }
 )
 
-tech_startup = Organization.create!(
-  name: 'TechStart Inc',
-  slug: 'techstart',
-  domain: 'techstart.com',
+organizations << Organization.create!(
+  name: 'Global Financial Services',
+  slug: 'global-financial-services',
+  domain: 'globalfinancial.com',
   status: 'active',
   settings: {
-    industry: 'Software',
+    industry: 'Financial Services',
     jurisdiction: 'US',
-    compliance_keywords: ['software licensing', 'intellectual property'],
-    exclusion_terms: %w[manufacturing chemicals]
+    size: 'large',
+    description: 'International financial services and banking',
+    website: 'https://globalfinancial.com',
+    contact_email: 'contact@globalfinancial.com',
+    contact_phone: '+1-555-0456',
+    state: 'New York',
+    country: 'United States',
+    timezone: 'America/New_York',
+    locale: 'en',
+    currency: 'USD',
+    primary_color: '#059669',
+    secondary_color: '#374151',
+    accent_color: '#F59E0B',
+    brand_colors: {
+      primary: '#059669',
+      secondary: '#374151',
+      accent: '#F59E0B',
+      text: '#111827',
+      background: '#F9FAFB',
+      success: '#059669',
+      warning: '#F59E0B',
+      error: '#DC2626'
+    },
+    privacy_level: 'high',
+    data_retention_days: 3650,
+    allow_external_sharing: false,
+    require_2fa: true,
+    session_timeout_minutes: 240,
+    auto_approval_enabled: false,
+    document_expiry_warning_days: 60,
+    compliance_keywords: ['SOX', 'GLBA', 'PCI DSS', 'Basel III'],
+    exclusion_terms: %w[confidential restricted internal],
+    notification_preferences: {
+      email: { document_approval: true, compliance_deadlines: true, risk_alerts: true },
+      in_app: { document_approval: true, compliance_deadlines: true, risk_alerts: true },
+      frequency: 'immediate'
+    },
+    ai_settings: { content_analysis: true, risk_assessment: true, compliance_mapping: true },
+    show_analytics: true,
+    show_recommendations: false,
+    api_enabled: false
   }
 )
 
-# Create Departments
-puts 'Creating departments...'
-acme_legal = acme_corp.departments.create!(
-  name: 'Legal Department',
-  slug: 'legal',
+organizations << Organization.create!(
+  name: 'Healthcare Solutions Inc',
+  slug: 'healthcare-solutions-inc',
+  domain: 'healthcare-solutions.com',
   status: 'active',
   settings: {
-    description: 'Handles all legal and compliance matters',
-    compliance_focus: ['regulatory compliance', 'contract management'],
-    department_type: 'Legal'
+    industry: 'Healthcare',
+    jurisdiction: 'US',
+    size: 'medium',
+    description: 'Healthcare technology and compliance solutions',
+    website: 'https://healthcare-solutions.com',
+    contact_email: 'info@healthcare-solutions.com',
+    contact_phone: '+1-555-0789',
+    state: 'Texas',
+    country: 'United States',
+    timezone: 'America/Chicago',
+    locale: 'en',
+    currency: 'USD',
+    primary_color: '#7C3AED',
+    secondary_color: '#6B7280',
+    accent_color: '#EC4899',
+    brand_colors: {
+      primary: '#7C3AED',
+      secondary: '#6B7280',
+      accent: '#EC4899',
+      text: '#1F2937',
+      background: '#FFFFFF',
+      success: '#10B981',
+      warning: '#F59E0B',
+      error: '#EF4444'
+    },
+    privacy_level: 'high',
+    data_retention_days: 2555,
+    allow_external_sharing: false,
+    require_2fa: true,
+    session_timeout_minutes: 360,
+    auto_approval_enabled: false,
+    document_expiry_warning_days: 45,
+    compliance_keywords: ['HIPAA', 'HITECH', 'FDA', 'ISO 13485'],
+    exclusion_terms: %w[PHI confidential restricted],
+    notification_preferences: {
+      email: { document_approval: true, compliance_deadlines: true, risk_alerts: true },
+      in_app: { document_approval: true, compliance_deadlines: true, risk_alerts: true },
+      frequency: 'daily'
+    },
+    ai_settings: { content_analysis: true, risk_assessment: true, document_summarization: true },
+    show_analytics: true,
+    show_recommendations: true,
+    api_enabled: true
   }
 )
 
-acme_it = acme_corp.departments.create!(
-  name: 'IT Department',
-  slug: 'it',
-  status: 'active',
-  settings: {
-    description: 'Information Technology and Security',
-    compliance_focus: ['cybersecurity', 'data protection'],
-    department_type: 'Technology'
-  }
-)
-
-tech_legal = tech_startup.departments.create!(
-  name: 'Legal & Compliance',
-  slug: 'legal-compliance',
-  status: 'active',
-  settings: {
-    description: 'Legal and compliance operations',
-    compliance_focus: ['software compliance', 'licensing'],
-    department_type: 'Legal'
-  }
-)
-
-# Create Teams
-puts 'Creating teams...'
-acme_legal_compliance = acme_legal.teams.create!(
-  name: 'Compliance Team',
-  slug: 'compliance',
-  status: 'active',
-  settings: {
-    description: 'Regulatory compliance specialists',
-    team_type: 'Compliance',
-    compliance_responsibilities: ['regulatory monitoring', 'policy development']
-  }
-)
-
-acme_it_security = acme_it.teams.create!(
-  name: 'Security Team',
-  slug: 'security',
-  status: 'active',
-  settings: {
-    description: 'Cybersecurity and data protection',
-    team_type: 'Security',
-    compliance_responsibilities: ['cybersecurity compliance', 'data protection']
-  }
-)
-
-tech_compliance = tech_legal.teams.create!(
-  name: 'Software Compliance',
-  slug: 'software-compliance',
-  status: 'active',
-  settings: {
-    description: 'Software licensing and IP compliance',
-    team_type: 'Compliance',
-    compliance_responsibilities: ['software licensing', 'IP protection']
-  }
-)
-
-# Create Units
-puts 'Creating units...'
-acme_compliance_monitoring = acme_legal_compliance.units.create!(
-  name: 'Regulatory Monitoring',
-  slug: 'regulatory-monitoring',
-  status: 'active',
-  settings: {
-    description: 'Monitors regulatory changes and updates',
-    unit_type: 'Monitoring',
-    compliance_focus: ['regulatory tracking', 'change management']
-  }
-)
-
-acme_security_ops = acme_it_security.units.create!(
-  name: 'Security Operations',
-  slug: 'security-ops',
-  status: 'active',
-  settings: {
-    description: 'Day-to-day security operations',
-    unit_type: 'Operations',
-    compliance_focus: ['security monitoring', 'incident response']
-  }
-)
-
-tech_licensing = tech_compliance.units.create!(
-  name: 'Licensing Management',
-  slug: 'licensing-management',
-  status: 'active',
-  settings: {
-    description: 'Software licensing compliance',
-    unit_type: 'Management',
-    compliance_focus: ['license tracking', 'compliance reporting']
-  }
-)
-
-# Create Users with Roles (Rolify will create roles automatically)
+# Create users for each organization
 puts 'Creating users...'
+users = []
 
-# Super Admin (can access everything)
-super_admin = User.create!(
-  email: 'admin@complianceapp.com',
-  password: 'password123',
-  organization: acme_corp,
-  settings: {
-    first_name: 'System',
-    last_name: 'Administrator',
-    job_title: 'Super Administrator',
-    timezone: 'UTC'
-  }
-)
-super_admin.add_role(:super_admin)
+organizations.each_with_index do |org, index|
+  # Create admin user
+  admin_user = User.create!(
+    email: "admin#{index + 1}@example.com",
+    password: 'password123',
+    password_confirmation: 'password123',
+    organization: org,
+    settings: {
+      first_name: 'Admin',
+      last_name: 'User',
+      job_title: 'System Administrator',
+      phone: "+1-555-000#{index + 1}",
+      timezone: org.settings[:timezone],
+      notification_settings: {
+        email: true,
+        in_app: true,
+        frequency: 'immediate'
+      },
+      ui_preferences: {
+        theme: 'light',
+        dashboard_layout: 'default',
+        show_analytics: true
+      }
+    }
+  )
+  users << admin_user
 
-# Organization Admin for Acme
-acme_admin = User.create!(
-  email: 'admin@acme.com',
-  password: 'password123',
-  organization: acme_corp,
-  settings: {
-    first_name: 'John',
-    last_name: 'Smith',
-    job_title: 'Chief Compliance Officer',
-    timezone: 'America/New_York'
-  }
-)
-acme_admin.add_role(:organization_admin, acme_corp)
+  # Create regular users
+  3.times do |i|
+    user = User.create!(
+      email: "user#{index + 1}_#{i + 1}@example.com",
+      password: 'password123',
+      password_confirmation: 'password123',
+      organization: org,
+      settings: {
+        first_name: Faker::Name.first_name,
+        last_name: Faker::Name.last_name,
+        job_title: Faker::Job.title,
+        phone: Faker::PhoneNumber.phone_number,
+        timezone: org.settings[:timezone],
+        notification_settings: {
+          email: true,
+          in_app: true,
+          frequency: 'daily'
+        },
+        ui_preferences: {
+          theme: 'light',
+          dashboard_layout: 'default',
+          show_analytics: true
+        }
+      }
+    )
+    users << user
+  end
+end
 
-# Department Admin for Acme Legal
-legal_admin = User.create!(
-  email: 'legal.admin@acme.com',
-  password: 'password123',
-  organization: acme_corp,
-  department: acme_legal,
-  settings: {
-    first_name: 'Sarah',
-    last_name: 'Johnson',
-    job_title: 'Legal Department Head',
-    timezone: 'America/New_York'
-  }
-)
-legal_admin.add_role(:department_admin, acme_legal)
+# Create global roles (available to all organizations)
+puts 'Creating global roles...'
+roles = {}
 
-# Team Lead for Compliance
-compliance_lead = User.create!(
-  email: 'compliance.lead@acme.com',
-  password: 'password123',
-  organization: acme_corp,
-  department: acme_legal,
-  team: acme_legal_compliance,
-  settings: {
-    first_name: 'Michael',
-    last_name: 'Brown',
-    job_title: 'Compliance Team Lead',
-    timezone: 'America/New_York'
-  }
-)
-compliance_lead.add_role(:team_lead, acme_legal_compliance)
-
-# Unit Manager for Regulatory Monitoring
-monitoring_manager = User.create!(
-  email: 'monitoring.manager@acme.com',
-  password: 'password123',
-  organization: acme_corp,
-  department: acme_legal,
-  team: acme_legal_compliance,
-  unit: acme_compliance_monitoring,
-  settings: {
-    first_name: 'Emily',
-    last_name: 'Davis',
-    job_title: 'Regulatory Monitoring Manager',
-    timezone: 'America/New_York'
-  }
-)
-monitoring_manager.add_role(:unit_manager, acme_compliance_monitoring)
-
-# Compliance Officer
-compliance_officer = User.create!(
-  email: 'compliance.officer@acme.com',
-  password: 'password123',
-  organization: acme_corp,
-  department: acme_legal,
-  team: acme_legal_compliance,
-  unit: acme_compliance_monitoring,
-  settings: {
-    first_name: 'David',
-    last_name: 'Wilson',
-    job_title: 'Compliance Officer',
-    timezone: 'America/New_York'
-  }
-)
-compliance_officer.add_role(:compliance_officer)
-
-# Regular User
-regular_user = User.create!(
-  email: 'user@acme.com',
-  password: 'password123',
-  organization: acme_corp,
-  department: acme_legal,
-  team: acme_legal_compliance,
-  unit: acme_compliance_monitoring,
-  settings: {
-    first_name: 'Lisa',
-    last_name: 'Anderson',
-    job_title: 'Compliance Analyst',
-    timezone: 'America/New_York'
-  }
-)
-regular_user.add_role(:user)
-
-# TechStart Users
-tech_admin = User.create!(
-  email: 'admin@techstart.com',
-  password: 'password123',
-  organization: tech_startup,
-  settings: {
-    first_name: 'Alex',
-    last_name: 'Chen',
-    job_title: 'CTO',
-    timezone: 'America/Los_Angeles'
-  }
-)
-tech_admin.add_role(:organization_admin, tech_startup)
-
-tech_compliance_user = User.create!(
-  email: 'compliance@techstart.com',
-  password: 'password123',
-  organization: tech_startup,
-  department: tech_legal,
-  team: tech_compliance,
-  unit: tech_licensing,
-  settings: {
-    first_name: 'Rachel',
-    last_name: 'Garcia',
-    job_title: 'Software Compliance Specialist',
-    timezone: 'America/Los_Angeles'
-  }
-)
-tech_compliance_user.add_role(:compliance_officer)
-
-# Create Additional Roles for Management Interface
-puts 'Creating additional roles...'
-
-# Acme Corporation Roles
-acme_roles = [
-  { name: 'Compliance Manager', resource_type: 'Organization', resource: acme_corp },
-  { name: 'Data Privacy Officer', resource_type: 'Organization', resource: acme_corp },
-  { name: 'Security Analyst', resource_type: 'Department', resource: acme_it },
-  { name: 'Legal Assistant', resource_type: 'Department', resource: acme_legal },
-  { name: 'Compliance Specialist', resource_type: 'Team', resource: acme_legal_compliance },
-  { name: 'Security Operator', resource_type: 'Team', resource: acme_it_security },
-  { name: 'Regulatory Analyst', resource_type: 'Unit', resource: acme_compliance_monitoring },
-  { name: 'Security Monitor', resource_type: 'Unit', resource: acme_security_ops }
-]
-
-acme_roles.each do |role_attrs|
-  Role.find_or_create_by!(
-    name: role_attrs[:name],
-    resource_type: role_attrs[:resource_type],
-    resource_id: role_attrs[:resource]&.id
+%w[super_admin org_admin compliance_manager compliance_analyst user].each do |role_name|
+  roles[role_name] = Role.create!(
+    name: role_name,
+    organization: nil # Global role, not tied to any specific organization
   )
 end
 
-# TechStart Roles
-tech_roles = [
-  { name: 'Software Compliance Manager', resource_type: 'Organization', resource: tech_startup },
-  { name: 'IP Specialist', resource_type: 'Department', resource: tech_legal },
-  { name: 'License Manager', resource_type: 'Team', resource: tech_compliance },
-  { name: 'Compliance Analyst', resource_type: 'Unit', resource: tech_licensing }
-]
+# Create organization-specific roles for each organization
+puts 'Creating organization-specific roles...'
+organizations.each do |org|
+  # Create some custom roles for each organization
+  org_roles = []
 
-tech_roles.each do |role_attrs|
-  Role.find_or_create_by!(
-    name: role_attrs[:name],
-    resource_type: role_attrs[:resource_type],
-    resource_id: role_attrs[:resource]&.id
+  org_roles << Role.create!(
+    name: "#{org.name.downcase.gsub(/\s+/, '_')}_custom_role",
+    organization: org
   )
+
+  org_roles << Role.create!(
+    name: "#{org.name.downcase.gsub(/\s+/, '_')}_department_head",
+    organization: org
+  )
+
+  # Store org-specific roles for later use
+  roles["#{org.slug}_custom"] = org_roles.first
+  roles["#{org.slug}_dept_head"] = org_roles.last
 end
 
-# Assign some additional roles to users
-puts 'Assigning additional roles to users...'
-
-# Assign Compliance Manager role to acme_admin
-compliance_manager_role = Role.find_by(name: 'Compliance Manager', resource_type: 'Organization', resource: acme_corp)
-acme_admin.add_role(compliance_manager_role.name, compliance_manager_role.resource) if compliance_manager_role
-
-# Assign Data Privacy Officer role to legal_admin
-privacy_officer_role = Role.find_by(name: 'Data Privacy Officer', resource_type: 'Organization', resource: acme_corp)
-legal_admin.add_role(privacy_officer_role.name, privacy_officer_role.resource) if privacy_officer_role
-
-# Assign Security Analyst role to compliance_lead
-security_analyst_role = Role.find_by(name: 'Security Analyst', resource_type: 'Department', resource: acme_it)
-compliance_lead.add_role(security_analyst_role.name, security_analyst_role.resource) if security_analyst_role
-
-# Assign Software Compliance Manager role to tech_admin
-software_compliance_role = Role.find_by(name: 'Software Compliance Manager', resource_type: 'Organization',
-                                        resource: tech_startup)
-tech_admin.add_role(software_compliance_role.name, software_compliance_role.resource) if software_compliance_role
-
-# Create permissions for specific organizational roles
-puts 'Creating permissions for specific organizational roles...'
-
-# Acme Corporation specific role permissions
-acme_compliance_manager_role = Role.find_by(name: 'Compliance Manager', resource_type: 'Organization',
-                                            resource: acme_corp)
-if acme_compliance_manager_role
-  create_permission(acme_corp, 'Compliance Manager - Manage Compliance', 'manage', 'Organization', acme_corp,
-                    acme_compliance_manager_role)
-  create_permission(acme_corp, 'Compliance Manager - Read All Users', 'read', 'User', nil, acme_compliance_manager_role)
-  create_permission(acme_corp, 'Compliance Manager - Read All Departments', 'read', 'Department', nil,
-                    acme_compliance_manager_role)
-  create_permission(acme_corp, 'Compliance Manager - Read All Teams', 'read', 'Team', nil, acme_compliance_manager_role)
-  create_permission(acme_corp, 'Compliance Manager - Read All Units', 'read', 'Unit', nil, acme_compliance_manager_role)
-  create_permission(acme_corp, 'Compliance Manager - Manage Permissions', 'manage', 'Permission', nil,
-                    acme_compliance_manager_role)
-end
-
-acme_privacy_officer_role = Role.find_by(name: 'Data Privacy Officer', resource_type: 'Organization',
-                                         resource: acme_corp)
-if acme_privacy_officer_role
-  create_permission(acme_corp, 'Data Privacy Officer - Manage Privacy', 'manage', 'Organization', acme_corp,
-                    acme_privacy_officer_role)
-  create_permission(acme_corp, 'Data Privacy Officer - Read All Users', 'read', 'User', nil, acme_privacy_officer_role)
-  create_permission(acme_corp, 'Data Privacy Officer - Read All Departments', 'read', 'Department', nil,
-                    acme_privacy_officer_role)
-  create_permission(acme_corp, 'Data Privacy Officer - Read All Teams', 'read', 'Team', nil, acme_privacy_officer_role)
-  create_permission(acme_corp, 'Data Privacy Officer - Read All Units', 'read', 'Unit', nil, acme_privacy_officer_role)
-end
-
-acme_security_analyst_role = Role.find_by(name: 'Security Analyst', resource_type: 'Department', resource: acme_it)
-if acme_security_analyst_role
-  create_permission(acme_corp, 'Security Analyst - Manage IT Security', 'manage', 'Department', acme_it,
-                    acme_security_analyst_role)
-  create_permission(acme_corp, 'Security Analyst - Read IT Users', 'read', 'User', nil, acme_security_analyst_role, {
-                      'data_conditions' => { 'department_id' => acme_it.id }
-                    })
-  create_permission(acme_corp, 'Security Analyst - Read IT Teams', 'read', 'Team', nil, acme_security_analyst_role, {
-                      'data_conditions' => { 'department_id' => acme_it.id }
-                    })
-  create_permission(acme_corp, 'Security Analyst - Read IT Units', 'read', 'Unit', nil, acme_security_analyst_role, {
-                      'data_conditions' => { 'department_id' => acme_it.id }
-                    })
-end
-
-acme_legal_assistant_role = Role.find_by(name: 'Legal Assistant', resource_type: 'Department', resource: acme_legal)
-if acme_legal_assistant_role
-  create_permission(acme_corp, 'Legal Assistant - Manage Legal Department', 'manage', 'Department', acme_legal,
-                    acme_legal_assistant_role)
-  create_permission(acme_corp, 'Legal Assistant - Read Legal Users', 'read', 'User', nil, acme_legal_assistant_role, {
-                      'data_conditions' => { 'department_id' => acme_legal.id }
-                    })
-  create_permission(acme_corp, 'Legal Assistant - Read Legal Teams', 'read', 'Team', nil, acme_legal_assistant_role, {
-                      'data_conditions' => { 'department_id' => acme_legal.id }
-                    })
-  create_permission(acme_corp, 'Legal Assistant - Read Legal Units', 'read', 'Unit', nil, acme_legal_assistant_role, {
-                      'data_conditions' => { 'department_id' => acme_legal.id }
-                    })
-end
-
-acme_compliance_specialist_role = Role.find_by(name: 'Compliance Specialist', resource_type: 'Team',
-                                               resource: acme_legal_compliance)
-if acme_compliance_specialist_role
-  create_permission(acme_corp, 'Compliance Specialist - Manage Compliance Team', 'manage', 'Team',
-                    acme_legal_compliance, acme_compliance_specialist_role)
-  create_permission(acme_corp, 'Compliance Specialist - Read Team Users', 'read', 'User', nil, acme_compliance_specialist_role, {
-                      'data_conditions' => { 'team_id' => acme_legal_compliance.id }
-                    })
-  create_permission(acme_corp, 'Compliance Specialist - Read Team Units', 'read', 'Unit', nil, acme_compliance_specialist_role, {
-                      'data_conditions' => { 'team_id' => acme_legal_compliance.id }
-                    })
-end
-
-acme_security_operator_role = Role.find_by(name: 'Security Operator', resource_type: 'Team', resource: acme_it_security)
-if acme_security_operator_role
-  create_permission(acme_corp, 'Security Operator - Manage Security Team', 'manage', 'Team', acme_it_security,
-                    acme_security_operator_role)
-  create_permission(acme_corp, 'Security Operator - Read Team Users', 'read', 'User', nil, acme_security_operator_role, {
-                      'data_conditions' => { 'team_id' => acme_it_security.id }
-                    })
-  create_permission(acme_corp, 'Security Operator - Read Team Units', 'read', 'Unit', nil, acme_security_operator_role, {
-                      'data_conditions' => { 'team_id' => acme_it_security.id }
-                    })
-end
-
-acme_regulatory_analyst_role = Role.find_by(name: 'Regulatory Analyst', resource_type: 'Unit',
-                                            resource: acme_compliance_monitoring)
-if acme_regulatory_analyst_role
-  create_permission(acme_corp, 'Regulatory Analyst - Manage Monitoring Unit', 'manage', 'Unit',
-                    acme_compliance_monitoring, acme_regulatory_analyst_role)
-  create_permission(acme_corp, 'Regulatory Analyst - Read Unit Users', 'read', 'User', nil, acme_regulatory_analyst_role, {
-                      'data_conditions' => { 'unit_id' => acme_compliance_monitoring.id }
-                    })
-end
-
-acme_security_monitor_role = Role.find_by(name: 'Security Monitor', resource_type: 'Unit', resource: acme_security_ops)
-if acme_security_monitor_role
-  create_permission(acme_corp, 'Security Monitor - Manage Security Ops Unit', 'manage', 'Unit', acme_security_ops,
-                    acme_security_monitor_role)
-  create_permission(acme_corp, 'Security Monitor - Read Unit Users', 'read', 'User', nil, acme_security_monitor_role, {
-                      'data_conditions' => { 'unit_id' => acme_security_ops.id }
-                    })
-end
-
-# TechStart specific role permissions
-tech_software_compliance_role = Role.find_by(name: 'Software Compliance Manager', resource_type: 'Organization',
-                                             resource: tech_startup)
-if tech_software_compliance_role
-  create_permission(tech_startup, 'Software Compliance Manager - Manage Software Compliance', 'manage', 'Organization',
-                    tech_startup, tech_software_compliance_role)
-  create_permission(tech_startup, 'Software Compliance Manager - Read All Users', 'read', 'User', nil,
-                    tech_software_compliance_role)
-  create_permission(tech_startup, 'Software Compliance Manager - Read All Departments', 'read', 'Department', nil,
-                    tech_software_compliance_role)
-  create_permission(tech_startup, 'Software Compliance Manager - Read All Teams', 'read', 'Team', nil,
-                    tech_software_compliance_role)
-  create_permission(tech_startup, 'Software Compliance Manager - Read All Units', 'read', 'Unit', nil,
-                    tech_software_compliance_role)
-  create_permission(tech_startup, 'Software Compliance Manager - Manage Permissions', 'manage', 'Permission', nil,
-                    tech_software_compliance_role)
-end
-
-tech_ip_specialist_role = Role.find_by(name: 'IP Specialist', resource_type: 'Department', resource: tech_legal)
-if tech_ip_specialist_role
-  create_permission(tech_startup, 'IP Specialist - Manage Legal Department', 'manage', 'Department', tech_legal,
-                    tech_ip_specialist_role)
-  create_permission(tech_startup, 'IP Specialist - Read Legal Users', 'read', 'User', nil, tech_ip_specialist_role, {
-                      'data_conditions' => { 'department_id' => tech_legal.id }
-                    })
-  create_permission(tech_startup, 'IP Specialist - Read Legal Teams', 'read', 'Team', nil, tech_ip_specialist_role, {
-                      'data_conditions' => { 'department_id' => tech_legal.id }
-                    })
-  create_permission(tech_startup, 'IP Specialist - Read Legal Units', 'read', 'Unit', nil, tech_ip_specialist_role, {
-                      'data_conditions' => { 'department_id' => tech_legal.id }
-                    })
-end
-
-tech_license_manager_role = Role.find_by(name: 'License Manager', resource_type: 'Team', resource: tech_compliance)
-if tech_license_manager_role
-  create_permission(tech_startup, 'License Manager - Manage Compliance Team', 'manage', 'Team', tech_compliance,
-                    tech_license_manager_role)
-  create_permission(tech_startup, 'License Manager - Read Team Users', 'read', 'User', nil, tech_license_manager_role, {
-                      'data_conditions' => { 'team_id' => tech_compliance.id }
-                    })
-  create_permission(tech_startup, 'License Manager - Read Team Units', 'read', 'Unit', nil, tech_license_manager_role, {
-                      'data_conditions' => { 'team_id' => tech_compliance.id }
-                    })
-end
-
-tech_compliance_analyst_role = Role.find_by(name: 'Compliance Analyst', resource_type: 'Unit', resource: tech_licensing)
-if tech_compliance_analyst_role
-  create_permission(tech_startup, 'Compliance Analyst - Manage Licensing Unit', 'manage', 'Unit', tech_licensing,
-                    tech_compliance_analyst_role)
-  create_permission(tech_startup, 'Compliance Analyst - Read Unit Users', 'read', 'User', nil, tech_compliance_analyst_role, {
-                      'data_conditions' => { 'unit_id' => tech_licensing.id }
-                    })
-end
-
-# Create Permissions
+# Create permissions for each organization
 puts 'Creating permissions...'
+permissions = {}
 
-# Acme Corporation Permissions
+organizations.each do |org|
+  org_permissions = {}
 
-# Super Admin gets all permissions
-create_permission(acme_corp, 'Super Admin - Full Access', 'manage', 'Organization', acme_corp, super_admin)
+  # Use only valid actions from the Permission model
+  %w[create read update destroy manage assign delegate].each do |action|
+    %w[organizations users roles permissions documents compliance_frameworks compliance_requirements compliance_controls
+       providers].each do |resource|
+      permission_name = "#{action}_#{resource}"
+      org_permissions[permission_name] = Permission.create!(
+        name: permission_name,
+        action: action,
+        resource_type: resource.classify,
+        organization: org,
+        grantee_type: 'Role',
+        grantee_id: roles['super_admin'].id
+      )
+    end
+  end
 
-# Organization Admin permissions
-create_permission(acme_corp, 'Org Admin - Manage Organization', 'manage', 'Organization', acme_corp, acme_admin)
-create_permission(acme_corp, 'Org Admin - Manage Users', 'manage', 'User', nil, acme_admin)
-create_permission(acme_corp, 'Org Admin - Manage Departments', 'manage', 'Department', nil, acme_admin)
-create_permission(acme_corp, 'Org Admin - Manage Teams', 'manage', 'Team', nil, acme_admin)
-create_permission(acme_corp, 'Org Admin - Manage Units', 'manage', 'Unit', nil, acme_admin)
-create_permission(acme_corp, 'Org Admin - Manage Permissions', 'manage', 'Permission', nil, acme_admin)
-
-# Department Admin permissions
-create_permission(acme_corp, 'Dept Admin - Manage Legal Department', 'manage', 'Department', acme_legal, legal_admin)
-create_permission(acme_corp, 'Dept Admin - Manage Legal Teams', 'manage', 'Team', nil, legal_admin, {
-                    'data_conditions' => { 'department_id' => acme_legal.id }
-                  })
-create_permission(acme_corp, 'Dept Admin - Manage Legal Units', 'manage', 'Unit', nil, legal_admin, {
-                    'data_conditions' => { 'department_id' => acme_legal.id }
-                  })
-create_permission(acme_corp, 'Dept Admin - View Legal Users', 'read', 'User', nil, legal_admin, {
-                    'data_conditions' => { 'department_id' => acme_legal.id }
-                  })
-
-# Team Lead permissions
-create_permission(acme_corp, 'Team Lead - Manage Compliance Team', 'manage', 'Team', acme_legal_compliance,
-                  compliance_lead)
-create_permission(acme_corp, 'Team Lead - Manage Compliance Units', 'manage', 'Unit', nil, compliance_lead, {
-                    'data_conditions' => { 'team_id' => acme_legal_compliance.id }
-                  })
-create_permission(acme_corp, 'Team Lead - View Team Users', 'read', 'User', nil, compliance_lead, {
-                    'data_conditions' => { 'team_id' => acme_legal_compliance.id }
-                  })
-
-# Unit Manager permissions
-create_permission(acme_corp, 'Unit Manager - Manage Monitoring Unit', 'manage', 'Unit', acme_compliance_monitoring,
-                  monitoring_manager)
-create_permission(acme_corp, 'Unit Manager - View Unit Users', 'read', 'User', nil, monitoring_manager, {
-                    'data_conditions' => { 'unit_id' => acme_compliance_monitoring.id }
-                  })
-
-# Compliance Officer permissions
-create_permission(acme_corp, 'Compliance Officer - Read All', 'read', 'Organization', acme_corp, compliance_officer)
-create_permission(acme_corp, 'Compliance Officer - Read Users', 'read', 'User', nil, compliance_officer)
-create_permission(acme_corp, 'Compliance Officer - Read Departments', 'read', 'Department', nil, compliance_officer)
-create_permission(acme_corp, 'Compliance Officer - Read Teams', 'read', 'Team', nil, compliance_officer)
-create_permission(acme_corp, 'Compliance Officer - Read Units', 'read', 'Unit', nil, compliance_officer)
-
-# Regular User permissions
-create_permission(acme_corp, 'User - Read Own Organization', 'read', 'Organization', acme_corp, regular_user)
-create_permission(acme_corp, 'User - Read Own Department', 'read', 'Department', acme_legal, regular_user)
-create_permission(acme_corp, 'User - Read Own Team', 'read', 'Team', acme_legal_compliance, regular_user)
-create_permission(acme_corp, 'User - Read Own Unit', 'read', 'Unit', acme_compliance_monitoring, regular_user)
-
-# Role-based permissions for Acme
-acme_org_admin_role = Role.find_by(name: 'organization_admin', resource: acme_corp)
-acme_dept_admin_role = Role.find_by(name: 'department_admin', resource: acme_legal)
-acme_team_lead_role = Role.find_by(name: 'team_lead', resource: acme_legal_compliance)
-acme_unit_manager_role = Role.find_by(name: 'unit_manager', resource: acme_compliance_monitoring)
-acme_compliance_officer_role = Role.find_by(name: 'compliance_officer')
-acme_user_role = Role.find_by(name: 'user')
-
-# Role-based permissions
-if acme_org_admin_role
-  create_permission(acme_corp, 'Role - Org Admin - Manage Users', 'manage', 'User', nil, acme_org_admin_role)
-  create_permission(acme_corp, 'Role - Org Admin - Manage Permissions', 'manage', 'Permission', nil,
-                    acme_org_admin_role)
-  create_permission(acme_corp, 'Role - Org Admin - Manage Roles', 'manage', 'Role', nil, acme_org_admin_role)
-  create_permission(acme_corp, 'Role - Org Admin - Manage Departments', 'manage', 'Department', nil,
-                    acme_org_admin_role)
-  create_permission(acme_corp, 'Role - Org Admin - Manage Teams', 'manage', 'Team', nil, acme_org_admin_role)
-  create_permission(acme_corp, 'Role - Org Admin - Manage Units', 'manage', 'Unit', nil, acme_org_admin_role)
-  create_permission(acme_corp, 'Role - Org Admin - Read Organization', 'read', 'Organization', acme_corp,
-                    acme_org_admin_role)
+  # Store permissions for this organization
+  permissions[org.id] = org_permissions
 end
 
-if acme_dept_admin_role
-  create_permission(acme_corp, 'Role - Dept Admin - Manage Department Users', 'manage', 'User', nil, acme_dept_admin_role, {
-                      'data_conditions' => { 'department_id' => acme_legal.id }
-                    })
-  create_permission(acme_corp, 'Role - Dept Admin - Manage Department Teams', 'manage', 'Team', nil, acme_dept_admin_role, {
-                      'data_conditions' => { 'department_id' => acme_legal.id }
-                    })
-  create_permission(acme_corp, 'Role - Dept Admin - Manage Department Units', 'manage', 'Unit', nil, acme_dept_admin_role, {
-                      'data_conditions' => { 'department_id' => acme_legal.id }
-                    })
-  create_permission(acme_corp, 'Role - Dept Admin - Read Department', 'read', 'Department', acme_legal,
-                    acme_dept_admin_role)
+# Assign roles to users
+puts 'Assigning roles to users...'
+users.each_with_index do |user, index|
+  puts "  Assigning roles to user #{index + 1}: #{user.email}"
+
+  # Assign global roles to users
+  if index == 0
+    puts "    Assigning super_admin role to #{user.email}"
+    user.add_role(roles['super_admin'])
+  elsif index % 4 == 0
+    puts "    Assigning org_admin role to #{user.email}"
+    user.add_role(roles['org_admin'])
+  elsif index % 4 == 1
+    puts "    Assigning compliance_manager role to #{user.email}"
+    user.add_role(roles['compliance_manager'])
+  elsif index % 4 == 2
+    puts "    Assigning compliance_analyst role to #{user.email}"
+    user.add_role(roles['compliance_analyst'])
+  else
+    puts "    Assigning user role to #{user.email}"
+    user.add_role(roles['user'])
+  end
+
+  # Also assign organization-specific roles to some users
+  user_org = user.organization
+  next unless user_org
+
+  # Assign custom role to every 3rd user
+  if index % 3 == 0
+    custom_role = roles["#{user_org.slug}_custom"]
+    if custom_role
+      puts "    Assigning custom role to #{user.email}"
+      user.add_role(custom_role)
+    end
+  end
+
+  # Assign department head role to every 5th user
+  if index % 5 == 0
+    dept_head_role = roles["#{user_org.slug}_dept_head"]
+    if dept_head_role
+      puts "    Assigning department head role to #{user.email}"
+      user.add_role(dept_head_role)
+    end
+  end
 end
 
-if acme_team_lead_role
-  create_permission(acme_corp, 'Role - Team Lead - Manage Team Users', 'manage', 'User', nil, acme_team_lead_role, {
-                      'data_conditions' => { 'team_id' => acme_legal_compliance.id }
-                    })
-  create_permission(acme_corp, 'Role - Team Lead - Manage Team Units', 'manage', 'Unit', nil, acme_team_lead_role, {
-                      'data_conditions' => { 'team_id' => acme_legal_compliance.id }
-                    })
-  create_permission(acme_corp, 'Role - Team Lead - Read Team', 'read', 'Team', acme_legal_compliance,
-                    acme_team_lead_role)
+# Create platform-wide providers
+puts 'Creating platform-wide providers...'
+platform_providers = [
+  {
+    name: 'Securities and Exchange Commission (SEC)',
+    code: 'SEC',
+    description: 'Federal securities regulator for the United States',
+    website: 'https://www.sec.gov',
+    jurisdiction: 'US',
+    state: nil,
+    country: 'United States',
+    contact_info: {
+      email: 'help@sec.gov',
+      phone: '+1-202-551-6551'
+    },
+    provider_type: 'platform_wide',
+    status: 'active'
+  },
+  {
+    name: 'Financial Industry Regulatory Authority (FINRA)',
+    code: 'FINRA',
+    description: 'Self-regulatory organization for broker-dealers',
+    website: 'https://www.finra.org',
+    jurisdiction: 'US',
+    state: nil,
+    country: 'United States',
+    contact_info: {
+      email: 'support@finra.org',
+      phone: '+1-301-590-6500'
+    },
+    provider_type: 'platform_wide',
+    status: 'active'
+  },
+  {
+    name: 'Federal Reserve Board',
+    code: 'FRB',
+    description: 'Central bank of the United States',
+    website: 'https://www.federalreserve.gov',
+    jurisdiction: 'US',
+    state: nil,
+    country: 'United States',
+    contact_info: {
+      email: 'info@federalreserve.gov',
+      phone: '+1-202-452-3000'
+    },
+    provider_type: 'platform_wide',
+    status: 'active'
+  },
+  {
+    name: 'Office of the Comptroller of the Currency (OCC)',
+    code: 'OCC',
+    description: 'Federal bank regulator',
+    website: 'https://www.occ.gov',
+    jurisdiction: 'US',
+    state: nil,
+    country: 'United States',
+    contact_info: {
+      email: 'occ@occ.gov',
+      phone: '+1-202-649-6800'
+    },
+    provider_type: 'platform_wide',
+    status: 'active'
+  },
+  {
+    name: 'Consumer Financial Protection Bureau (CFPB)',
+    code: 'CFPB',
+    description: 'Consumer financial protection regulator',
+    website: 'https://www.consumerfinance.gov',
+    jurisdiction: 'US',
+    state: nil,
+    country: 'United States',
+    contact_info: {
+      email: 'info@consumerfinance.gov',
+      phone: '+1-855-411-2372'
+    },
+    provider_type: 'platform_wide',
+    status: 'active'
+  },
+  {
+    name: 'European Banking Authority (EBA)',
+    code: 'EBA',
+    description: 'EU banking regulator',
+    website: 'https://www.eba.europa.eu',
+    jurisdiction: 'EU',
+    state: nil,
+    country: 'France',
+    contact_info: {
+      email: 'info@eba.europa.eu',
+      phone: '+33-1-86-52-70-00'
+    },
+    provider_type: 'platform_wide',
+    status: 'active'
+  },
+  {
+    name: 'Financial Conduct Authority (FCA)',
+    code: 'FCA',
+    description: 'UK financial services regulator',
+    website: 'https://www.fca.org.uk',
+    jurisdiction: 'UK',
+    state: nil,
+    country: 'United Kingdom',
+    contact_info: {
+      email: 'consumer.queries@fca.org.uk',
+      phone: '+44-20-7066-1000'
+    },
+    provider_type: 'platform_wide',
+    status: 'active'
+  },
+  {
+    name: 'Office of the Superintendent of Financial Institutions (OSFI)',
+    code: 'OSFI',
+    description: 'Canadian financial regulator',
+    website: 'https://www.osfi-bsif.gc.ca',
+    jurisdiction: 'CA',
+    state: nil,
+    country: 'Canada',
+    contact_info: {
+      email: 'information@osfi-bsif.gc.ca',
+      phone: '+1-613-990-7788'
+    },
+    provider_type: 'platform_wide',
+    status: 'active'
+  },
+  {
+    name: 'Australian Prudential Regulation Authority (APRA)',
+    code: 'APRA',
+    description: 'Australian financial regulator',
+    website: 'https://www.apra.gov.au',
+    jurisdiction: 'AU',
+    state: nil,
+    country: 'Australia',
+    contact_info: {
+      email: 'info@apra.gov.au',
+      phone: '+61-2-9210-3000'
+    },
+    provider_type: 'platform_wide',
+    status: 'active'
+  }
+]
+
+# Create platform-wide providers without tenant scoping
+Provider.unscoped do
+  platform_providers.each do |provider_data|
+    Provider.create!(provider_data.merge(organization_id: nil))
+  end
 end
 
-if acme_unit_manager_role
-  create_permission(acme_corp, 'Role - Unit Manager - Manage Unit Users', 'manage', 'User', nil, acme_unit_manager_role, {
-                      'data_conditions' => { 'unit_id' => acme_compliance_monitoring.id }
-                    })
-  create_permission(acme_corp, 'Role - Unit Manager - Read Unit', 'read', 'Unit', acme_compliance_monitoring,
-                    acme_unit_manager_role)
+# Create organization-specific providers
+puts 'Creating organization-specific providers...'
+organizations.each do |org|
+  org_provider = Provider.create!(
+    name: "#{org.name} Internal Compliance",
+    code: "#{org.name.upcase.gsub(/\s+/, '')}_COMPLIANCE".first(20),
+    description: "Internal compliance department for #{org.name}",
+    website: org.settings[:website],
+    jurisdiction: org.settings[:jurisdiction].presence || 'US',
+    state: org.settings[:state],
+    country: org.settings[:country].presence || 'United States',
+    contact_info: {
+      email: "compliance@#{org.name.downcase.gsub(/\s+/, '')}.com",
+      phone: org.settings[:contact_phone]
+    },
+    provider_type: 'organization_specific',
+    organization: org,
+    status: 'active'
+  )
 end
 
-if acme_compliance_officer_role
-  create_permission(acme_corp, 'Role - Compliance Officer - Read All', 'read', 'Organization', acme_corp,
-                    acme_compliance_officer_role)
-  create_permission(acme_corp, 'Role - Compliance Officer - Read Users', 'read', 'User', nil,
-                    acme_compliance_officer_role)
-  create_permission(acme_corp, 'Role - Compliance Officer - Read Departments', 'read', 'Department', nil,
-                    acme_compliance_officer_role)
-  create_permission(acme_corp, 'Role - Compliance Officer - Read Teams', 'read', 'Team', nil,
-                    acme_compliance_officer_role)
-  create_permission(acme_corp, 'Role - Compliance Officer - Read Units', 'read', 'Unit', nil,
-                    acme_compliance_officer_role)
+# Create compliance frameworks
+puts 'Creating compliance frameworks...'
+frameworks = []
+
+# SEC Frameworks
+sec_provider = Provider.find_by(code: 'SEC')
+if sec_provider
+  frameworks << ComplianceFramework.create!(
+    name: 'SEC Regulation S-P: Privacy of Consumer Financial Information',
+    slug: 'sec-regulation-s-p',
+    description: 'Regulation S-P requires broker-dealers, investment companies, and investment advisers to adopt written policies and procedures that address administrative, technical, and physical safeguards for the protection of customer records and information.',
+    version: '1.0',
+    jurisdiction: 'US',
+    provider: sec_provider,
+    issuance_type: 'Final_Rule',
+    publication_date: Date.new(2000, 6, 22),
+    provider_url: 'https://www.sec.gov/rules/final/34-42974.htm',
+    enforcement_date: Date.new(2001, 7, 1),
+    potentially_impacted_departments: 'IT, Legal, Compliance, Operations',
+    status: 'active',
+    organization: organizations.first,
+    settings: {
+      framework_type: 'privacy',
+      effective_date: Date.new(2000, 11, 13),
+      industry_scope: %w[financial_services investment_management],
+      review_frequency: 'annually'
+    }
+  )
+
+  frameworks << ComplianceFramework.create!(
+    name: 'SEC Regulation S-ID: Identity Theft Red Flags',
+    slug: 'sec-regulation-s-id',
+    description: 'Regulation S-ID requires certain financial institutions and creditors to develop and implement a written Identity Theft Prevention Program designed to detect, prevent, and mitigate identity theft in connection with certain existing accounts or the opening of certain new accounts.',
+    version: '1.0',
+    jurisdiction: 'US',
+    provider: sec_provider,
+    issuance_type: 'Final_Rule',
+    publication_date: Date.new(2013, 4, 10),
+    provider_url: 'https://www.sec.gov/rules/final/2013/34-69359.pdf',
+    enforcement_date: Date.new(2013, 11, 20),
+    potentially_impacted_departments: 'IT, Security, Compliance, Customer Service',
+    status: 'active',
+    organization: organizations.second,
+    settings: {
+      framework_type: 'security',
+      effective_date: Date.new(2013, 5, 20),
+      industry_scope: %w[financial_services banking],
+      review_frequency: 'quarterly'
+    }
+  )
 end
 
-if acme_user_role
-  create_permission(acme_corp, 'Role - User - Read Own Organization', 'read', 'Organization', acme_corp, acme_user_role)
-  create_permission(acme_corp, 'Role - User - Read Own Department', 'read', 'Department', acme_legal, acme_user_role)
-  create_permission(acme_corp, 'Role - User - Read Own Team', 'read', 'Team', acme_legal_compliance, acme_user_role)
-  create_permission(acme_corp, 'Role - User - Read Own Unit', 'read', 'Unit', acme_compliance_monitoring,
-                    acme_user_role)
+# FINRA Frameworks
+finra_provider = Provider.find_by(code: 'FINRA')
+if finra_provider
+  frameworks << ComplianceFramework.create!(
+    name: 'FINRA Rule 3110: Supervision',
+    slug: 'finra-rule-3110',
+    description: 'FINRA Rule 3110 requires member firms to establish and maintain a system to supervise the activities of each associated person that is reasonably designed to achieve compliance with applicable securities laws and regulations.',
+    version: '1.0',
+    jurisdiction: 'US',
+    provider: finra_provider,
+    issuance_type: 'Guidance',
+    publication_date: Date.new(2014, 12, 1),
+    provider_url: 'https://www.finra.org/rules-guidance/rulebooks/finra-rules/3110',
+    enforcement_date: Date.new(2015, 3, 1),
+    potentially_impacted_departments: 'Compliance, Supervision, Operations, Legal',
+    status: 'active',
+    organization: organizations.third,
+    settings: {
+      framework_type: 'supervision',
+      effective_date: Date.new(2015, 3, 1),
+      industry_scope: %w[broker_dealers securities],
+      review_frequency: 'monthly'
+    }
+  )
 end
 
-# TechStart Permissions
-create_permission(tech_startup, 'TechStart Admin - Full Access', 'manage', 'Organization', tech_startup, tech_admin)
-create_permission(tech_startup, 'TechStart Admin - Manage Users', 'manage', 'User', nil, tech_admin)
-create_permission(tech_startup, 'TechStart Admin - Manage Departments', 'manage', 'Department', nil, tech_admin)
-create_permission(tech_startup, 'TechStart Admin - Manage Teams', 'manage', 'Team', nil, tech_admin)
-create_permission(tech_startup, 'TechStart Admin - Manage Units', 'manage', 'Unit', nil, tech_admin)
-create_permission(tech_startup, 'TechStart Admin - Manage Permissions', 'manage', 'Permission', nil, tech_admin)
-create_permission(tech_startup, 'TechStart Admin - Manage Roles', 'manage', 'Role', nil, tech_admin)
-
-create_permission(tech_startup, 'TechStart Compliance - Read Access', 'read', 'Organization', tech_startup,
-                  tech_compliance_user)
-create_permission(tech_startup, 'TechStart Compliance - Read Users', 'read', 'User', nil, tech_compliance_user)
-create_permission(tech_startup, 'TechStart Compliance - Read Departments', 'read', 'Department', nil,
-                  tech_compliance_user)
-create_permission(tech_startup, 'TechStart Compliance - Read Teams', 'read', 'Team', nil, tech_compliance_user)
-create_permission(tech_startup, 'TechStart Compliance - Read Units', 'read', 'Unit', nil, tech_compliance_user)
-
-# TechStart Role-based permissions
-tech_org_admin_role = Role.find_by(name: 'organization_admin', resource: tech_startup)
-tech_dept_admin_role = Role.find_by(name: 'department_admin', resource: tech_legal)
-tech_team_lead_role = Role.find_by(name: 'team_lead', resource: tech_compliance)
-tech_unit_manager_role = Role.find_by(name: 'unit_manager', resource: tech_licensing)
-tech_compliance_officer_role = Role.find_by(name: 'compliance_officer')
-tech_user_role = Role.find_by(name: 'user')
-
-if tech_org_admin_role
-  create_permission(tech_startup, 'TechStart Role - Org Admin - Manage Users', 'manage', 'User', nil,
-                    tech_org_admin_role)
-  create_permission(tech_startup, 'TechStart Role - Org Admin - Manage Permissions', 'manage', 'Permission', nil,
-                    tech_org_admin_role)
-  create_permission(tech_startup, 'TechStart Role - Org Admin - Manage Roles', 'manage', 'Role', nil,
-                    tech_org_admin_role)
-  create_permission(tech_startup, 'TechStart Role - Org Admin - Manage Departments', 'manage', 'Department', nil,
-                    tech_org_admin_role)
-  create_permission(tech_startup, 'TechStart Role - Org Admin - Manage Teams', 'manage', 'Team', nil,
-                    tech_org_admin_role)
-  create_permission(tech_startup, 'TechStart Role - Org Admin - Manage Units', 'manage', 'Unit', nil,
-                    tech_org_admin_role)
-  create_permission(tech_startup, 'TechStart Role - Org Admin - Read Organization', 'read', 'Organization',
-                    tech_startup, tech_org_admin_role)
+# GDPR Framework (Note: Using 'Guidance' instead of 'Regulation' since 'Regulation' is not in the enum)
+eba_provider = Provider.find_by(code: 'EBA')
+if eba_provider
+  frameworks << ComplianceFramework.create!(
+    name: 'General Data Protection Regulation (GDPR)',
+    slug: 'gdpr',
+    description: 'The GDPR is a regulation in EU law on data protection and privacy in the European Union and the European Economic Area. It also addresses the transfer of personal data outside the EU and EEA areas.',
+    version: '1.0',
+    jurisdiction: 'EU',
+    provider: eba_provider,
+    issuance_type: 'Guidance', # Changed from 'Regulation' to 'Guidance' since 'Regulation' is not in the enum
+    publication_date: Date.new(2016, 4, 27),
+    provider_url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32016R0679',
+    enforcement_date: Date.new(2018, 5, 25),
+    potentially_impacted_departments: 'IT, Legal, Compliance, HR, Marketing',
+    status: 'active',
+    organization: organizations.first, # Back to first org since we only have 3 orgs
+    settings: {
+      framework_type: 'privacy',
+      effective_date: Date.new(2018, 5, 25),
+      industry_scope: ['all'],
+      review_frequency: 'quarterly'
+    }
+  )
 end
 
-if tech_dept_admin_role
-  create_permission(tech_startup, 'TechStart Role - Dept Admin - Manage Department Users', 'manage', 'User', nil, tech_dept_admin_role, {
-                      'data_conditions' => { 'department_id' => tech_legal.id }
-                    })
-  create_permission(tech_startup, 'TechStart Role - Dept Admin - Manage Department Teams', 'manage', 'Team', nil, tech_dept_admin_role, {
-                      'data_conditions' => { 'department_id' => tech_legal.id }
-                    })
-  create_permission(tech_startup, 'TechStart Role - Dept Admin - Manage Department Units', 'manage', 'Unit', nil, tech_dept_admin_role, {
-                      'data_conditions' => { 'department_id' => tech_legal.id }
-                    })
-  create_permission(tech_startup, 'TechStart Role - Dept Admin - Read Department', 'read', 'Department', tech_legal,
-                    tech_dept_admin_role)
+# Create compliance requirements
+puts 'Creating compliance requirements...'
+requirements = []
+
+frameworks.each do |framework|
+  3.times do |i|
+    requirements << ComplianceRequirement.create!(
+      name: "#{framework.name} - Requirement #{i + 1}",
+      code: "REQ-#{framework.id}-#{i + 1}",
+      description: Faker::Lorem.paragraph(sentence_count: 3),
+      compliance_framework: framework,
+      requirement_type: %w[legal_basis data_subject_rights risk_assessment].sample,
+      priority: %w[high medium low].sample,
+      status: %w[active inactive draft].sample,
+      organization: framework.organization,
+      settings: {
+        category: %w[technical operational administrative].sample,
+        due_date: Faker::Date.forward(days: 365),
+        responsible_party: Faker::Name.name
+      }
+    )
+  end
 end
 
-if tech_team_lead_role
-  create_permission(tech_startup, 'TechStart Role - Team Lead - Manage Team Users', 'manage', 'User', nil, tech_team_lead_role, {
-                      'data_conditions' => { 'team_id' => tech_compliance.id }
-                    })
-  create_permission(tech_startup, 'TechStart Role - Team Lead - Manage Team Units', 'manage', 'Unit', nil, tech_team_lead_role, {
-                      'data_conditions' => { 'team_id' => tech_compliance.id }
-                    })
-  create_permission(tech_startup, 'TechStart Role - Team Lead - Read Team', 'read', 'Team', tech_compliance,
-                    tech_team_lead_role)
+# Create compliance controls
+puts 'Creating compliance controls...'
+controls = []
+
+requirements.each do |requirement|
+  2.times do |i|
+    controls << ComplianceControl.create!(
+      name: "#{requirement.name} - Control #{i + 1}",
+      description: Faker::Lorem.paragraph(sentence_count: 2),
+      compliance_requirement: requirement,
+      control_type: %w[preventive detective corrective].sample,
+      effectiveness: %w[low medium high].sample,
+      status: %w[active inactive draft].sample,
+      organization: requirement.organization,
+      settings: {
+        control_category: %w[technical operational administrative].sample,
+        frequency: %w[daily weekly monthly quarterly annually].sample,
+        responsible_party: Faker::Name.name,
+        implementation_date: Faker::Date.backward(days: 30)
+      }
+    )
+  end
 end
 
-if tech_unit_manager_role
-  create_permission(tech_startup, 'TechStart Role - Unit Manager - Manage Unit Users', 'manage', 'User', nil, tech_unit_manager_role, {
-                      'data_conditions' => { 'unit_id' => tech_licensing.id }
-                    })
-  create_permission(tech_startup, 'TechStart Role - Unit Manager - Read Unit', 'read', 'Unit', tech_licensing,
-                    tech_unit_manager_role)
+# Generate sample documents
+puts 'Generating sample documents...'
+organizations.each do |org|
+  puts "  Generating documents for organization: #{org.name}"
+  generator = DocumentGeneratorService.new(org)
+
+  # Generate different types of documents for each organization
+  %w[text word excel powerpoint pdf].each_with_index do |type, index|
+    puts "    Generating #{type} document..."
+    document = generator.generate_document(type, index + 1)
+    if document
+      puts "    ✓ Created #{type} document for #{org.name}: #{document.title}"
+    else
+      puts "    ✗ Failed to create #{type} document for #{org.name}"
+    end
+  end
 end
 
-if tech_compliance_officer_role
-  create_permission(tech_startup, 'TechStart Role - Compliance Officer - Read All', 'read', 'Organization',
-                    tech_startup, tech_compliance_officer_role)
-  create_permission(tech_startup, 'TechStart Role - Compliance Officer - Read Users', 'read', 'User', nil,
-                    tech_compliance_officer_role)
-  create_permission(tech_startup, 'TechStart Role - Compliance Officer - Read Departments', 'read', 'Department', nil,
-                    tech_compliance_officer_role)
-  create_permission(tech_startup, 'TechStart Role - Compliance Officer - Read Teams', 'read', 'Team', nil,
-                    tech_compliance_officer_role)
-  create_permission(tech_startup, 'TechStart Role - Compliance Officer - Read Units', 'read', 'Unit', nil,
-                    tech_compliance_officer_role)
+puts "\n✓ Seed data creation complete!"
+puts 'Created:'
+puts "- #{Organization.count} organizations"
+puts "- #{User.count} users"
+puts "- #{Role.count} roles"
+puts "- #{Permission.count} permissions"
+puts "- #{Provider.count} providers"
+puts "- #{ComplianceFramework.count} compliance frameworks"
+puts "- #{ComplianceRequirement.count} compliance requirements"
+puts "- #{ComplianceControl.count} compliance controls"
+puts "- #{Document.count} documents"
+
+# Verify super admin user
+super_admin_user = User.find_by(email: 'admin1@example.com')
+if super_admin_user
+  puts "\nSuper Admin User Verification:"
+  puts "- Email: #{super_admin_user.email}"
+  puts "- Super Admin?: #{super_admin_user.super_admin?}"
+  puts "- Roles: #{super_admin_user.roles.pluck(:name).join(', ')}"
+  puts "- Organization: #{super_admin_user.organization&.name || 'None'}"
+else
+  puts "\n⚠️  Warning: Super admin user (admin1@example.com) not found!"
 end
 
-if tech_user_role
-  create_permission(tech_startup, 'TechStart Role - User - Read Own Organization', 'read', 'Organization',
-                    tech_startup, tech_user_role)
-  create_permission(tech_startup, 'TechStart Role - User - Read Own Department', 'read', 'Department', tech_legal,
-                    tech_user_role)
-  create_permission(tech_startup, 'TechStart Role - User - Read Own Team', 'read', 'Team', tech_compliance,
-                    tech_user_role)
-  create_permission(tech_startup, 'TechStart Role - User - Read Own Unit', 'read', 'Unit', tech_licensing,
-                    tech_user_role)
-end
-
-# Time-based permissions example
-create_permission(acme_corp, 'Business Hours Only - User Management', 'manage', 'User', nil, acme_admin, {
-                    'time_conditions' => {
-                      'start_time' => '09:00',
-                      'end_time' => '17:00',
-                      'days' => %w[monday tuesday wednesday thursday friday]
-                    }
-                  })
-
-# User condition permissions example
-create_permission(acme_corp, 'Department Specific - Legal Only', 'read', 'Department', acme_legal, regular_user, {
-                    'user_conditions' => { 'department_id' => acme_legal.id }
-                  })
-
-puts 'Seed data created successfully!'
-puts "Organizations: #{Organization.count}"
-puts "Departments: #{Department.count}"
-puts "Teams: #{Team.count}"
-puts "Units: #{Unit.count}"
-puts "Users: #{User.count}"
-puts "Roles: #{Role.count}"
-puts "Permissions: #{Permission.count}"
-
-puts "\nTest Accounts:"
-puts 'Super Admin: admin@complianceapp.com / password123'
-puts 'Acme Admin: admin@acme.com / password123'
-puts 'TechStart Admin: admin@techstart.com / password123'
-puts 'Regular User: user@acme.com / password123'
-
-puts "\nPermission Examples Created:"
-puts '- Super Admin: Full access to everything'
-puts '- Organization Admin: Manage organization, users, departments, teams, units, permissions'
-puts '- Department Admin: Manage their department and related teams/units'
-puts '- Team Lead: Manage their team and related units'
-puts '- Unit Manager: Manage their unit'
-puts '- Compliance Officer: Read access to all organizational data'
-puts '- Regular User: Read access to their own organizational hierarchy'
-puts '- Role-based permissions for dynamic assignment'
-puts '- Time-based permissions (business hours only)'
-puts '- User condition permissions (department-specific)'
+puts "\nDefault login credentials:"
+puts 'Email: admin1@example.com'
+puts 'Password: password123'

@@ -1,0 +1,472 @@
+<div class="container mx-auto px-4 py-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex justify-between items-start">
+      <div>
+        <nav class="flex" aria-label="Breadcrumb">
+          <ol class="flex items-center space-x-4">
+            <li>
+              <%= link_to "Documents", organization_documents_path(@organization), 
+                          class: "text-gray-400 hover:text-gray-500" %>
+            </li>
+            <li>
+              <div class="flex items-center">
+                <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="ml-4 text-sm font-medium text-gray-500"><%= @document.title %></span>
+              </div>
+            </li>
+          </ol>
+        </nav>
+        <h1 class="text-3xl font-bold text-gray-900 mt-2"><%= @document.title %></h1>
+      </div>
+      
+      <div class="flex space-x-2">
+        <% if policy(@document).update? %>
+          <%= link_to "Edit", edit_organization_document_path(@organization, @document), 
+                      class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+        <% end %>
+        
+        <% if @document.needs_review? && policy(@document).approve? %>
+          <%= link_to "Approve", approve_organization_document_path(@organization, @document), 
+                      method: :patch,
+                      data: { confirm: "Are you sure you want to approve this document?" },
+                      class: "bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" %>
+        <% end %>
+        
+        <% if @document.needs_review? && policy(@document).approve? %>
+          <%= link_to "Reject", reject_organization_document_path(@organization, @document), 
+                      method: :patch,
+                      data: { confirm: "Are you sure you want to reject this document?" },
+                      class: "bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" %>
+        <% end %>
+        
+        <% if policy(@document).update? %>
+          <%= link_to "Duplicate", duplicate_organization_document_path(@organization, @document), 
+                      method: :post,
+                      class: "bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Content -->
+    <div class="lg:col-span-2">
+      <!-- Document Preview -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Document Preview</h2>
+        
+        <% if @document.file.attached? %>
+          <div class="border-2 border-dashed border-gray-300 rounded-lg p-6">
+            <% preview_data = @document.preview_data %>
+            
+            <% case preview_data[:type] %>
+            <% when 'image' %>
+              <!-- Image Preview -->
+              <div class="text-center">
+                <%= image_tag @document.file, class: "max-w-full h-auto mx-auto max-h-96 rounded-lg shadow-md" %>
+                <% if preview_data[:metadata][:dimensions] %>
+                  <p class="text-sm text-gray-600 mt-2">
+                    <%= preview_data[:metadata][:dimensions][:width] %> × <%= preview_data[:metadata][:dimensions][:height] %> pixels
+                  </p>
+                <% end %>
+                <div class="mt-4 space-y-2">
+                  <%= link_to "View Full Size", rails_blob_path(@document.file), target: "_blank",
+                              class: "bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded block w-full" %>
+                  <%= link_to "Open in New Tab", rails_blob_path(@document.file), target: "_blank",
+                              class: "bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded block w-full" %>
+                </div>
+              </div>
+              
+            <% when 'pdf' %>
+              <!-- PDF Preview -->
+              <div class="text-center">
+                <div class="bg-gray-100 rounded-lg p-6 mb-4">
+                  <i class="fas fa-file-pdf text-red-500 text-6xl mb-4"></i>
+                  <h3 class="text-lg font-medium text-gray-900 mb-2">PDF Document</h3>
+                  <% if preview_data[:metadata][:pages] %>
+                    <p class="text-sm text-gray-600 mb-2"><%= preview_data[:metadata][:pages] %> pages</p>
+                  <% end %>
+                  <p class="text-sm text-gray-600 mb-4">PDF preview available in browser</p>
+                  <div class="space-y-2">
+                    <%= link_to "Open in Browser", rails_blob_path(@document.file), target: "_blank",
+                                class: "bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded block w-full" %>
+                    <%= link_to "Embed Viewer", "#", onclick: "openPdfViewer('#{rails_blob_path(@document.file)}')",
+                                class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded block w-full" %>
+                  </div>
+                </div>
+              </div>
+              
+            <% when 'text' %>
+              <!-- Text Preview -->
+              <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center">
+                    <i class="fas fa-file-alt text-blue-500 text-xl mr-2"></i>
+                    <h3 class="text-lg font-medium text-gray-900">Text Preview</h3>
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    <% if preview_data[:metadata][:lines] %>
+                      <%= preview_data[:metadata][:lines] %> lines
+                    <% end %>
+                    <% if preview_data[:metadata][:characters] %>
+                      • <%= preview_data[:metadata][:characters] %> characters
+                    <% end %>
+                  </div>
+                </div>
+                <div class="bg-white border rounded-lg p-4 max-h-96 overflow-y-auto">
+                  <pre class="text-sm text-gray-800 whitespace-pre-wrap"><%= preview_data[:content] %></pre>
+                </div>
+                <div class="mt-4">
+                  <%= link_to "Open in New Tab", rails_blob_path(@document.file), target: "_blank",
+                              class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded block w-full" %>
+                </div>
+              </div>
+              
+            <% when 'word' %>
+              <!-- Word Document Preview -->
+              <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center">
+                    <i class="fas fa-file-word text-blue-600 text-xl mr-2"></i>
+                    <h3 class="text-lg font-medium text-gray-900">Word Document Preview</h3>
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    <% if preview_data[:metadata][:paragraphs] %>
+                      <%= preview_data[:metadata][:paragraphs] %> paragraphs
+                    <% end %>
+                    <% if preview_data[:metadata][:words] %>
+                      • <%= preview_data[:metadata][:words] %> words
+                    <% end %>
+                  </div>
+                </div>
+                <div class="bg-white border rounded-lg p-4 max-h-96 overflow-y-auto">
+                  <div class="prose max-w-none">
+                    <%= simple_format(preview_data[:content]) %>
+                  </div>
+                </div>
+                <div class="mt-4 space-y-2">
+                  <%= link_to "Open in Word Online", "https://view.officeapps.live.com/op/embed.aspx?src=#{CGI.escape(request.base_url + rails_blob_path(@document.file))}", 
+                              target: "_blank", class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded block w-full" %>
+                  <%= link_to "Open in New Tab", rails_blob_path(@document.file), target: "_blank",
+                              class: "bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded block w-full" %>
+                </div>
+              </div>
+              
+            <% when 'excel' %>
+              <!-- Excel Document Preview -->
+              <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center">
+                    <i class="fas fa-file-excel text-green-600 text-xl mr-2"></i>
+                    <h3 class="text-lg font-medium text-gray-900">Excel Spreadsheet Preview</h3>
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    <% if preview_data[:metadata][:sheets] %>
+                      <%= preview_data[:metadata][:sheets] %> sheets
+                    <% end %>
+                    <% if preview_data[:metadata][:rows] %>
+                      • <%= preview_data[:metadata][:rows] %> rows
+                    <% end %>
+                  </div>
+                </div>
+                
+                <% if preview_data[:content].is_a?(Hash) && preview_data[:content][:sheets] %>
+                  <div class="space-y-4">
+                    <% preview_data[:content][:sheets].each_with_index do |sheet, index| %>
+                      <div class="bg-white border rounded-lg p-4">
+                        <h4 class="font-medium text-gray-900 mb-2"><%= sheet[:name] %></h4>
+                        <% if sheet[:rows]&.any? %>
+                          <div class="overflow-x-auto">
+                            <table class="min-w-full text-sm">
+                              <% sheet[:rows].take(10).each do |row| %>
+                                <tr>
+                                  <% row.each do |cell| %>
+                                    <td class="border px-2 py-1"><%= cell %></td>
+                                  <% end %>
+                                </tr>
+                              <% end %>
+                              <% if sheet[:rows].length > 10 %>
+                                <tr><td colspan="<%= sheet[:rows].first&.length || 1 %>" class="text-center text-gray-500 py-2">... (showing first 10 rows)</td></tr>
+                              <% end %>
+                            </table>
+                          </div>
+                        <% else %>
+                          <p class="text-gray-500">No data available</p>
+                        <% end %>
+                      </div>
+                    <% end %>
+                  </div>
+                <% else %>
+                  <div class="bg-white border rounded-lg p-4 text-center text-gray-500">
+                    <p>Preview not available</p>
+                  </div>
+                <% end %>
+                
+                <div class="mt-4 space-y-2">
+                  <%= link_to "Open in Excel Online", "https://view.officeapps.live.com/op/embed.aspx?src=#{CGI.escape(request.base_url + rails_blob_path(@document.file))}", 
+                              target: "_blank", class: "bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded block w-full" %>
+                  <%= link_to "Open in New Tab", rails_blob_path(@document.file), target: "_blank",
+                              class: "bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded block w-full" %>
+                </div>
+              </div>
+              
+            <% when 'powerpoint' %>
+              <!-- PowerPoint Document Preview -->
+              <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center">
+                    <i class="fas fa-file-powerpoint text-orange-500 text-xl mr-2"></i>
+                    <h3 class="text-lg font-medium text-gray-900">PowerPoint Presentation Preview</h3>
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    <% if preview_data[:metadata][:slides] %>
+                      <%= preview_data[:metadata][:slides] %> slides
+                    <% end %>
+                  </div>
+                </div>
+                
+                <% if preview_data[:content].is_a?(Hash) && preview_data[:content][:slides] %>
+                  <div class="space-y-4">
+                    <% preview_data[:content][:slides].each_with_index do |slide, index| %>
+                      <div class="bg-white border rounded-lg p-4">
+                        <h4 class="font-medium text-gray-900 mb-2">Slide <%= index + 1 %></h4>
+                        <div class="prose max-w-none">
+                          <%= simple_format(slide[:text]) %>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                <% else %>
+                  <div class="bg-white border rounded-lg p-4 text-center text-gray-500">
+                    <p>Preview not available</p>
+                  </div>
+                <% end %>
+                
+                <div class="mt-4 space-y-2">
+                  <%= link_to "Open in PowerPoint Online", "https://view.officeapps.live.com/op/embed.aspx?src=#{CGI.escape(request.base_url + rails_blob_path(@document.file))}", 
+                              target: "_blank", class: "bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded block w-full" %>
+                  <%= link_to "Open in New Tab", rails_blob_path(@document.file), target: "_blank",
+                              class: "bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded block w-full" %>
+                </div>
+              </div>
+              
+            <% else %>
+              <!-- Generic File Preview -->
+              <div class="text-center">
+                <div class="bg-gray-100 rounded-lg p-6 mb-4">
+                  <i class="fas fa-file text-gray-500 text-6xl mb-4"></i>
+                  <h3 class="text-lg font-medium text-gray-900 mb-2">Document File</h3>
+                  <p class="text-sm text-gray-600 mb-4">
+                    <%= @document.file.filename %> 
+                    (<%= number_to_human_size(@document.file.byte_size) %>)
+                  </p>
+                  <div class="space-y-2">
+                    <%= link_to "Open in New Tab", rails_blob_path(@document.file), target: "_blank",
+                                class: "bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded block w-full" %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-8 text-gray-500">
+            <i class="fas fa-file-upload text-4xl mb-4"></i>
+            <p>No file attached to this document.</p>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- PDF Viewer Modal -->
+      <div id="pdfViewerModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 h-5/6 shadow-lg rounded-md bg-white">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-medium">PDF Viewer</h3>
+            <button onclick="closePdfViewer()" class="text-gray-400 hover:text-gray-600">
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+          <iframe id="pdfViewerFrame" class="w-full h-full border-0" src=""></iframe>
+        </div>
+      </div>
+
+      <script>
+        function openPdfViewer(pdfUrl) {
+          document.getElementById('pdfViewerFrame').src = pdfUrl;
+          document.getElementById('pdfViewerModal').classList.remove('hidden');
+        }
+
+        function closePdfViewer() {
+          document.getElementById('pdfViewerModal').classList.add('hidden');
+          document.getElementById('pdfViewerFrame').src = '';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('pdfViewerModal').addEventListener('click', function(e) {
+          if (e.target === this) {
+            closePdfViewer();
+          }
+        });
+      </script>
+
+      <!-- Description -->
+      <% if @document.description.present? %>
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Description</h2>
+          <div class="prose max-w-none">
+            <%= simple_format(@document.description) %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Version History -->
+      <% if @document_versions.any? %>
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Version History</h2>
+          <div class="space-y-4">
+            <% @document_versions.each do |version| %>
+              <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div>
+                  <div class="font-medium text-gray-900">Version <%= safe_version_display(version, 'version') %></div>
+                  <div class="text-sm text-gray-500">
+                    <%= time_ago_in_words(version.created_at) %> ago
+                    by <%= version_user_name(version) %>
+                  </div>
+                </div>
+                <div class="text-sm text-gray-500">
+                  <%= version_changes_summary(version) %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-1">
+      <!-- Document Info -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Document Information</h2>
+        
+        <dl class="space-y-4">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Status</dt>
+            <dd class="mt-1">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                           <%= @document.status == 'approved' ? 'bg-green-100 text-green-800' :
+                               @document.status == 'review' ? 'bg-yellow-100 text-yellow-800' :
+                               @document.status == 'draft' ? 'bg-gray-100 text-gray-800' :
+                               @document.status == 'archived' ? 'bg-red-100 text-red-800' :
+                               'bg-gray-100 text-gray-800' %>">
+                <%= @document.status.titleize %>
+              </span>
+            </dd>
+          </div>
+
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Category</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= @document.category&.titleize %></dd>
+          </div>
+
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Version</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= @document.version %></dd>
+          </div>
+
+          <div>
+            <dt class="text-sm font-medium text-gray-500">File Type</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= @document.file_type %></dd>
+          </div>
+
+          <div>
+            <dt class="text-sm font-medium text-gray-500">File Size</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= number_to_human_size(@document.file_size_mb * 1024 * 1024) %></dd>
+          </div>
+
+          <% if @document.expires_at %>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Expires At</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                <%= @document.expires_at.strftime("%B %d, %Y") %>
+                <% if @document.expired? %>
+                  <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    Expired
+                  </span>
+                <% elsif @document.expiring_soon? %>
+                  <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    Expires in <%= @document.days_until_expiry %> days
+                  </span>
+                <% end %>
+              </dd>
+            </div>
+          <% end %>
+
+          <% if @document.compliance_hierarchy.present? %>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Compliance</dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= @document.compliance_hierarchy %></dd>
+            </div>
+          <% end %>
+        </dl>
+      </div>
+
+      <!-- People -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">People</h2>
+        
+        <dl class="space-y-4">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Uploaded By</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= @document.uploaded_by.full_name %></dd>
+          </div>
+
+          <% if @document.approved_by %>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Approved By</dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= @document.approved_by.full_name %></dd>
+            </div>
+          <% end %>
+
+          <% if @document.approved_at %>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Approved At</dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= @document.approved_at.strftime("%B %d, %Y at %I:%M %p") %></dd>
+            </div>
+          <% end %>
+        </dl>
+      </div>
+
+      <!-- Tags -->
+      <% if @document.tags_array.any? %>
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Tags</h2>
+          <div class="flex flex-wrap gap-2">
+            <% @document.tags_array.each do |tag| %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <%= tag %>
+              </span>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Custom Fields -->
+      <% if @document.custom_fields.present? %>
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Custom Fields</h2>
+          <dl class="space-y-4">
+            <% @document.custom_fields.each do |key, value| %>
+              <div>
+                <dt class="text-sm font-medium text-gray-500"><%= key.titleize %></dt>
+                <dd class="mt-1 text-sm text-gray-900"><%= value %></dd>
+              </div>
+            <% end %>
+          </dl>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div> 

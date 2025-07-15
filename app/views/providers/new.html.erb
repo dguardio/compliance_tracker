@@ -1,0 +1,200 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <%= link_to "← Back to Providers", providers_path, 
+                class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+
+  <div class="max-w-4xl mx-auto">
+    <div class="bg-white shadow rounded-lg">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h1 class="text-2xl font-bold text-gray-900">Add New Regulatory Provider</h1>
+      </div>
+
+      <div class="px-6 py-4">
+        <%= form_with model: @provider, local: true, class: "space-y-6" do |form| %>
+          <% if @provider.errors.any? %>
+            <div class="bg-red-50 border border-red-200 rounded-md p-4">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <h3 class="text-sm font-medium text-red-800">
+                    <%= pluralize(@provider.errors.count, "error") %> prohibited this provider from being saved:
+                  </h3>
+                  <div class="mt-2 text-sm text-red-700">
+                    <ul class="list-disc pl-5 space-y-1">
+                      <% @provider.errors.full_messages.each do |message| %>
+                        <li><%= message %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- Basic Information -->
+          <div class="bg-gray-50 rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <%= form.label :name, "Provider Name", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= form.text_field :name, class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+              </div>
+
+              <div>
+                <%= form.label :code, "Provider Code", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= form.text_field :code, class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+                <p class="mt-1 text-sm text-gray-500">Leave blank to auto-generate</p>
+              </div>
+
+              <div>
+                <%= form.label :website, "Website", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= form.url_field :website, class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+              </div>
+
+              <div>
+                <%= form.label :status, "Status", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= form.select :status, Provider.statuses.keys.map { |s| [s.titleize, s] }, {}, 
+                               class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+              </div>
+
+              <% if current_user.super_admin? %>
+                <div>
+                  <%= form.label :organization_id, "Organization", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                  <%= form.select :organization_id, 
+                                  options_for_select([['Platform-Wide (Available to all organizations)', nil]] + 
+                                                    Organization.active.map { |org| [org.name, org.id] }, 
+                                                    @provider.organization_id),
+                                  {},
+                                  class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+                  <p class="mt-1 text-sm text-gray-500">
+                    Select "Platform-Wide" to make this provider available to all organizations, or select a specific organization.
+                  </p>
+                </div>
+              <% else %>
+                <div class="bg-blue-50 border border-blue-200 rounded-md p-3">
+                  <p class="text-sm text-blue-800">
+                    <strong>Provider Type:</strong> Organization-Specific
+                  </p>
+                  <p class="text-sm text-blue-600 mt-1">
+                    This provider will only be available to your organization.
+                  </p>
+                </div>
+              <% end %>
+            </div>
+
+            <div class="mt-6">
+              <%= form.label :description, "Description", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= form.text_area :description, rows: 3, class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+            </div>
+          </div>
+
+          <!-- Location Information -->
+          <div class="bg-gray-50 rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Location Information</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <%= form.label :jurisdiction, "Jurisdiction", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= form.text_field :jurisdiction, class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+              </div>
+
+              <div>
+                <%= form.label :state, "State/Province", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= form.text_field :state, class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+              </div>
+
+              <div>
+                <%= form.label :country, "Country", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= form.text_field :country, class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Information -->
+          <div class="bg-gray-50 rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Contact Information</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <%= form.label "contact_info[email]", "Email", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= form.email_field "contact_info[email]", value: @provider.contact_info&.dig(:email), 
+                                    class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+              </div>
+
+              <div>
+                <%= form.label "contact_info[phone]", "Phone", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= form.telephone_field "contact_info[phone]", value: @provider.contact_info&.dig(:phone), 
+                                        class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+              </div>
+
+              <div>
+                <%= form.label "contact_info[primary_contact]", "Primary Contact", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= form.text_field "contact_info[primary_contact]", value: @provider.contact_info&.dig(:primary_contact), 
+                                   class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+              </div>
+
+              <div>
+                <%= form.label "contact_info[secondary_contact]", "Secondary Contact", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= form.text_field "contact_info[secondary_contact]", value: @provider.contact_info&.dig(:secondary_contact), 
+                                   class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+              </div>
+            </div>
+
+            <div class="mt-6">
+              <%= form.label "contact_info[address]", "Address", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= form.text_area "contact_info[address]", value: @provider.contact_info&.dig(:address), rows: 3, 
+                                class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+            </div>
+          </div>
+
+          <!-- Provider Settings -->
+          <div class="bg-gray-50 rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Provider Settings</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <%= form.label "settings[provider_type]", "Provider Type", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                <%= form.text_field "settings[provider_type]", value: @provider.settings&.dig(:provider_type), 
+                                   class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+              </div>
+
+              <div class="flex items-center space-x-4">
+                <div class="flex items-center">
+                  <%= form.check_box "settings[regulatory_authority]", checked: @provider.settings&.dig(:regulatory_authority), 
+                                     class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+                  <%= form.label "settings[regulatory_authority]", "Regulatory Authority", class: "ml-2 block text-sm text-gray-900" %>
+                </div>
+
+                <div class="flex items-center">
+                  <%= form.check_box "settings[enforcement_powers]", checked: @provider.settings&.dig(:enforcement_powers), 
+                                     class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+                  <%= form.label "settings[enforcement_powers]", "Enforcement Powers", class: "ml-2 block text-sm text-gray-900" %>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-6">
+              <%= form.label "settings[compliance_areas]", "Compliance Areas (comma-separated)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= form.text_field "settings[compliance_areas]", value: @provider.settings&.dig(:compliance_areas)&.join(', '), 
+                                 class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" %>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+            <%= link_to "Cancel", providers_path, 
+                        class: "bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded" %>
+            <%= form.submit "Create Provider", 
+                           class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

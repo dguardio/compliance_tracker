@@ -1,0 +1,351 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex justify-between items-center">
+        <h1 class="text-3xl font-bold text-gray-900">Edit Profile</h1>
+        <%= link_to "Back to Profile", profile_path, 
+                    class: "text-blue-600 hover:text-blue-800 font-medium" %>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-8">
+      <nav class="flex space-x-8" aria-label="Tabs">
+        <button onclick="showTab('basic')" id="tab-basic" class="tab-button active px-3 py-2 text-sm font-medium rounded-md">
+          Basic Information
+        </button>
+        <button onclick="showTab('password')" id="tab-password" class="tab-button px-3 py-2 text-sm font-medium rounded-md">
+          Password
+        </button>
+        <button onclick="showTab('notifications')" id="tab-notifications" class="tab-button px-3 py-2 text-sm font-medium rounded-md">
+          Notifications
+        </button>
+        <button onclick="showTab('preferences')" id="tab-preferences" class="tab-button px-3 py-2 text-sm font-medium rounded-md">
+          Preferences
+        </button>
+      </nav>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="bg-white rounded-lg shadow-md">
+      <!-- Basic Information Tab -->
+      <div id="tab-content-basic" class="tab-content p-6">
+        <%= form_with model: @user, url: profile_path, method: :patch, local: true do |form| %>
+          <div class="space-y-6">
+            <div>
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
+              <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                  <%= form.label :first_name, "First Name", class: "block text-sm font-medium text-gray-700" %>
+                  <%= form.text_field :first_name, value: @user.first_name, 
+                                      class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+                </div>
+
+                <div>
+                  <%= form.label :last_name, "Last Name", class: "block text-sm font-medium text-gray-700" %>
+                  <%= form.text_field :last_name, value: @user.last_name, 
+                                      class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+                </div>
+
+                <div>
+                  <%= form.label :job_title, "Job Title", class: "block text-sm font-medium text-gray-700" %>
+                  <%= form.text_field :job_title, value: @user.job_title, 
+                                      class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+                </div>
+
+                <div>
+                  <%= form.label :phone, "Phone", class: "block text-sm font-medium text-gray-700" %>
+                  <%= form.telephone_field :phone, value: @user.phone, 
+                                          class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+                </div>
+
+                <div>
+                  <%= form.label :timezone, "Timezone", class: "block text-sm font-medium text-gray-700" %>
+                  <%= form.select :timezone, 
+                      options_for_select([
+                        ['UTC', 'UTC'],
+                        ['Eastern Time (US & Canada)', 'America/New_York'],
+                        ['Central Time (US & Canada)', 'America/Chicago'],
+                        ['Mountain Time (US & Canada)', 'America/Denver'],
+                        ['Pacific Time (US & Canada)', 'America/Los_Angeles'],
+                        ['London', 'Europe/London'],
+                        ['Paris', 'Europe/Paris'],
+                        ['Tokyo', 'Asia/Tokyo'],
+                        ['Sydney', 'Australia/Sydney']
+                      ], @user.timezone), 
+                      { prompt: 'Select timezone' },
+                      { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" } %>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Organization Assignment</h3>
+              <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                <div>
+                  <%= form.label :department_id, "Department", class: "block text-sm font-medium text-gray-700" %>
+                  <%= form.select :department_id, 
+                      options_from_collection_for_select(@departments, :id, :name, @user.department_id),
+                      { prompt: 'Select department' },
+                      { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm",
+                        onchange: "updateTeams(this.value)" } %>
+                </div>
+
+                <div>
+                  <%= form.label :team_id, "Team", class: "block text-sm font-medium text-gray-700" %>
+                  <%= form.select :team_id, 
+                      options_from_collection_for_select(@teams, :id, :name, @user.team_id),
+                      { prompt: 'Select team' },
+                      { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm",
+                        onchange: "updateUnits(this.value)" } %>
+                </div>
+
+                <div>
+                  <%= form.label :unit_id, "Unit", class: "block text-sm font-medium text-gray-700" %>
+                  <%= form.select :unit_id, 
+                      options_from_collection_for_select(@units, :id, :name, @user.unit_id),
+                      { prompt: 'Select unit' },
+                      { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" } %>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+              <%= link_to "Cancel", profile_path, 
+                          class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+              <%= form.submit "Update Profile", 
+                             class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Password Tab -->
+      <div id="tab-content-password" class="tab-content p-6 hidden">
+        <%= form_with model: @user, url: update_password_profile_path, method: :patch, local: true do |form| %>
+          <div class="space-y-6">
+            <div>
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Change Password</h3>
+              <div class="grid grid-cols-1 gap-6 max-w-md">
+                <div>
+                  <%= form.label :current_password, "Current Password", class: "block text-sm font-medium text-gray-700" %>
+                  <%= form.password_field :current_password, 
+                                          class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+                </div>
+
+                <div>
+                  <%= form.label :password, "New Password", class: "block text-sm font-medium text-gray-700" %>
+                  <%= form.password_field :password, 
+                                          class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+                </div>
+
+                <div>
+                  <%= form.label :password_confirmation, "Confirm New Password", class: "block text-sm font-medium text-gray-700" %>
+                  <%= form.password_field :password_confirmation, 
+                                          class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+              <%= link_to "Cancel", profile_path, 
+                          class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+              <%= form.submit "Update Password", 
+                             class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Notifications Tab -->
+      <div id="tab-content-notifications" class="tab-content p-6 hidden">
+        <%= form_with url: update_notifications_profile_path, method: :patch, local: true do |form| %>
+          <div class="space-y-6">
+            <div>
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Notification Settings</h3>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h4 class="text-sm font-medium text-gray-900">Email Notifications</h4>
+                    <p class="text-sm text-gray-500">Receive notifications via email</p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <%= form.check_box :notification_settings, { multiple: false, checked: @user.settings&.dig('notification_settings', 'email_enabled') }, 'email_enabled', nil %>
+                    <span class="ml-3 text-sm font-medium text-gray-900">Enabled</span>
+                  </label>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h4 class="text-sm font-medium text-gray-900">Risk Assessment Alerts</h4>
+                    <p class="text-sm text-gray-500">Get notified about risk assessment updates</p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <%= form.check_box :notification_settings, { multiple: false, checked: @user.settings&.dig('notification_settings', 'risk_alerts') }, 'risk_alerts', nil %>
+                    <span class="ml-3 text-sm font-medium text-gray-900">Enabled</span>
+                  </label>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h4 class="text-sm font-medium text-gray-900">Compliance Updates</h4>
+                    <p class="text-sm text-gray-500">Receive updates about compliance requirements</p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <%= form.check_box :notification_settings, { multiple: false, checked: @user.settings&.dig('notification_settings', 'compliance_updates') }, 'compliance_updates', nil %>
+                    <span class="ml-3 text-sm font-medium text-gray-900">Enabled</span>
+                  </label>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h4 class="text-sm font-medium text-gray-900">Weekly Reports</h4>
+                    <p class="text-sm text-gray-500">Receive weekly compliance reports</p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <%= form.check_box :notification_settings, { multiple: false, checked: @user.settings&.dig('notification_settings', 'weekly_reports') }, 'weekly_reports', nil %>
+                    <span class="ml-3 text-sm font-medium text-gray-900">Enabled</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+              <%= link_to "Cancel", profile_path, 
+                          class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+              <%= form.submit "Update Notifications", 
+                             class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Preferences Tab -->
+      <div id="tab-content-preferences" class="tab-content p-6 hidden">
+        <%= form_with url: update_preferences_profile_path, method: :patch, local: true do |form| %>
+          <div class="space-y-6">
+            <div>
+              <h3 class="text-lg font-medium text-gray-900 mb-4">UI Preferences</h3>
+              <div class="space-y-4">
+                <div>
+                  <h4 class="text-sm font-medium text-gray-900 mb-2">Theme</h4>
+                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <label class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none">
+                      <%= form.radio_button :preferences, 'light', { checked: @user.settings&.dig('ui_preferences', 'theme') == 'light' } %>
+                      <span class="flex flex-1">
+                        <span class="flex flex-col">
+                          <span class="block text-sm font-medium text-gray-900">Light</span>
+                          <span class="mt-1 flex items-center text-sm text-gray-500">Default light theme</span>
+                        </span>
+                      </span>
+                    </label>
+
+                    <label class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none">
+                      <%= form.radio_button :preferences, 'dark', { checked: @user.settings&.dig('ui_preferences', 'theme') == 'dark' } %>
+                      <span class="flex flex-1">
+                        <span class="flex flex-col">
+                          <span class="block text-sm font-medium text-gray-900">Dark</span>
+                          <span class="mt-1 flex items-center text-sm text-gray-500">Dark theme</span>
+                        </span>
+                      </span>
+                    </label>
+
+                    <label class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none">
+                      <%= form.radio_button :preferences, 'auto', { checked: @user.settings&.dig('ui_preferences', 'theme') == 'auto' } %>
+                      <span class="flex flex-1">
+                        <span class="flex flex-col">
+                          <span class="block text-sm font-medium text-gray-900">Auto</span>
+                          <span class="mt-1 flex items-center text-sm text-gray-500">Follow system</span>
+                        </span>
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h4 class="text-sm font-medium text-gray-900">Compact Mode</h4>
+                    <p class="text-sm text-gray-500">Use more compact layout</p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <%= form.check_box :preferences, { multiple: false, checked: @user.settings&.dig('ui_preferences', 'compact_mode') }, 'compact_mode', nil %>
+                    <span class="ml-3 text-sm font-medium text-gray-900">Enabled</span>
+                  </label>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h4 class="text-sm font-medium text-gray-900">Show Advanced Options</h4>
+                    <p class="text-sm text-gray-500">Display advanced configuration options</p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <%= form.check_box :preferences, { multiple: false, checked: @user.settings&.dig('ui_preferences', 'show_advanced') }, 'show_advanced', nil %>
+                    <span class="ml-3 text-sm font-medium text-gray-900">Enabled</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+              <%= link_to "Cancel", profile_path, 
+                          class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+              <%= form.submit "Update Preferences", 
+                             class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+      content.classList.add('hidden');
+    });
+    
+    // Remove active class from all tab buttons
+    document.querySelectorAll('.tab-button').forEach(button => {
+      button.classList.remove('active', 'bg-indigo-100', 'text-indigo-700');
+      button.classList.add('text-gray-500', 'hover:text-gray-700');
+    });
+    
+    // Show selected tab content
+    document.getElementById('tab-content-' + tabName).classList.remove('hidden');
+    
+    // Add active class to selected tab button
+    document.getElementById('tab-' + tabName).classList.add('active', 'bg-indigo-100', 'text-indigo-700');
+    document.getElementById('tab-' + tabName).classList.remove('text-gray-500', 'hover:text-gray-700');
+  }
+
+  function updateTeams(departmentId) {
+    if (departmentId) {
+      fetch(`/organizations/<%= @user.organization.id %>/departments/${departmentId}/teams`)
+        .then(response => response.json())
+        .then(teams => {
+          const teamSelect = document.getElementById('user_team_id');
+          teamSelect.innerHTML = '<option value="">Select team</option>';
+          teams.forEach(team => {
+            teamSelect.innerHTML += `<option value="${team.id}">${team.name}</option>`;
+          });
+        });
+    }
+  }
+
+  function updateUnits(teamId) {
+    if (teamId) {
+      fetch(`/organizations/<%= @user.organization.id %>/teams/${teamId}/units`)
+        .then(response => response.json())
+        .then(units => {
+          const unitSelect = document.getElementById('user_unit_id');
+          unitSelect.innerHTML = '<option value="">Select unit</option>';
+          units.forEach(unit => {
+            unitSelect.innerHTML += `<option value="${unit.id}">${unit.name}</option>`;
+          });
+        });
+    }
+  }
+</script> 

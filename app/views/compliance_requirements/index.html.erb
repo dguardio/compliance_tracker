@@ -1,0 +1,83 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <%= link_to "← Back to Framework", organization_compliance_framework_path(@organization, @compliance_framework), 
+                class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Compliance Requirements</h1>
+      <p class="text-gray-600 mt-1">Framework: <%= @compliance_framework.name %></p>
+    </div>
+    <% if policy(ComplianceRequirement.new(compliance_framework: @compliance_framework, organization: @organization)).create? %>
+      <%= link_to "New Requirement", new_organization_compliance_framework_compliance_requirement_path(@organization, @compliance_framework), 
+                  class: "bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" %>
+    <% end %>
+  </div>
+
+  <% if @compliance_requirements.any? %>
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+      <ul class="divide-y divide-gray-200">
+        <% @compliance_requirements.each do |requirement| %>
+          <li class="px-6 py-4 hover:bg-gray-50">
+            <div class="flex items-center justify-between">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h3 class="text-lg font-medium text-gray-900">
+                      <%= link_to requirement.name, organization_compliance_framework_compliance_requirement_path(@organization, @compliance_framework, requirement), 
+                                  class: "hover:text-blue-600" %>
+                    </h3>
+                    <p class="text-sm text-gray-500 mt-1"><%= requirement.code %></p>
+                  </div>
+                  <div class="flex space-x-2">
+                    <span class="px-2 py-1 text-xs font-medium rounded-full 
+                               <%= requirement.priority == 'high' ? 'bg-red-100 text-red-800' : 
+                                   requirement.priority == 'medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' %>">
+                      <%= requirement.priority.titleize %>
+                    </span>
+                    <span class="px-2 py-1 text-xs font-medium rounded-full 
+                               <%= requirement.risk_level == 'risk_critical' ? 'bg-red-100 text-red-800' : 
+                                   requirement.risk_level == 'risk_high' ? 'bg-orange-100 text-orange-800' : 
+                                   requirement.risk_level == 'risk_medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' %>">
+                      <%= requirement.risk_level&.gsub('risk_', '')&.titleize %>
+                    </span>
+                    <span class="px-2 py-1 text-xs font-medium rounded-full 
+                               <%= requirement.status == 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+                      <%= requirement.status.titleize %>
+                    </span>
+                  </div>
+                </div>
+                <p class="text-gray-600 mt-2"><%= truncate(requirement.description, length: 150) %></p>
+                <div class="flex items-center mt-3 text-sm text-gray-500">
+                  <span class="mr-4">Type: <%= requirement.requirement_type.titleize %></span>
+                  <span>Controls: <%= requirement.compliance_controls.count %></span>
+                </div>
+              </div>
+              <div class="ml-4 flex-shrink-0">
+                <% if policy(requirement).update? %>
+                  <%= link_to "Edit", edit_organization_compliance_framework_compliance_requirement_path(@organization, @compliance_framework, requirement), 
+                              class: "text-gray-600 hover:text-gray-800 font-medium" %>
+                <% end %>
+              </div>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% else %>
+    <div class="text-center py-12">
+      <div class="text-gray-400 mb-4">
+        <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No compliance requirements</h3>
+      <p class="text-gray-500 mb-4">Add requirements to this framework to get started.</p>
+      <% if policy(ComplianceRequirement.new(compliance_framework: @compliance_framework, organization: @organization)).create? %>
+        <%= link_to "Add Requirement", new_organization_compliance_framework_compliance_requirement_path(@organization, @compliance_framework), 
+                    class: "bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" %>
+      <% end %>
+    </div>
+  <% end %>
+</div> 

@@ -1,0 +1,213 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-8">
+    <div class="flex justify-between items-center">
+      <h1 class="text-3xl font-bold text-gray-900">Documents</h1>
+      <% if policy(Document.new(organization: @organization)).create? %>
+        <%= link_to "Upload Document", new_organization_document_path(@organization), 
+                    class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <%= form_with url: organization_documents_path(@organization), method: :get, local: true, class: "space-y-4" do |form| %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Search -->
+        <div>
+          <%= form.label :search, "Search", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= form.text_field :search, value: params[:search], 
+                              placeholder: "Search documents...",
+                              class: "block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+        </div>
+
+        <!-- Category Filter -->
+        <div>
+          <%= form.label :category, "Category", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= form.select :category, 
+              options_for_select([['All Categories', '']] + @categories.map { |c| [c.titleize, c] }, params[:category]),
+              {},
+              { class: "block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" } %>
+        </div>
+
+        <!-- Status Filter -->
+        <div>
+          <%= form.label :status, "Status", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= form.select :status, 
+              options_for_select([['All Statuses', '']] + @statuses.map { |s| [s.titleize, s] }, params[:status]),
+              {},
+              { class: "block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" } %>
+        </div>
+
+        <!-- Framework Filter -->
+        <div>
+          <%= form.label :framework_id, "Framework", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= form.select :framework_id, 
+              options_for_select([['All Frameworks', '']] + @compliance_frameworks.map { |f| [f.name, f.id] }, params[:framework_id]),
+              {},
+              { class: "block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" } %>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center">
+        <div class="flex space-x-2">
+          <%= form.submit "Filter", class: "bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded" %>
+          <%= link_to "Clear", organization_documents_path(@organization), 
+                      class: "bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded" %>
+        </div>
+
+        <!-- Sort Options -->
+        <div class="flex items-center space-x-2">
+          <span class="text-sm text-gray-700">Sort by:</span>
+          <%= form.select :sort, 
+              options_for_select([
+                ['Newest First', ''],
+                ['Title', 'title'],
+                ['Created Date', 'created_at'],
+                ['Updated Date', 'updated_at'],
+                ['Status', 'status']
+              ], params[:sort]),
+              {},
+              { class: "border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" } %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Documents List -->
+  <div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <% if @documents.any? %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded By</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% @documents.each do |document| %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10">
+                      <div class="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900">
+                        <%= link_to document.title, organization_document_path(@organization, document), 
+                                    class: "hover:text-blue-600" %>
+                      </div>
+                      <div class="text-sm text-gray-500">
+                        <%= document.file_extension&.upcase %> • <%= number_to_human_size(document.file_size_mb * 1024 * 1024) %>
+                      </div>
+                      <% if document.compliance_hierarchy.present? %>
+                        <div class="text-xs text-gray-400">
+                          <%= document.compliance_hierarchy %>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                    <%= document.category&.titleize %>
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                               <%= document.status == 'approved' ? 'bg-green-100 text-green-800' :
+                                   document.status == 'review' ? 'bg-yellow-100 text-yellow-800' :
+                                   document.status == 'draft' ? 'bg-gray-100 text-gray-800' :
+                                   document.status == 'archived' ? 'bg-red-100 text-red-800' :
+                                   'bg-gray-100 text-gray-800' %>">
+                    <%= document.status.titleize %>
+                  </span>
+                  <% if document.expired? %>
+                    <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      Expired
+                    </span>
+                  <% elsif document.expiring_soon? %>
+                    <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      Expires in <%= document.days_until_expiry %> days
+                    </span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <%= document.uploaded_by.full_name %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <%= time_ago_in_words(document.updated_at) %> ago
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <div class="flex space-x-2">
+                    <%= link_to "View", organization_document_path(@organization, document), 
+                                class: "text-indigo-600 hover:text-indigo-900" %>
+                    
+                    <% if policy(document).update? %>
+                      <%= link_to "Edit", edit_organization_document_path(@organization, document), 
+                                  class: "text-blue-600 hover:text-blue-900" %>
+                    <% end %>
+                    
+                    <% if document.needs_review? && policy(document).approve? %>
+                      <%= link_to "Approve", approve_organization_document_path(@organization, document), 
+                                  method: :patch,
+                                  data: { confirm: "Are you sure you want to approve this document?" },
+                                  class: "text-green-600 hover:text-green-900" %>
+                    <% end %>
+                    
+                    <% if document.needs_review? && policy(document).approve? %>
+                      <%= link_to "Reject", reject_organization_document_path(@organization, document), 
+                                  method: :patch,
+                                  data: { confirm: "Are you sure you want to reject this document?" },
+                                  class: "text-red-600 hover:text-red-900" %>
+                    <% end %>
+                    
+                    <% if policy(document).update? %>
+                      <%= link_to "Duplicate", duplicate_organization_document_path(@organization, document), 
+                                  method: :post,
+                                  class: "text-purple-600 hover:text-purple-900" %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+        <%= paginate @documents %>
+      </div>
+    <% else %>
+      <div class="text-center py-12">
+        <div class="text-gray-400 mb-4">
+          <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No documents found</h3>
+        <p class="text-gray-500 mb-4">
+          <% if params[:search].present? || params[:category].present? || params[:status].present? %>
+            Try adjusting your search criteria or filters.
+          <% else %>
+            Get started by uploading your first document.
+          <% end %>
+        </p>
+        <% if policy(Document.new(organization: @organization)).create? %>
+          <%= link_to "Upload Document", new_organization_document_path(@organization), 
+                      class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div> 

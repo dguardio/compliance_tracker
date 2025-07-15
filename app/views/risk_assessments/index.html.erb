@@ -1,0 +1,222 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <% if @compliance_control %>
+      <%= link_to "← Back to Control", organization_compliance_framework_compliance_requirement_compliance_control_path(@organization, @compliance_framework, @compliance_requirement, @compliance_control), 
+                  class: "text-blue-600 hover:text-blue-800 font-medium" %>
+    <% elsif @compliance_requirement %>
+      <%= link_to "← Back to Requirement", organization_compliance_framework_compliance_requirement_path(@organization, @compliance_framework, @compliance_requirement), 
+                  class: "text-blue-600 hover:text-blue-800 font-medium" %>
+    <% elsif @compliance_framework %>
+      <%= link_to "← Back to Framework", organization_compliance_framework_path(@organization, @compliance_framework), 
+                  class: "text-blue-600 hover:text-blue-800 font-medium" %>
+    <% else %>
+      <%= link_to "← Back to Organization", organization_path(@organization), 
+                  class: "text-blue-600 hover:text-blue-800 font-medium" %>
+    <% end %>
+  </div>
+
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Risk Assessments</h1>
+      <p class="mt-1 text-sm text-gray-500">
+        <% if @compliance_control %>
+          Risk assessments for <%= @compliance_control.name %>
+        <% elsif @compliance_requirement %>
+          Risk assessments for <%= @compliance_requirement.name %>
+        <% elsif @compliance_framework %>
+          Risk assessments for <%= @compliance_framework.name %>
+        <% else %>
+          All risk assessments for <%= @organization.name %>
+        <% end %>
+      </p>
+    </div>
+    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+      <%= link_to "New Risk Assessment", new_risk_assessment_path, 
+                  class: "inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+    </div>
+  </div>
+
+  <!-- Risk Summary Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-red-100 rounded-md flex items-center justify-center">
+              <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">High Risk</dt>
+              <dd class="text-lg font-medium text-gray-900">
+                <%= @risk_assessments.high_risk.count %>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-yellow-100 rounded-md flex items-center justify-center">
+              <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Due Soon</dt>
+              <dd class="text-lg font-medium text-gray-900">
+                <%= @risk_assessments.due_soon.count %>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-red-100 rounded-md flex items-center justify-center">
+              <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Overdue</dt>
+              <dd class="text-lg font-medium text-gray-900">
+                <%= @risk_assessments.overdue.count %>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-green-100 rounded-md flex items-center justify-center">
+              <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Completed</dt>
+              <dd class="text-lg font-medium text-gray-900">
+                <%= @risk_assessments.where(status: :completed).count %>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if @risk_assessments.any? %>
+    <div class="overflow-x-auto shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+      <table class="min-w-full divide-y divide-gray-300">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Risk Assessment</th>
+            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Risk Level</th>
+            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Status</th>
+            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Assigned To</th>
+            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Next Review</th>
+            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @risk_assessments.each do |risk_assessment| %>
+            <tr>
+              <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
+                    <div class="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-<%= risk_assessment.risk_level_color %>-500 flex items-center justify-center">
+                      <span class="text-white font-semibold text-xs sm:text-sm">
+                        <%= risk_assessment.risk_score %>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="ml-2 sm:ml-4">
+                    <div class="text-sm font-medium text-gray-900"><%= risk_assessment.name %></div>
+                    <div class="text-xs sm:text-sm text-gray-500">
+                      <%= risk_assessment.compliance_framework.name %> → 
+                      <%= risk_assessment.compliance_requirement.name %>
+                      <% if risk_assessment.compliance_control %>
+                        → <%= risk_assessment.compliance_control.name %>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= risk_assessment.risk_level_color %>-100 text-<%= risk_assessment.risk_level_color %>-800">
+                  <%= risk_assessment.risk_level %>
+                </span>
+              </td>
+              <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  <%= risk_assessment.status.titleize %>
+                </span>
+              </td>
+              <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden lg:table-cell">
+                <%= risk_assessment.assigned_to.full_name %>
+              </td>
+              <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden lg:table-cell">
+                <div class="flex items-center">
+                  <span class="<%= risk_assessment.overdue? ? 'text-red-600' : risk_assessment.due_soon? ? 'text-yellow-600' : 'text-gray-900' %>">
+                    <%= risk_assessment.next_review_date.strftime("%b %d, %Y") %>
+                  </span>
+                  <% if risk_assessment.overdue? %>
+                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      Overdue
+                    </span>
+                  <% elsif risk_assessment.due_soon? %>
+                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      Due Soon
+                    </span>
+                  <% end %>
+                </div>
+              </td>
+              <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <%= link_to "View", risk_assessment_path(risk_assessment), class: "text-indigo-600 hover:text-indigo-900" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="mt-8">
+      <%= paginate @risk_assessments %>
+    </div>
+  <% else %>
+    <div class="text-center py-12">
+      <div class="text-gray-400 mb-4">
+        <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No risk assessments yet</h3>
+      <p class="text-gray-500 mb-4">Get started by creating your first risk assessment.</p>
+      <%= link_to "Create Risk Assessment", new_risk_assessment_path, 
+                  class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+    </div>
+  <% end %>
+</div>

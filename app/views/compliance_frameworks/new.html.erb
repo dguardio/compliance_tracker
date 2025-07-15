@@ -1,0 +1,14 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <%= link_to "← Back to Frameworks", organization_compliance_frameworks_path(@organization), 
+                class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+
+  <div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h1 class="text-3xl font-bold text-gray-900 mb-6">New Compliance Framework</h1>
+      
+      <%= render 'form' %>
+    </div>
+  </div>
+</div> 

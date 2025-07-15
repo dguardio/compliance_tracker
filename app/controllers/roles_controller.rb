@@ -4,7 +4,7 @@ class RolesController < ApplicationController
 
   def index
     authorize Role, :index?
-    
+
     # Get roles that are scoped to this organization or its resources
     @roles = Role.where(
       '(resource_type = ? AND resource_id = ?) OR ' \
@@ -49,7 +49,8 @@ class RolesController < ApplicationController
   def create
     authorize Role, :create?
     @role = Role.new(role_params)
-    
+    @role.organization = current_user.organization
+
     # Set the resource based on resource_type and resource_id
     if role_params[:resource_type].present? && role_params[:resource_id].present?
       resource_class = role_params[:resource_type].constantize
@@ -105,16 +106,18 @@ class RolesController < ApplicationController
     authorize @role, :update?
     user = current_user.organization.users.find(params[:user_id])
     user.add_role(@role.name, @role.resource)
-    
-    redirect_to organization_role_path(current_user.organization, @role), notice: "User #{user.full_name} was successfully assigned to this role."
+
+    redirect_to organization_role_path(current_user.organization, @role),
+                notice: "User #{user.full_name} was successfully assigned to this role."
   end
 
   def remove_user
     authorize @role, :update?
     user = current_user.organization.users.find(params[:user_id])
     user.remove_role(@role.name, @role.resource)
-    
-    redirect_to organization_role_path(current_user.organization, @role), notice: "User #{user.full_name} was successfully removed from this role."
+
+    redirect_to organization_role_path(current_user.organization, @role),
+                notice: "User #{user.full_name} was successfully removed from this role."
   end
 
   # AJAX endpoint for dynamic form updates

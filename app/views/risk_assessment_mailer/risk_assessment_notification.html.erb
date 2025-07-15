@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+</head>
+<body>
+  <h1>Risk Assessment Notification</h1>
+  
+  <p>Hello <%= @notification.recipient.full_name %>,</p>
+  
+  <p>
+    <% case @action.to_sym %>
+    <% when :created %>
+      A new risk assessment has been created:
+    <% when :updated %>
+      A risk assessment has been updated:
+    <% when :assigned %>
+      You have been assigned to a risk assessment:
+    <% when :overdue %>
+      A risk assessment is overdue:
+    <% when :high_risk %>
+      A risk assessment has been flagged as HIGH RISK:
+    <% end %>
+  </p>
+  
+  <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+    <h3><%= @risk_assessment.name %></h3>
+    <p><strong>Risk Level:</strong> <span style="color: <%= @risk_assessment.risk_level_color == 'red' ? '#dc3545' : '#28a745' %>;"><%= @risk_assessment.risk_level %></span></p>
+    <p><strong>Risk Score:</strong> <%= @risk_assessment.risk_score %></p>
+    <p><strong>Status:</strong> <%= @risk_assessment.status.titleize %></p>
+    <p><strong>Next Review:</strong> <%= @risk_assessment.next_review_date.strftime("%B %d, %Y") %></p>
+    <% if @risk_assessment.description.present? %>
+      <p><strong>Description:</strong> <%= @risk_assessment.description %></p>
+    <% end %>
+  </div>
+  
+  <p>
+    <a href="<%= @notification.url %>" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+      View Risk Assessment
+    </a>
+  </p>
+  
+  <p>Best regards,<br>Compliance Management System</p>
+</body>
+</html> 

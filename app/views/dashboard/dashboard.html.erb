@@ -9,9 +9,9 @@
             Welcome to <%= @organization.name %> - Compliance Management Overview
           </p>
         </div>
-        <div class="flex space-x-3">
-          <%= link_to "Manage Organization", organization_path(@organization), class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-          <%= link_to "Add User", new_users_registration_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+          <%= link_to "Manage Organization", organization_path(@organization), class: "inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+          <%= link_to "Add User", new_users_registration_path, class: "inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
         </div>
       </div>
     </div>
@@ -94,6 +94,139 @@
             </div>
           </div>
         </div>
+
+        <!-- Compliance Frameworks -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Compliance Frameworks</dt>
+                  <dd class="text-lg font-medium text-gray-900"><%= @stats[:compliance_frameworks] || 0 %></dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk Assessments -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Risk Assessments</dt>
+                  <dd class="text-lg font-medium text-gray-900"><%= @stats[:risk_assessments] || 0 %></dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- High Risk Assessments -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">High Risk</dt>
+                  <dd class="text-lg font-medium text-red-600"><%= @stats[:high_risk_assessments] || 0 %></dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Overdue Assessments -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Overdue Reviews</dt>
+                  <dd class="text-lg font-medium text-yellow-600"><%= @stats[:overdue_risk_assessments] || 0 %></dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Documents -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Documents</dt>
+                  <dd class="text-lg font-medium text-gray-900"><%= @stats[:documents] || 0 %></dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Documents Needing Review -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Needing Review</dt>
+                  <dd class="text-lg font-medium text-orange-600"><%= @stats[:documents_needing_review] || 0 %></dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Documents Expiring Soon -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Expiring Soon</dt>
+                  <dd class="text-lg font-medium text-purple-600"><%= @stats[:documents_expiring_soon] || 0 %></dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -143,6 +276,180 @@
       </div>
     </div>
 
+    <!-- Compliance Frameworks -->
+    <div class="px-4 py-6 sm:px-0">
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Compliance Frameworks</h3>
+            <% if policy(ComplianceFramework.new(organization: @organization)).create? %>
+              <%= link_to "View All", organization_compliance_frameworks_path(@organization), 
+                          class: "text-sm text-blue-600 hover:text-blue-800 font-medium" %>
+            <% end %>
+          </div>
+          
+          <% if @compliance_frameworks&.any? %>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <% @compliance_frameworks.limit(6).each do |framework| %>
+                <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                  <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-medium text-gray-900">
+                      <%= link_to framework.name, organization_compliance_framework_path(@organization, framework), 
+                                  class: "hover:text-blue-600" %>
+                    </h4>
+                    <span class="px-2 py-1 text-xs font-medium rounded-full 
+                               <%= framework.status == 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+                      <%= framework.status.titleize %>
+                    </span>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-2"><%= truncate(framework.description, length: 80) %></p>
+                  <div class="flex justify-between text-xs text-gray-500">
+                    <span>v<%= framework.version %></span>
+                    <span><%= framework.compliance_requirements.count %> requirements</span>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="text-center py-8">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">No compliance frameworks</h3>
+              <p class="mt-1 text-sm text-gray-500">Get started by creating your first compliance framework.</p>
+              <% if policy(ComplianceFramework.new(organization: @organization)).create? %>
+                <div class="mt-6">
+                  <%= link_to new_organization_compliance_framework_path(@organization), 
+                              class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Create Framework
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Risk Assessments -->
+    <div class="px-4 py-6 sm:px-0">
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Risk Assessments</h3>
+            <% if policy(RiskAssessment.new(organization: @organization)).create? %>
+              <%= link_to "View All", organization_risk_assessments_path(@organization), 
+                          class: "text-sm text-blue-600 hover:text-blue-800 font-medium" %>
+            <% end %>
+          </div>
+          
+          <% if @risk_assessments&.any? %>
+            <div class="overflow-x-auto shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+              <table class="min-w-full divide-y divide-gray-300">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Risk Assessment</th>
+                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Risk Level</th>
+                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Framework</th>
+                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Assigned To</th>
+                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Next Review</th>
+                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <% @risk_assessments.limit(10).each do |risk_assessment| %>
+                    <tr>
+                      <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                          <div class="flex-shrink-0 h-8 w-8">
+                            <div class="h-8 w-8 rounded-full bg-<%= risk_assessment.risk_level_color %>-500 flex items-center justify-center">
+                              <span class="text-white font-semibold text-xs">
+                                <%= risk_assessment.risk_score %>
+                              </span>
+                            </div>
+                          </div>
+                          <div class="ml-2 sm:ml-4">
+                            <div class="text-sm font-medium text-gray-900">
+                              <%= link_to risk_assessment.name, organization_risk_assessment_path(@organization, risk_assessment), 
+                                          class: "hover:text-blue-600" %>
+                            </div>
+                            <div class="text-xs sm:text-sm text-gray-500">
+                              <%= risk_assessment.compliance_requirement.name %>
+                              <% if risk_assessment.compliance_control %>
+                                → <%= risk_assessment.compliance_control.name %>
+                              <% end %>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= risk_assessment.risk_level_color %>-100 text-<%= risk_assessment.risk_level_color %>-800">
+                          <%= risk_assessment.risk_level %>
+                        </span>
+                      </td>
+                      <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          <%= risk_assessment.status.titleize %>
+                        </span>
+                      </td>
+                      <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
+                        <%= link_to risk_assessment.compliance_framework.name, organization_compliance_framework_path(@organization, risk_assessment.compliance_framework), 
+                                    class: "text-indigo-600 hover:text-indigo-900" %>
+                      </td>
+                      <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden lg:table-cell">
+                        <%= risk_assessment.assigned_to.full_name %>
+                      </td>
+                      <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden lg:table-cell">
+                        <span class="<%= risk_assessment.overdue? ? 'text-red-600' : risk_assessment.due_soon? ? 'text-yellow-600' : 'text-gray-900' %>">
+                          <%= risk_assessment.next_review_date.strftime("%b %d, %Y") %>
+                        </span>
+                        <% if risk_assessment.overdue? %>
+                          <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            Overdue
+                          </span>
+                        <% elsif risk_assessment.due_soon? %>
+                          <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Due Soon
+                          </span>
+                        <% end %>
+                      </td>
+                      <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <%= link_to "View", organization_risk_assessment_path(@organization, risk_assessment), 
+                                    class: "text-indigo-600 hover:text-indigo-900" %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <div class="text-center py-8">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">No risk assessments</h3>
+              <p class="mt-1 text-sm text-gray-500">Create risk assessments to track compliance risks.</p>
+              <% if policy(RiskAssessment.new(organization: @organization)).create? %>
+                <div class="mt-6">
+                  <%= link_to new_organization_risk_assessment_path(@organization), 
+                              class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" do %>
+                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Create Risk Assessment
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
     <!-- Recent Users -->
     <div class="px-4 py-6 sm:px-0">
       <div class="bg-white shadow rounded-lg">
@@ -150,51 +457,51 @@
           <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Recent Users</h3>
           
           <% if @users.any? %>
-            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+            <div class="overflow-x-auto shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
               <table class="min-w-full divide-y divide-gray-300">
                 <thead class="bg-gray-50">
                   <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit</th>
+                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Role</th>
+                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Department</th>
+                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Team</th>
+                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Unit</th>
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                   <% @users.limit(10).each do |user| %>
                     <tr>
-                      <td class="px-6 py-4 whitespace-nowrap">
+                      <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
-                          <div class="flex-shrink-0 h-10 w-10">
-                            <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center">
-                              <span class="text-white font-semibold text-sm">
+                          <div class="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
+                            <div class="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-indigo-500 flex items-center justify-center">
+                              <span class="text-white font-semibold text-xs sm:text-sm">
                                 <%= user.first_name&.first&.upcase || user.email.first.upcase %>
                               </span>
                             </div>
                           </div>
-                          <div class="ml-4">
+                          <div class="ml-2 sm:ml-4">
                             <div class="text-sm font-medium text-gray-900"><%= user.full_name %></div>
-                            <div class="text-sm text-gray-500"><%= user.email %></div>
+                            <div class="text-xs sm:text-sm text-gray-500"><%= user.email %></div>
                           </div>
                         </div>
                       </td>
-                      <td class="px-6 py-4 whitespace-nowrap">
+                      <td class="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
                         <div class="text-sm text-gray-900">
                           <% user.roles.each do |role| %>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                               <%= role.name.titleize %>
                             </span>
                           <% end %>
                         </div>
                       </td>
-                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
                         <%= user.department&.name || '-' %>
                       </td>
-                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden lg:table-cell">
                         <%= user.team&.name || '-' %>
                       </td>
-                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden lg:table-cell">
                         <%= user.unit&.name || '-' %>
                       </td>
                     </tr>

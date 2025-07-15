@@ -1,0 +1,85 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <%= link_to "← Back to Requirement", organization_compliance_framework_compliance_requirement_path(@organization, @compliance_framework, @compliance_requirement), 
+                class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Compliance Controls</h1>
+      <p class="text-gray-600 mt-1">Requirement: <%= @compliance_requirement.name %></p>
+    </div>
+    <% if policy(ComplianceControl.new(compliance_requirement: @compliance_requirement, organization: @organization)).create? %>
+      <%= link_to "New Control", new_organization_compliance_framework_compliance_requirement_compliance_control_path(@organization, @compliance_framework, @compliance_requirement), 
+                  class: "bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" %>
+    <% end %>
+  </div>
+
+  <% if @compliance_controls.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% @compliance_controls.each do |control| %>
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-semibold text-gray-900">
+              <%= link_to control.name, organization_compliance_framework_compliance_requirement_compliance_control_path(@organization, @compliance_framework, @compliance_requirement, control), 
+                          class: "hover:text-blue-600" %>
+            </h3>
+            <div class="flex space-x-2">
+              <span class="px-2 py-1 text-xs font-medium rounded-full 
+                         <%= control.effectiveness == 'high' ? 'bg-green-100 text-green-800' : 
+                             control.effectiveness == 'medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800' %>">
+                <%= control.effectiveness.titleize %>
+              </span>
+              <span class="px-2 py-1 text-xs font-medium rounded-full 
+                         <%= control.status == 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+                <%= control.status.titleize %>
+              </span>
+            </div>
+          </div>
+          
+          <p class="text-gray-600 mb-4"><%= truncate(control.description, length: 120) %></p>
+          
+          <div class="space-y-2 mb-4">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Type:</span>
+              <span class="font-medium"><%= control.control_type.titleize %></span>
+            </div>
+            <% if control.settings&.dig('control_owner') %>
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">Owner:</span>
+                <span class="font-medium"><%= control.settings['control_owner'] %></span>
+              </div>
+            <% end %>
+            <% if control.settings&.dig('testing_frequency') %>
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">Testing:</span>
+                <span class="font-medium"><%= control.settings['testing_frequency'] %></span>
+              </div>
+            <% end %>
+          </div>
+          
+          <div class="flex justify-between items-center">
+            <% if policy(control).update? %>
+              <%= link_to "Edit", edit_organization_compliance_framework_compliance_requirement_compliance_control_path(@organization, @compliance_framework, @compliance_requirement, control), 
+                          class: "text-gray-600 hover:text-gray-800 font-medium" %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center py-12">
+      <div class="text-gray-400 mb-4">
+        <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No compliance controls</h3>
+      <p class="text-gray-500 mb-4">Add controls to this requirement to get started.</p>
+      <% if policy(ComplianceControl.new(compliance_requirement: @compliance_requirement, organization: @organization)).create? %>
+        <%= link_to "Add Control", new_organization_compliance_framework_compliance_requirement_compliance_control_path(@organization, @compliance_framework, @compliance_requirement), 
+                    class: "bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" %>
+      <% end %>
+    </div>
+  <% end %>
+</div> 

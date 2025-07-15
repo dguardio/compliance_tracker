@@ -12,24 +12,49 @@ class ApplicationPolicy
   def can?(action, resource_type = nil, resource = nil)
     return false unless user&.organization
 
+    # Super admins have full access to everything
+    return true if user.super_admin?
+
+    # Organization admins have full access within their organization
+    if user.organization_admin? && resource_type != 'Organization'
+      # For organization-scoped resources, org admins have full access
+      return true
+    end
+
     # Determine resource type and resource from record if not provided
     resource_type ||= record.class.name if record
     resource ||= record
 
+    # Debug logging (remove in production)
+    # puts "DEBUG: can?(#{action}, #{resource_type}, #{resource&.id}) - calling Permission.user_has_permission?"
+
     # Check if user has permission for this action on this resource type/resource
     Permission.user_has_permission?(user, action.to_s, resource_type, resource)
+
+    # Debug logging (remove in production)
+    # puts "DEBUG: Permission.user_has_permission? returned: #{result}"
   end
 
   # Standard Pundit methods that delegate to our dynamic permission system
   def index?
-    can?(:read, record.class.name) if record
+    # For index actions, we check permissions on the resource type, not a specific record
+    resource_type = record.class.name if record
+    can?(:read, resource_type) if resource_type
   end
 
   def show?
+    # First check for global read permission
+    return true if can?(:read, record.class.name)
+
+    # Then check for resource-specific permission
     can?(:read, record.class.name, record)
   end
 
   def create?
+    # First check for global create permission
+    return true if can?(:create, record.class.name)
+
+    # Then check for resource-specific permission
     can?(:create, record.class.name, record)
   end
 
@@ -38,6 +63,10 @@ class ApplicationPolicy
   end
 
   def update?
+    # First check for global update permission
+    return true if can?(:update, record.class.name)
+
+    # Then check for resource-specific permission
     can?(:update, record.class.name, record)
   end
 
@@ -46,10 +75,18 @@ class ApplicationPolicy
   end
 
   def destroy?
+    # First check for global destroy permission
+    return true if can?(:destroy, record.class.name)
+
+    # Then check for resource-specific permission
     can?(:destroy, record.class.name, record)
   end
 
   def manage?
+    # First check for global manage permission
+    return true if can?(:manage, record.class.name)
+
+    # Then check for resource-specific permission
     can?(:manage, record.class.name, record)
   end
 

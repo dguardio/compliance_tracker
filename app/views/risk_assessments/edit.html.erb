@@ -1,0 +1,198 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <%= link_to "← Back to Risk Assessment", risk_assessment_path(@risk_assessment), 
+                class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+
+  <div class="max-w-3xl mx-auto">
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-gray-900">Edit Risk Assessment</h1>
+      <p class="mt-1 text-sm text-gray-500">
+        Update risk assessment: <%= @risk_assessment.name %>
+      </p>
+    </div>
+
+    <%= form_with model: [@organization, @risk_assessment], local: true, class: "space-y-6" do |form| %>
+      <% if @risk_assessment.errors.any? %>
+        <div class="bg-red-50 border border-red-200 rounded-md p-4">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-red-800">
+                <%= pluralize(@risk_assessment.errors.count, "error") %> prohibited this risk assessment from being saved:
+              </h3>
+              <div class="mt-2 text-sm text-red-700">
+                <ul class="list-disc pl-5 space-y-1">
+                  <% @risk_assessment.errors.full_messages.each do |message| %>
+                    <li><%= message %></li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <div class="bg-white shadow rounded-lg p-6 space-y-6">
+        <!-- Basic Information -->
+        <div>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+          <div class="grid grid-cols-1 gap-6">
+            <div>
+              <%= form.label :name, class: "block text-sm font-medium text-gray-700" %>
+              <%= form.text_field :name, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", required: true %>
+            </div>
+
+            <div>
+              <%= form.label :description, class: "block text-sm font-medium text-gray-700" %>
+              <%= form.text_area :description, rows: 4, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compliance Association -->
+        <div>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Compliance Association</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <%= form.label :compliance_framework_id, "Framework", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.collection_select :compliance_framework_id, 
+                                        @organization.compliance_frameworks.order(:name), 
+                                        :id, 
+                                        :name, 
+                                        { prompt: "Select Framework" }, 
+                                        { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" } %>
+            </div>
+
+            <div>
+              <%= form.label :compliance_requirement_id, "Requirement", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.collection_select :compliance_requirement_id, 
+                                        @risk_assessment.compliance_framework&.compliance_requirements&.order(:name) || [], 
+                                        :id, 
+                                        :name, 
+                                        { prompt: "Select Requirement" }, 
+                                        { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" } %>
+            </div>
+
+            <div>
+              <%= form.label :compliance_control_id, "Control", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.collection_select :compliance_control_id, 
+                                        @risk_assessment.compliance_requirement&.compliance_controls&.order(:name) || [], 
+                                        :id, 
+                                        :name, 
+                                        { prompt: "Select Control" }, 
+                                        { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk Assessment -->
+        <div>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Risk Assessment</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <%= form.label :likelihood, class: "block text-sm font-medium text-gray-700" %>
+              <%= form.select :likelihood, 
+                             RiskAssessment.likelihoods.keys.map { |k| [k.titleize, k] }, 
+                             { prompt: "Select Likelihood" }, 
+                             { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" } %>
+              <p class="mt-1 text-xs text-gray-500">
+                How likely is this risk to occur?
+              </p>
+            </div>
+
+            <div>
+              <%= form.label :impact, class: "block text-sm font-medium text-gray-700" %>
+              <%= form.select :impact,
+                  RiskAssessment.impacts.keys.map { |k| [k.titleize, k] },
+                  { prompt: "Select Impact" },
+                  class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+              <p class="mt-1 text-sm text-gray-500">
+                What would be the impact if this risk occurs?
+              </p>
+            </div>
+          </div>
+
+          <!-- Risk Score Display -->
+          <div class="mt-4 p-4 bg-gray-50 rounded-md">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-gray-700">Current Risk Score:</span>
+              <span class="text-lg font-bold text-<%= @risk_assessment.risk_level_color %>-600">
+                <%= @risk_assessment.risk_score %>
+              </span>
+            </div>
+            <div class="mt-2">
+              <span class="text-sm text-<%= @risk_assessment.risk_level_color %>-600 font-medium">
+                <%= @risk_assessment.risk_level %> Risk
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status and Dates -->
+        <div>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Status and Timeline</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <%= form.label :status, class: "block text-sm font-medium text-gray-700" %>
+              <%= form.select :status, 
+                             RiskAssessment.statuses.keys.map { |k| [k.titleize, k] }, 
+                             { prompt: "Select Status" }, 
+                             { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" } %>
+            </div>
+
+            <div>
+              <%= form.label :assessment_date, class: "block text-sm font-medium text-gray-700" %>
+              <%= form.date_field :assessment_date, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+            </div>
+
+            <div>
+              <%= form.label :next_review_date, class: "block text-sm font-medium text-gray-700" %>
+              <%= form.date_field :next_review_date, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Assignment -->
+        <div>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Assignment</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <%= form.label :assigned_to_id, "Assigned To", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.collection_select :assigned_to_id, 
+                                        @organization.users.by_name, 
+                                        :id, 
+                                        :full_name, 
+                                        { prompt: "Select Assignee" }, 
+                                        { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mitigation Plan -->
+        <div>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Mitigation Plan</h3>
+          <div>
+            <%= form.label :mitigation_plan, class: "block text-sm font-medium text-gray-700" %>
+            <%= form.text_area :mitigation_plan, rows: 4, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+            <p class="mt-1 text-xs text-gray-500">
+              Describe the plan to mitigate this risk
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex justify-end space-x-3">
+        <%= link_to "Cancel", risk_assessment_path(@risk_assessment), 
+                    class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        <%= form.submit "Update Risk Assessment", 
+                        class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+      </div>
+    <% end %>
+  </div>
+</div>

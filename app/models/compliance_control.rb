@@ -1,16 +1,16 @@
 class ComplianceControl < ApplicationRecord
   acts_as_tenant(:organization)
   resourcify
+  has_paper_trail
 
   # Associations
   belongs_to :compliance_requirement
-  has_many :control_evidences, dependent: :destroy
-  has_many :control_tests, dependent: :destroy
+  has_many :risk_assessments, dependent: :destroy
 
   # Validations
   validates :name, presence: true, length: { minimum: 2, maximum: 200 }
   validates :control_type, presence: true
-  validates :effectiveness, presence: true, inclusion: { in: 1..5 }
+  validates :effectiveness, presence: true
   validates :status, presence: true
   validates :compliance_requirement, presence: true
 
@@ -20,15 +20,26 @@ class ComplianceControl < ApplicationRecord
     detective: 1,
     corrective: 2,
     deterrent: 3,
-    compensating: 4
+    recovery: 4
   }
 
   enum status: {
-    planned: 0,
-    implemented: 1,
-    effective: 2,
-    ineffective: 3,
-    retired: 4
+    active: 0,
+    inactive: 1,
+    draft: 2
+  }
+
+  enum effectiveness: {
+    low: 0,
+    medium: 1,
+    high: 2
+  }
+
+  enum risk_level: {
+    risk_low: 0,
+    risk_medium: 1,
+    risk_high: 2,
+    risk_critical: 3
   }
 
   # JSONB Settings
@@ -46,11 +57,11 @@ class ComplianceControl < ApplicationRecord
                  custom_fields: :json
 
   # Scopes
-  scope :active, -> { where.not(status: :retired) }
-  scope :effective, -> { where(status: :effective) }
+  scope :active, -> { where.not(status: :inactive) }
+  scope :effective, -> { where(effectiveness: :high) }
   scope :by_type, -> { order(:control_type) }
   scope :by_effectiveness, -> { order(:effectiveness) }
-  scope :high_effectiveness, -> { where(effectiveness: [4, 5]) }
+  scope :high_effectiveness, -> { where(effectiveness: :high) }
   scope :needs_review, -> { where("settings->>'next_review_date' < ?", Date.current.to_s) }
   scope :for_category, ->(category) { where("settings->>'control_category' = ?", category) }
 
@@ -60,7 +71,7 @@ class ComplianceControl < ApplicationRecord
   end
 
   def effective?
-    status == 'effective'
+    effectiveness == 'high'
   end
 
   def needs_review?
@@ -70,20 +81,25 @@ class ComplianceControl < ApplicationRecord
   end
 
   def effectiveness_percentage
-    (effectiveness.to_f / 5 * 100).round(2)
+    case effectiveness
+    when 'high'
+      100
+    when 'medium'
+      66
+    when 'low'
+      33
+    else
+      0
+    end
   end
 
   def effectiveness_color
     case effectiveness
-    when 5
+    when 'high'
       'green'
-    when 4
-      'light-green'
-    when 3
+    when 'medium'
       'yellow'
-    when 2
-      'orange'
-    when 1
+    when 'low'
       'red'
     else
       'gray'
@@ -127,18 +143,6 @@ class ComplianceControl < ApplicationRecord
     else
       0
     end
-  end
-
-  def evidence_count
-    control_evidences.count
-  end
-
-  def test_count
-    control_tests.count
-  end
-
-  def last_test_result
-    control_tests.order(:created_at).last&.result
   end
 
   def compliance_framework

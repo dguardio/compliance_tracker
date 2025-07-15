@@ -1,0 +1,113 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <%= link_to "← Back to Dashboard", dashboard_path, 
+                class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-gray-900">Compliance Frameworks</h1>
+    <% if policy(ComplianceFramework.new(organization: @organization)).create? %>
+      <%= link_to "New Framework", new_organization_compliance_framework_path(@organization), 
+                  class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+    <% end %>
+  </div>
+
+  <!-- Search Form -->
+  <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <%= search_form_for @q, url: organization_compliance_frameworks_path(@organization), class: "space-y-4" do |f| %>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <%= f.label :name_cont, "Name contains", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.search_field :name_cont, class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+        
+        <div>
+          <%= f.label :status_eq, "Status", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.select :status_eq, 
+                      options_for_select([['All', ''], ['Active', 'active'], ['Inactive', 'inactive'], ['Draft', 'draft']], params.dig(:q, :status_eq)), 
+                      {}, 
+                      class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+        
+        <div>
+          <%= f.label :version_cont, "Version contains", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.search_field :version_cont, class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+      </div>
+      
+      <div class="flex justify-between items-center">
+        <div class="flex space-x-2">
+          <%= f.submit "Search", class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+          <%= link_to "Clear", organization_compliance_frameworks_path(@organization), 
+                      class: "bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded" %>
+        </div>
+        <div class="text-sm text-gray-500">
+          <%= pluralize(@compliance_frameworks.total_count, 'framework') %> found
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @compliance_frameworks.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% @compliance_frameworks.each do |framework| %>
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-semibold text-gray-900"><%= framework.name %></h3>
+            <span class="px-2 py-1 text-xs font-medium rounded-full 
+                       <%= framework.status == 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+              <%= framework.status.titleize %>
+            </span>
+          </div>
+          
+          <p class="text-gray-600 mb-4"><%= framework.description %></p>
+          
+          <div class="space-y-2 mb-4">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Version:</span>
+              <span class="font-medium"><%= framework.version %></span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Requirements:</span>
+              <span class="font-medium"><%= framework.compliance_requirements.count %></span>
+            </div>
+            <% if framework.settings&.dig('jurisdiction') %>
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">Jurisdiction:</span>
+                <span class="font-medium"><%= framework.settings['jurisdiction'] %></span>
+              </div>
+            <% end %>
+          </div>
+          
+          <div class="flex justify-between items-center">
+            <%= link_to "View Details", organization_compliance_framework_path(@organization, framework), 
+                        class: "text-blue-600 hover:text-blue-800 font-medium" %>
+            <% if policy(framework).update? %>
+              <%= link_to "Edit", edit_organization_compliance_framework_path(@organization, framework), 
+                          class: "text-gray-600 hover:text-gray-800 font-medium" %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Pagination -->
+    <div class="mt-8">
+      <%= paginate @compliance_frameworks %>
+    </div>
+  <% else %>
+    <div class="text-center py-12">
+      <div class="text-gray-400 mb-4">
+        <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No compliance frameworks</h3>
+      <p class="text-gray-500 mb-4">Get started by creating your first compliance framework.</p>
+      <% if policy(ComplianceFramework.new(organization: @organization)).create? %>
+        <%= link_to "Create Framework", new_organization_compliance_framework_path(@organization), 
+                    class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+      <% end %>
+    </div>
+  <% end %>
+</div> 

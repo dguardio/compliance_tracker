@@ -1,0 +1,15 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <%= link_to "← Back to Controls", organization_compliance_framework_compliance_requirement_compliance_controls_path(@organization, @compliance_framework, @compliance_requirement), 
+                class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+
+  <div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h1 class="text-3xl font-bold text-gray-900 mb-6">New Compliance Control</h1>
+      <p class="text-gray-600 mb-6">Requirement: <%= @compliance_requirement.name %></p>
+      
+      <%= render 'form' %>
+    </div>
+  </div>
+</div> 

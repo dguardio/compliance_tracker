@@ -62,6 +62,9 @@ gem 'acts_as_tenant', '~> 0.5'
 gem 'sidekiq', '~> 7.0'
 gem 'sidekiq-scheduler', '~> 5.0'
 
+# Notifications and Messaging
+gem 'noticed', '~> 2.0'
+
 # Web Scraping and AI
 gem 'httparty', '~> 0.21'
 gem 'langchainrb', '~> 0.7'
@@ -72,13 +75,23 @@ gem 'ruby-openai', '~> 6.0'
 gem 'pdf-forms', '~> 1.4'
 gem 'pdf-reader', '~> 2.11'
 
+# Document Preview and Processing
+gem 'activestorage-office-previewer', '~> 0.1' # Office file previews
+gem 'creek', '~> 2.6' # Excel file processing (alternative)
+gem 'docx', '~> 0.7' # Word document processing
+gem 'roo', '~> 2.10' # Excel/Spreadsheet processing
+gem 'ruby-ole', '~> 1.2'                # OLE file handling for older Office formats
+gem 'rubyzip', '~> 2.4'                 # ZIP file handling for Office Open XML
+
 # API and JSON
 gem 'jsonapi-serializer', '~> 2.2'
 gem 'jsonb_accessor', '~> 1.4'
+gem 'rack-cors', '~> 2.0'
 
 # Search and Indexing
 gem 'elasticsearch-rails', '~> 7.0'
 gem 'pg_search', '~> 2.3'
+gem 'ransack', '~> 4.1'
 
 # File Upload and Storage
 gem 'aws-sdk-s3', '~> 1.0', require: false

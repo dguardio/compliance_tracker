@@ -1,0 +1,183 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <%= link_to "← Back to Providers", providers_path, 
+                class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900">Provider Recommendations</h1>
+    <p class="text-gray-600 mt-2">
+      Based on your organization's industry (<%= @current_user.organization.settings[:industry] || 'Not specified' %>) 
+      and jurisdiction (<%= @current_user.organization.settings[:jurisdiction] || 'Not specified' %>)
+    </p>
+  </div>
+
+  <!-- Auto-Assign Section -->
+  <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h3 class="text-lg font-medium text-blue-900">Quick Setup</h3>
+        <p class="text-blue-700 mt-1">
+          Automatically assign the most relevant providers for your organization
+        </p>
+      </div>
+      <%= form_with url: auto_assign_providers_path, method: :post, local: true do |form| %>
+        <%= form.submit "Auto-Assign Recommended Providers", 
+                       class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Essential Providers -->
+  <% if @essential_providers.any? %>
+    <div class="bg-white shadow rounded-lg mb-8">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">Essential Providers</h2>
+        <p class="text-gray-600 mt-1">These providers are essential for most organizations in your jurisdiction</p>
+      </div>
+      
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <% @essential_providers.each do |provider| %>
+            <div class="border border-gray-200 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="font-medium text-gray-900"><%= provider.name %></h3>
+                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                  Essential
+                </span>
+              </div>
+              <p class="text-sm text-gray-600 mb-3"><%= provider.description %></p>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500"><%= provider.code %></span>
+                <% if @current_user.organization.providers.exists?(code: provider.code) %>
+                  <span class="text-xs text-green-600 font-medium">✓ Already assigned</span>
+                <% else %>
+                  <%= link_to "Add", bulk_assign_providers_path(provider_ids: [provider.id]), 
+                              method: :post,
+                              class: "text-xs text-blue-600 hover:text-blue-800 font-medium" %>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Industry-Specific Providers -->
+  <% if @industry_providers.any? %>
+    <div class="bg-white shadow rounded-lg mb-8">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">Industry-Specific Providers</h2>
+        <p class="text-gray-600 mt-1">Providers relevant to your industry</p>
+      </div>
+      
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <% @industry_providers.each do |provider| %>
+            <div class="border border-gray-200 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="font-medium text-gray-900"><%= provider.name %></h3>
+                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">
+                  Industry
+                </span>
+              </div>
+              <p class="text-sm text-gray-600 mb-3"><%= provider.description %></p>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500"><%= provider.code %></span>
+                <% if @current_user.organization.providers.exists?(code: provider.code) %>
+                  <span class="text-xs text-green-600 font-medium">✓ Already assigned</span>
+                <% else %>
+                  <%= link_to "Add", bulk_assign_providers_path(provider_ids: [provider.id]), 
+                              method: :post,
+                              class: "text-xs text-blue-600 hover:text-blue-800 font-medium" %>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- All Recommendations -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-900">All Recommendations</h2>
+      <p class="text-gray-600 mt-1">All providers recommended for your organization</p>
+    </div>
+    
+    <div class="p-6">
+      <%= form_with url: bulk_assign_providers_path, method: :post, local: true do |form| %>
+        <div class="mb-4">
+          <button type="button" onclick="toggleAllProviders()" 
+                  class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+            Select All
+          </button>
+        </div>
+        
+        <div class="space-y-4">
+          <% @recommendations.each do |recommendation| %>
+            <% provider = recommendation[:provider] %>
+            <div class="border border-gray-200 rounded-lg p-4">
+              <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0">
+                  <%= check_box_tag "provider_ids[]", provider.id, false, 
+                                   id: "provider_#{provider.id}",
+                                   class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+                </div>
+                
+                <div class="flex-1">
+                  <div class="flex items-center justify-between mb-2">
+                    <h3 class="font-medium text-gray-900"><%= provider.name %></h3>
+                    <div class="flex items-center space-x-2">
+                      <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                                   <%= provider.platform_wide? ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' %>">
+                        <%= provider.provider_type.titleize %>
+                      </span>
+                      <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                        Score: <%= recommendation[:priority_score] %>
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <p class="text-sm text-gray-600 mb-2"><%= provider.description %></p>
+                  
+                  <div class="text-sm text-gray-500 mb-2">
+                    <strong>Why recommended:</strong> <%= recommendation[:explanation] %>
+                  </div>
+                  
+                  <div class="flex items-center justify-between text-xs text-gray-500">
+                    <span><%= provider.code %> • <%= provider.full_jurisdiction %></span>
+                    <% if @current_user.organization.providers.exists?(code: provider.code) %>
+                      <span class="text-green-600 font-medium">✓ Already assigned</span>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        
+        <div class="mt-6 flex justify-end">
+          <%= form.submit "Assign Selected Providers", 
+                         class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleAllProviders() {
+  const checkboxes = document.querySelectorAll('input[name="provider_ids[]"]');
+  const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+  
+  checkboxes.forEach(checkbox => {
+    checkbox.checked = !allChecked;
+  });
+  
+  const button = event.target;
+  button.textContent = allChecked ? 'Select All' : 'Deselect All';
+}
+</script> 

@@ -1,0 +1,79 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <%= link_to "← Back to Organization", organization_path(@organization), 
+                class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Units</h1>
+      <p class="mt-1 text-sm text-gray-500">
+        Manage units for <%= @organization.name %>
+      </p>
+    </div>
+    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+      <%= link_to "New Unit", new_organization_unit_path(@organization), 
+                  class: "inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+    </div>
+  </div>
+
+  <% if @units.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% @units.each do |unit| %>
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-semibold text-gray-900">
+              <%= link_to unit.name, organization_unit_path(@organization, unit), 
+                          class: "hover:text-blue-600" %>
+            </h3>
+            <span class="px-2 py-1 text-xs font-medium rounded-full 
+                       <%= unit.status == 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+              <%= unit.status.titleize %>
+            </span>
+          </div>
+          
+          <p class="text-gray-600 mb-4"><%= unit.settings&.dig('description') || 'No description' %></p>
+          
+          <div class="space-y-2 mb-4">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Team:</span>
+              <span class="font-medium"><%= unit.team.name %></span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Department:</span>
+              <span class="font-medium"><%= unit.department.name %></span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Users:</span>
+              <span class="font-medium"><%= unit.user_count %></span>
+            </div>
+          </div>
+          
+          <div class="flex space-x-2">
+            <%= link_to "View", organization_unit_path(@organization, unit), 
+                        class: "flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm" %>
+            <%= link_to "Edit", edit_organization_unit_path(@organization, unit), 
+                        class: "flex-1 text-center bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded text-sm" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Pagination -->
+    <div class="mt-8">
+      <%= paginate @units %>
+    </div>
+  <% else %>
+    <div class="text-center py-12">
+      <div class="text-gray-400 mb-4">
+        <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No units yet</h3>
+      <p class="text-gray-500 mb-4">Get started by creating units for your organization.</p>
+      <%= link_to "Create Unit", new_organization_unit_path(@organization), 
+                  class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+    </div>
+  <% end %>
+</div> 

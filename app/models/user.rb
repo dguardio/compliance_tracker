@@ -4,7 +4,14 @@ class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable
+         :recoverable, :rememberable, :validatable, :trackable
+
+  # Noticed associations
+  has_many :notifications, as: :recipient, class_name: 'Noticed::Notification', dependent: :destroy
+
+  # Risk assessment associations
+  has_many :created_risk_assessments, class_name: 'RiskAssessment', foreign_key: 'created_by_id', dependent: :destroy
+  has_many :assigned_risk_assessments, class_name: 'RiskAssessment', foreign_key: 'assigned_to_id', dependent: :destroy
 
   # Multi-tenancy associations
   belongs_to :organization, optional: true
@@ -34,7 +41,7 @@ class User < ApplicationRecord
   scope :for_department, ->(dept) { where(department: dept) }
   scope :for_team, ->(team) { where(team: team) }
   scope :for_unit, ->(unit) { where(unit: unit) }
-  scope :by_name, -> { order(:first_name, :last_name) }
+  scope :by_name, -> { order(Arel.sql("settings->>'first_name'"), Arel.sql("settings->>'last_name'")) }
 
   # Instance methods
   def full_name
@@ -54,7 +61,7 @@ class User < ApplicationRecord
   end
 
   def organization_admin?
-    has_role?(:organization_admin, organization)
+    has_role?(:org_admin, organization)
   end
 
   def department_admin?
@@ -70,7 +77,7 @@ class User < ApplicationRecord
   end
 
   def compliance_officer?
-    has_role?(:compliance_officer)
+    has_role?(:compliance_manager)
   end
 
   def can_manage_organization?(org = nil)
@@ -127,6 +134,54 @@ class User < ApplicationRecord
     organization&.active?
   end
 
+  # Notification methods
+  def unread_notifications_count
+    notifications.unread.count
+  end
+
+  def mark_all_notifications_as_read!
+    notifications.unread.update_all(read_at: Time.current)
+  end
+
+  # Profile helper methods
+  def profile_completion_percentage
+    fields = %w[first_name last_name job_title phone timezone]
+    completed = fields.count { |field| send(field).present? }
+    ((completed.to_f / fields.length) * 100).round
+  end
+
+  def profile_complete?
+    profile_completion_percentage >= 80
+  end
+
+  def notification_enabled?(type)
+    settings&.dig('notification_settings', type) == true
+  end
+
+  def ui_preference(key, default = nil)
+    settings&.dig('ui_preferences', key) || default
+  end
+
+  def compliance_preference(key, default = nil)
+    settings&.dig('compliance_preferences', key) || default
+  end
+
+  def avatar_initials
+    if first_name.present? && last_name.present?
+      "#{first_name.first.upcase}#{last_name.first.upcase}"
+    elsif first_name.present?
+      first_name.first.upcase
+    else
+      email.first.upcase
+    end
+  end
+
+  def avatar_color
+    # Generate a consistent color based on user ID
+    colors = %w[bg-blue-500 bg-green-500 bg-purple-500 bg-red-500 bg-yellow-500 bg-indigo-500 bg-pink-500 bg-gray-500]
+    colors[id % colors.length]
+  end
+
   # Permission checking methods
   def has_permission?(action, resource_type, resource = nil)
     return true if super_admin?
@@ -178,10 +233,10 @@ class User < ApplicationRecord
   def can_manage_organization?(organization = nil)
     org = organization || self.organization
     return false unless org
-    
+
     # Super admins can manage any organization
     return true if super_admin?
-    
+
     # Check if user has organization_admin role for this organization
     has_role?(:organization_admin, org) || has_role?(:admin, org)
   end

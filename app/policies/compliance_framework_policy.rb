@@ -1,0 +1,2 @@
+class ComplianceFrameworkPolicy < ApplicationPolicy
+end

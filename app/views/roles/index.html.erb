@@ -86,7 +86,7 @@
                 <div class="flex items-center justify-between">
                   <div>
                     <h3 class="text-lg font-medium text-gray-900">
-                      <%= link_to role.name, organization_role_path(current_user.organization, role), 
+                      <%= link_to role.display_name, organization_role_path(current_user.organization, role), 
                                   class: "hover:text-indigo-600" %>
                     </h3>
                     <div class="mt-1 flex items-center space-x-4 text-sm text-gray-500">
