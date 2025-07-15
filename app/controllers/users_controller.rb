@@ -4,7 +4,7 @@ class UsersController < ApplicationController
   before_action :authorize_user
 
   def index
-    @users = @organization.users.includes(:roles, :department, :team, :unit).page(params[:page]).per(20)
+    @users = current_organization.users.includes(:roles, :department, :team, :unit).page(params[:page]).per(20)
   end
 
   def show
@@ -12,14 +12,14 @@ class UsersController < ApplicationController
   end
 
   def new
-    @user = @organization.users.build
+    @user = current_organization.users.build
   end
 
   def create
-    @user = @organization.users.build(user_params)
+    @user = current_organization.users.build(user_params)
 
     if @user.save
-      redirect_to organization_user_path(@organization, @user),
+      redirect_to organization_user_path(current_organization, @user),
                   notice: 'User was successfully created.'
     else
       render :new, status: :unprocessable_entity
@@ -31,7 +31,7 @@ class UsersController < ApplicationController
 
   def update
     if @user.update(user_params)
-      redirect_to organization_user_path(@organization, @user),
+      redirect_to organization_user_path(current_organization, @user),
                   notice: 'User was successfully updated.'
     else
       render :edit, status: :unprocessable_entity
@@ -40,18 +40,18 @@ class UsersController < ApplicationController
 
   def destroy
     @user.destroy
-    redirect_to organization_users_path(@organization),
+    redirect_to organization_users_path(current_organization),
                 notice: 'User was successfully deleted.'
   end
 
   private
 
   def set_organization
-    @organization = Organization.find(params[:organization_id])
+    @organization = current_organization
   end
 
   def set_user
-    @user = @organization.users.find(params[:id])
+    @user = current_organization.users.find(params[:id])
   end
 
   def user_params
@@ -62,11 +62,11 @@ class UsersController < ApplicationController
   def authorize_user
     case action_name
     when 'index'
-      authorize User.new(organization: @organization), :index?
+      authorize User.new(organization: current_organization), :index?
     when 'show'
       authorize @user, :show?
     when 'new', 'create'
-      authorize User.new(organization: @organization), :create?
+      authorize User.new(organization: current_organization), :create?
     when 'edit', 'update'
       authorize @user, :update?
     when 'destroy'

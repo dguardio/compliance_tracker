@@ -3,7 +3,7 @@ class RiskDashboardController < ApplicationController
   before_action :ensure_user_has_organization
 
   def index
-    @organization = current_user.organization
+    @organization = current_organization
 
     # Risk statistics
     @risk_stats = {
@@ -40,7 +40,7 @@ class RiskDashboardController < ApplicationController
   private
 
   def ensure_user_has_organization
-    return if current_user.organization
+    return if current_organization
 
     redirect_to new_organization_path, alert: 'You must be part of an organization to access the risk dashboard.'
   end

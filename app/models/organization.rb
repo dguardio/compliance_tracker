@@ -13,6 +13,8 @@ class Organization < ApplicationRecord
   has_many :risk_assessments, dependent: :destroy
   has_many :documents, dependent: :destroy
   has_many :providers, dependent: :destroy
+  has_many :memberships, dependent: :destroy
+  has_many :users, through: :memberships
 
   # Validations
   validates :name, presence: true, length: { minimum: 2, maximum: 100 }

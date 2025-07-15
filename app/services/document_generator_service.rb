@@ -305,10 +305,9 @@ class DocumentGeneratorService
   def create_document_record(temp_file, filename, content_type, title)
     return nil unless @organization
 
-    # Try to find a user in the organization, with fallbacks
-    # I want to use the Organization admin instead.
-    user = @organization.users.organization_admin.first ||
-           User.where(organization: @organization).first ||
+    # Find the first user in the organization with the org_admin role
+    user = @organization.users.joins(:roles).where(roles: { name: 'org_admin' }).first ||
+           @organization.users.first ||
            User.first # Last resort fallback
 
     return nil unless user
@@ -321,7 +320,8 @@ class DocumentGeneratorService
       status: %w[draft review approved].sample,
       tags: [Faker::Lorem.word, Faker::Lorem.word, Faker::Lorem.word],
       expires_at: Faker::Date.forward(days: 365),
-      version: 1
+      version: 1,
+      category: %w[technical operational administrative].sample
     )
 
     document.file.attach(
@@ -340,7 +340,7 @@ class DocumentGeneratorService
       Rails.logger.error "Failed to create document: #{document.errors.full_messages.join(', ')}"
       nil
     end
-  rescue => e
+  rescue StandardError => e
     Rails.logger.error "Error creating document: #{e.message}"
     temp_file.close
     temp_file.unlink

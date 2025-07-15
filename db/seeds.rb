@@ -306,20 +306,21 @@ users.each_with_index do |user, index|
 
   # Assign global roles to users
   if index == 0
-    puts "    Assigning super_admin role to #{user.email}"
-    user.add_role(roles['super_admin'])
+    puts "    Assigning super_admin and org_admin roles to #{user.email}"
+    user.roles << roles['super_admin']
+    #user.roles << roles['org_admin']
   elsif index % 4 == 0
     puts "    Assigning org_admin role to #{user.email}"
-    user.add_role(roles['org_admin'])
+    user.roles << roles['org_admin']
   elsif index % 4 == 1
     puts "    Assigning compliance_manager role to #{user.email}"
-    user.add_role(roles['compliance_manager'])
+    user.roles << roles['compliance_manager']
   elsif index % 4 == 2
     puts "    Assigning compliance_analyst role to #{user.email}"
-    user.add_role(roles['compliance_analyst'])
+    user.roles << roles['compliance_analyst']
   else
     puts "    Assigning user role to #{user.email}"
-    user.add_role(roles['user'])
+    user.roles << roles['user']
   end
 
   # Also assign organization-specific roles to some users
@@ -331,17 +332,17 @@ users.each_with_index do |user, index|
     custom_role = roles["#{user_org.slug}_custom"]
     if custom_role
       puts "    Assigning custom role to #{user.email}"
-      user.add_role(custom_role)
+      user.roles << custom_role
     end
   end
 
   # Assign department head role to every 5th user
-  if index % 5 == 0
-    dept_head_role = roles["#{user_org.slug}_dept_head"]
-    if dept_head_role
-      puts "    Assigning department head role to #{user.email}"
-      user.add_role(dept_head_role)
-    end
+  next unless index % 5 == 0
+
+  dept_head_role = roles["#{user_org.slug}_dept_head"]
+  if dept_head_role
+    puts "    Assigning department head role to #{user.email}"
+    user.roles << dept_head_role
   end
 end
 

@@ -75,6 +75,8 @@ Rails.application.routes.draw do
     end
   end
 
+  post 'switch_organization', to: 'organizations#switch_organization', as: :switch_organization
+
   # API routes
   namespace :api do
     namespace :v1 do

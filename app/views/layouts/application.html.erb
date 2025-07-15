@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     
     <!-- Organization Branding -->
-    <% if user_signed_in? && current_user.organization %>
+    <% if user_signed_in? && current_organization %>
       <style>
         :root {
           <%= organization_css_variables %>
@@ -98,14 +98,19 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
           <div class="flex items-center">
-            <% if user_signed_in? && current_user.organization %>
+            <% if user_signed_in? && current_organization %>
               <div class="flex items-center space-x-3">
                 <%= organization_logo %>
                 <h1 class="text-2xl font-bold text-primary">
-                  <%= current_user.organization.name %>
+                  <%= current_organization.name %>
                 </h1>
-                <% if current_user.organization.has_custom_branding? %>
+                <% if current_organization.has_custom_branding? %>
                   <span class="text-xs text-gray-500">(Custom Branding)</span>
+                <% end %>
+                <% if current_user.organizations.size > 1 %>
+                  <%= form_with url: switch_organization_path, method: :post, local: true, class: "ml-4" do %>
+                    <%= select_tag :organization_id, options_from_collection_for_select(current_user.organizations, :id, :name, current_organization.id), onchange: 'this.form.submit();', class: "rounded border-gray-300" %>
+                  <% end %>
                 <% end %>
               </div>
             <% else %>

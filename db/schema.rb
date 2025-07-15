@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_15_050609) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_15_072555) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -132,6 +132,17 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_15_050609) do
     t.index ["settings"], name: "index_documents_on_settings", using: :gin
     t.index ["status"], name: "index_documents_on_status"
     t.index ["uploaded_by_id"], name: "index_documents_on_uploaded_by_id"
+  end
+
+  create_table "memberships", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "organization_id", null: false
+    t.string "role"
+    t.string "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_memberships_on_organization_id"
+    t.index ["user_id"], name: "index_memberships_on_user_id"
   end
 
   create_table "noticed_events", force: :cascade do |t|
@@ -328,6 +339,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_15_050609) do
   add_foreign_key "documents", "organizations"
   add_foreign_key "documents", "users", column: "approved_by_id"
   add_foreign_key "documents", "users", column: "uploaded_by_id"
+  add_foreign_key "memberships", "organizations"
+  add_foreign_key "memberships", "users"
   add_foreign_key "permissions", "organizations"
   add_foreign_key "providers", "organizations"
   add_foreign_key "risk_assessments", "compliance_controls"

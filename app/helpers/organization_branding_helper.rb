@@ -79,7 +79,6 @@ module OrganizationBrandingHelper
 
   def organization_favicon
     return nil unless current_organization&.favicon_url.present?
-    
     favicon_link_tag current_organization.favicon_url
   end
 
@@ -101,7 +100,6 @@ module OrganizationBrandingHelper
 
   def format_organization_date(date)
     return date unless date
-    
     format = current_organization&.date_format || 'MM/DD/YYYY'
     case format
     when 'MM/DD/YYYY'
@@ -117,7 +115,6 @@ module OrganizationBrandingHelper
 
   def format_organization_time(time)
     return time unless time
-    
     format = current_organization&.time_format || '12h'
     case format
     when '12h'
@@ -131,7 +128,6 @@ module OrganizationBrandingHelper
 
   def organization_privacy_badge
     return "" unless current_organization
-    
     level = current_organization.privacy_level
     case level
     when 'high'
@@ -147,7 +143,6 @@ module OrganizationBrandingHelper
 
   def organization_compliance_badges
     return [] unless current_organization&.compliance_keywords.present?
-    
     current_organization.compliance_keywords.map do |keyword|
       content_tag :span, keyword, 
                   class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-1"
@@ -156,10 +151,8 @@ module OrganizationBrandingHelper
 
   def organization_retention_info
     return "" unless current_organization
-    
     days = current_organization.data_retention_days
     years = (days / 365.0).round(1)
-    
     content_tag :div, class: "text-sm text-gray-600" do
       "Data retention: #{years} years (#{days} days)"
     end
@@ -167,7 +160,6 @@ module OrganizationBrandingHelper
 
   def organization_2fa_status
     return "" unless current_organization
-    
     if current_organization.require_2fa
       content_tag :span, "2FA Required", 
                   class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
@@ -179,10 +171,8 @@ module OrganizationBrandingHelper
 
   def organization_session_timeout
     return "" unless current_organization
-    
     minutes = current_organization.session_timeout_minutes
     hours = (minutes / 60.0).round(1)
-    
     content_tag :div, class: "text-sm text-gray-600" do
       "Session timeout: #{hours} hours"
     end
@@ -193,9 +183,5 @@ module OrganizationBrandingHelper
   def darken_color(hex_color, percent)
     # Simple color darkening - in production you might want a more sophisticated color library
     hex_color
-  end
-
-  def current_organization
-    @current_organization ||= current_user&.organization
   end
 end 

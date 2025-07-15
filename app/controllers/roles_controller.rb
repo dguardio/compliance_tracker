@@ -11,10 +11,10 @@ class RolesController < ApplicationController
       '(resource_type = ? AND resource_id IN (?)) OR ' \
       '(resource_type = ? AND resource_id IN (?)) OR ' \
       '(resource_type = ? AND resource_id IN (?))',
-      'Organization', current_user.organization.id,
-      'Department', current_user.organization.departments.pluck(:id),
-      'Team', current_user.organization.teams.pluck(:id),
-      'Unit', current_user.organization.units.pluck(:id)
+      'Organization', current_organization.id,
+      'Department', current_organization.departments.pluck(:id),
+      'Team', current_organization.teams.pluck(:id),
+      'Unit', current_organization.units.pluck(:id)
     ).includes(:users, :resource)
 
     # Filtering
@@ -33,17 +33,17 @@ class RolesController < ApplicationController
   def show
     authorize @role, :show?
     @users_with_role = @role.users.includes(:department, :team, :unit)
-    @permissions_for_role = current_user.organization.permissions.for_role(@role)
+    @permissions_for_role = current_organization.permissions.for_role(@role)
   end
 
   def new
     authorize Role, :create?
     @role = Role.new
     @resource_types = %w[Organization Department Team Unit]
-    @organizations = [current_user.organization]
-    @departments = current_user.organization.departments
-    @teams = current_user.organization.teams
-    @units = current_user.organization.units
+    @organizations = [current_organization]
+    @departments = current_organization.departments
+    @teams = current_organization.teams
+    @units = current_organization.units
   end
 
   def create

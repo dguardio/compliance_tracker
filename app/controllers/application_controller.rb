@@ -5,6 +5,17 @@ class ApplicationController < ActionController::Base
   set_current_tenant_through_filter
   before_action :set_current_tenant
 
+  # Multi-org: current organization context
+  def current_organization
+    @current_organization ||= Organization.find_by(id: session[:organization_id])
+  end
+
+  def current_organization=(org)
+    session[:organization_id] = org&.id
+    @current_organization = org
+  end
+  helper_method :current_organization
+
   # Set the default policy class to our ApplicationPolicy
   def policy_scope(scope)
     super(scope)
@@ -20,13 +31,16 @@ class ApplicationController < ActionController::Base
   private
 
   def set_current_tenant
-    # First try to get organization from URL params (for nested routes)
-    if params[:organization_id].present?
+    # Prefer current_organization (from session), then URL param, then user's default
+    if current_organization
+      ActsAsTenant.current_tenant = current_organization
+    elsif params[:organization_id].present?
       organization = Organization.find_by(id: params[:organization_id])
       ActsAsTenant.current_tenant = organization if organization
+      self.current_organization = organization if organization
     elsif current_user&.organization
-      # Fall back to current user's organization
       ActsAsTenant.current_tenant = current_user.organization
+      self.current_organization = current_user.organization
     end
   end
 

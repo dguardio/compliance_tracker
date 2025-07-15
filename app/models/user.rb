@@ -14,7 +14,10 @@ class User < ApplicationRecord
   has_many :assigned_risk_assessments, class_name: 'RiskAssessment', foreign_key: 'assigned_to_id', dependent: :destroy
 
   # Multi-tenancy associations
+  # DEPRECATED: organization_id is now optional and replaced by memberships
   belongs_to :organization, optional: true
+  has_many :memberships, dependent: :destroy
+  has_many :organizations, through: :memberships
   belongs_to :department, optional: true
   belongs_to :team, optional: true
   belongs_to :unit, optional: true
@@ -57,7 +60,7 @@ class User < ApplicationRecord
   end
 
   def super_admin?
-    has_role?(:super_admin)
+    has_role?(:super_admin) || has_role?(:super_admin, nil)
   end
 
   def organization_admin?
