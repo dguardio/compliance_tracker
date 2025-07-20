@@ -1,0 +1,97 @@
+<%= form_with(model: [:admin, regulation], class: "contents") do |form| %>
+  <% if regulation.errors.any? %>
+    <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-lg mt-3">
+      <h2><%= pluralize(regulation.errors.count, "error") %> prohibited this regulation from being saved:</h2>
+
+      <ul>
+        <% regulation.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="my-5">
+    <%= form.label :title %>
+    <%= form.text_field :title, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :agency %>
+    <%= form.text_field :agency, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :jurisdiction %>
+    <%= form.text_field :jurisdiction, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :reg_type %>
+    <%= form.select :reg_type, 
+        options_for_select([
+          ['Federal Law', 'federal_law'],
+          ['State Law', 'state_law'],
+          ['Regulation', 'regulation'],
+          ['Guidance', 'guidance'],
+          ['Executive Order', 'executive_order'],
+          ['Other', 'other']
+        ], regulation.reg_type), 
+        { prompt: 'Select regulation type' },
+        { class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" } %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :version %>
+    <%= form.number_field :version, min: 1, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :effective_date %>
+    <%= form.date_field :effective_date, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :status %>
+    <%= form.select :status, 
+        options_for_select([
+          ['Active', 'active'],
+          ['Draft', 'draft'],
+          ['Proposed', 'proposed'],
+          ['Amended', 'amended'],
+          ['Repealed', 'repealed'],
+          ['Expired', 'expired']
+        ], regulation.status), 
+        { prompt: 'Select status' },
+        { class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" } %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :external_id, "External ID" %>
+    <%= form.text_field :external_id, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :previous_version_id, "Previous Version ID" %>
+    <%= form.number_field :previous_version_id, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :full_text, "Full Text (JSON)" %>
+    <%= form.text_area :full_text, rows: 10, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full font-mono text-sm" %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :files, "Files (JSON)" %>
+    <%= form.text_area :files, rows: 5, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full font-mono text-sm" %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :metadata, "Metadata (JSON)" %>
+    <%= form.text_area :metadata, rows: 5, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full font-mono text-sm" %>
+  </div>
+
+  <div class="inline">
+    <%= form.submit class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium cursor-pointer" %>
+  </div>
+<% end %>

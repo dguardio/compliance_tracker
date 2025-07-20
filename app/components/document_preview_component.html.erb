@@ -1,0 +1,121 @@
+<div class="document-preview bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-lg font-semibold text-gray-900">
+      <%= @document.title %> Preview
+    </h3>
+    <div class="flex space-x-2">
+      <% preview_actions.each do |action| %>
+        <%= render_preview_action(action) %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="preview-content">
+    <% case preview_type %>
+    <% when 'image' %>
+      <%= render_image_preview %>
+    <% when 'pdf' %>
+      <%= render_pdf_preview %>
+    <% when 'text' %>
+      <%= render_text_preview %>
+    <% when 'word' %>
+      <%= render_word_preview %>
+    <% when 'excel' %>
+      <%= render_excel_preview %>
+    <% when 'powerpoint' %>
+      <%= render_powerpoint_preview %>
+    <% else %>
+      <%= render_generic_preview %>
+    <% end %>
+  </div>
+
+  <% if preview_metadata.present? %>
+    <div class="mt-4 pt-4 border-t border-gray-200">
+      <h4 class="text-sm font-medium text-gray-700 mb-2">Document Information</h4>
+      <dl class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+        <% preview_metadata.each do |key, value| %>
+          <dt class="font-medium"><%= key.to_s.humanize %>:</dt>
+          <dd><%= value %></dd>
+        <% end %>
+      </dl>
+    </div>
+  <% end %>
+</div>
+
+<% content_for :styles do %>
+  <style>
+    .pdf-viewer {
+      width: 100%;
+      height: 600px;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.375rem;
+    }
+    
+    .office-viewer {
+      width: 100%;
+      height: 600px;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.375rem;
+    }
+    
+    .text-preview {
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      background-color: #f9fafb;
+      padding: 1rem;
+      border-radius: 0.375rem;
+      white-space: pre-wrap;
+    }
+    
+    .excel-preview {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .excel-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    
+    .excel-table th,
+    .excel-table td {
+      border: 1px solid #e5e7eb;
+      padding: 0.5rem;
+      text-align: left;
+    }
+    
+    .excel-table th {
+      background-color: #f3f4f6;
+      font-weight: 600;
+    }
+    
+    .powerpoint-preview {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .slide-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 0.375rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background-color: #f9fafb;
+    }
+    
+    .slide-title {
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+    
+    .slide-content {
+      color: #6b7280;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+  </style>
+<% end %> 

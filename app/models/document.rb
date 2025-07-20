@@ -213,7 +213,8 @@ class Document < ApplicationRecord
   def previewable?
     return false unless file.attached?
 
-    %w[image/jpeg image/png image/gif text/plain text/csv application/pdf].include?(file.content_type)
+    %w[image/jpeg image/png image/gif text/plain text/csv application/pdf application/msword
+       application/vnd.openxmlformats-officedocument.wordprocessingml.document application/vnd.ms-excel application/vnd.openxmlformats-officedocument.spreadsheetml.sheet application/vnd.ms-powerpoint application/vnd.openxmlformats-officedocument.presentationml.presentation].include?(file.content_type)
   end
 
   def image_previewable?
@@ -232,6 +233,33 @@ class Document < ApplicationRecord
     return false unless file.attached?
 
     file.content_type == 'application/pdf'
+  end
+
+  def word_previewable?
+    return false unless file.attached?
+
+    %w[
+      application/msword
+      application/vnd.openxmlformats-officedocument.wordprocessingml.document
+    ].include?(file.content_type)
+  end
+
+  def excel_previewable?
+    return false unless file.attached?
+
+    %w[
+      application/vnd.ms-excel
+      application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+    ].include?(file.content_type)
+  end
+
+  def powerpoint_previewable?
+    return false unless file.attached?
+
+    %w[
+      application/vnd.ms-powerpoint
+      application/vnd.openxmlformats-officedocument.presentationml.presentation
+    ].include?(file.content_type)
   end
 
   def office_document?

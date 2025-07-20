@@ -1,12 +1,6 @@
 # This file should ensure the existence of records required to run the application in every environment (production,
 # development, test). The code here should be idempotent so that it can be executed at any point in every environment.
 # The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Example:
-#
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
 
 # Clear existing data
 puts 'Clearing existing data...'
@@ -19,12 +13,14 @@ ComplianceFramework.destroy_all
 ComplianceRequirement.destroy_all
 ComplianceControl.destroy_all
 Document.destroy_all
+Regulation.destroy_all
+OrganizationRegulation.destroy_all
 
 # Create organizations
 puts 'Creating organizations...'
-organizations = []
+orgs = []
 
-organizations << Organization.create!(
+orgs << Organization.create!(
   name: 'Acme Corporation',
   slug: 'acme-corporation',
   domain: 'acme-corp.com',
@@ -76,7 +72,7 @@ organizations << Organization.create!(
   }
 )
 
-organizations << Organization.create!(
+orgs << Organization.create!(
   name: 'Global Financial Services',
   slug: 'global-financial-services',
   domain: 'globalfinancial.com',
@@ -128,7 +124,7 @@ organizations << Organization.create!(
   }
 )
 
-organizations << Organization.create!(
+orgs << Organization.create!(
   name: 'Healthcare Solutions Inc',
   slug: 'healthcare-solutions-inc',
   domain: 'healthcare-solutions.com',
@@ -184,7 +180,7 @@ organizations << Organization.create!(
 puts 'Creating users...'
 users = []
 
-organizations.each_with_index do |org, index|
+orgs.each_with_index do |org, index|
   # Create admin user
   admin_user = User.create!(
     email: "admin#{index + 1}@example.com",
@@ -196,25 +192,20 @@ organizations.each_with_index do |org, index|
       last_name: 'User',
       job_title: 'System Administrator',
       phone: "+1-555-000#{index + 1}",
-      timezone: org.settings[:timezone],
+      timezone: org.settings['timezone'],
       notification_settings: {
         email: true,
         in_app: true,
         frequency: 'immediate'
-      },
-      ui_preferences: {
-        theme: 'light',
-        dashboard_layout: 'default',
-        show_analytics: true
       }
     }
   )
   users << admin_user
 
   # Create regular users
-  3.times do |i|
+  3.times do |user_index|
     user = User.create!(
-      email: "user#{index + 1}_#{i + 1}@example.com",
+      email: "user#{index + 1}_#{user_index + 1}@example.com",
       password: 'password123',
       password_confirmation: 'password123',
       organization: org,
@@ -223,16 +214,11 @@ organizations.each_with_index do |org, index|
         last_name: Faker::Name.last_name,
         job_title: Faker::Job.title,
         phone: Faker::PhoneNumber.phone_number,
-        timezone: org.settings[:timezone],
+        timezone: org.settings['timezone'],
         notification_settings: {
           email: true,
           in_app: true,
           frequency: 'daily'
-        },
-        ui_preferences: {
-          theme: 'light',
-          dashboard_layout: 'default',
-          show_analytics: true
         }
       }
     )
@@ -240,277 +226,221 @@ organizations.each_with_index do |org, index|
   end
 end
 
-# Create global roles (available to all organizations)
-puts 'Creating global roles...'
-roles = {}
+# Create roles
+puts 'Creating roles...'
+roles = []
 
-%w[super_admin org_admin compliance_manager compliance_analyst user].each do |role_name|
-  roles[role_name] = Role.create!(
-    name: role_name,
-    organization: nil # Global role, not tied to any specific organization
-  )
-end
+# Global roles (not tied to any organization)
+roles << Role.create!(
+  name: 'Super Admin',
+  organization: nil
+)
 
-# Create organization-specific roles for each organization
-puts 'Creating organization-specific roles...'
-organizations.each do |org|
-  # Create some custom roles for each organization
-  org_roles = []
+roles << Role.create!(
+  name: 'Platform Admin',
+  organization: nil
+)
 
-  org_roles << Role.create!(
-    name: "#{org.name.downcase.gsub(/\s+/, '_')}_custom_role",
+# Organization-specific roles
+orgs.each do |org|
+  roles << Role.create!(
+    name: 'Admin',
     organization: org
   )
 
-  org_roles << Role.create!(
-    name: "#{org.name.downcase.gsub(/\s+/, '_')}_department_head",
+  roles << Role.create!(
+    name: 'Compliance Manager',
     organization: org
   )
 
-  # Store org-specific roles for later use
-  roles["#{org.slug}_custom"] = org_roles.first
-  roles["#{org.slug}_dept_head"] = org_roles.last
-end
+  roles << Role.create!(
+    name: 'Document Manager',
+    organization: org
+  )
 
-# Create permissions for each organization
-puts 'Creating permissions...'
-permissions = {}
-
-organizations.each do |org|
-  org_permissions = {}
-
-  # Use only valid actions from the Permission model
-  %w[create read update destroy manage assign delegate].each do |action|
-    %w[organizations users roles permissions documents compliance_frameworks compliance_requirements compliance_controls
-       providers].each do |resource|
-      permission_name = "#{action}_#{resource}"
-      org_permissions[permission_name] = Permission.create!(
-        name: permission_name,
-        action: action,
-        resource_type: resource.classify,
-        organization: org,
-        grantee_type: 'Role',
-        grantee_id: roles['super_admin'].id
-      )
-    end
-  end
-
-  # Store permissions for this organization
-  permissions[org.id] = org_permissions
+  roles << Role.create!(
+    name: 'User',
+    organization: org
+  )
 end
 
 # Assign roles to users
 puts 'Assigning roles to users...'
-users.each_with_index do |user, index|
-  puts "  Assigning roles to user #{index + 1}: #{user.email}"
 
-  # Assign global roles to users
-  if index == 0
-    puts "    Assigning super_admin and org_admin roles to #{user.email}"
-    user.roles << roles['super_admin']
-    #user.roles << roles['org_admin']
-  elsif index % 4 == 0
-    puts "    Assigning org_admin role to #{user.email}"
-    user.roles << roles['org_admin']
-  elsif index % 4 == 1
-    puts "    Assigning compliance_manager role to #{user.email}"
-    user.roles << roles['compliance_manager']
-  elsif index % 4 == 2
-    puts "    Assigning compliance_analyst role to #{user.email}"
-    user.roles << roles['compliance_analyst']
-  else
-    puts "    Assigning user role to #{user.email}"
-    user.roles << roles['user']
+# Assign super admin role to first admin user
+super_admin_role = Role.find_by(name: 'Super Admin', organization: nil)
+if super_admin_role && users.first
+  users.first.add_role(super_admin_role)
+  puts "✓ Assigned Super Admin role to #{users.first.email}"
+end
+
+# Assign organization-specific roles
+orgs.each_with_index do |org, org_index|
+  admin_user = users.find { |u| u.organization == org }
+  next unless admin_user
+
+  # Assign Admin role to admin user
+  admin_role = Role.find_by(name: 'Admin', organization: org)
+  if admin_role
+    admin_user.add_role(admin_role)
+    puts "✓ Assigned Admin role to #{admin_user.email} in #{org.name}"
   end
 
-  # Also assign organization-specific roles to some users
-  user_org = user.organization
-  next unless user_org
+  # Assign other roles to regular users
+  org_users = users.select { |u| u.organization == org && u != admin_user }
+  org_roles = Role.where(organization: org).where.not(name: 'Admin')
 
-  # Assign custom role to every 3rd user
-  if index % 3 == 0
-    custom_role = roles["#{user_org.slug}_custom"]
-    if custom_role
-      puts "    Assigning custom role to #{user.email}"
-      user.roles << custom_role
+  org_users.each_with_index do |user, user_index|
+    role = org_roles[user_index % org_roles.count]
+    if role
+      user.add_role(role)
+      puts "✓ Assigned #{role.name} role to #{user.email} in #{org.name}"
     end
   end
+end
 
-  # Assign department head role to every 5th user
-  next unless index % 5 == 0
+# Create permissions
+puts 'Creating permissions...'
+permissions = []
 
-  dept_head_role = roles["#{user_org.slug}_dept_head"]
-  if dept_head_role
-    puts "    Assigning department head role to #{user.email}"
-    user.roles << dept_head_role
+# Get all models that inherit from ApplicationRecord (excluding abstract classes)
+# Use a more reliable method to get models
+resource_types = []
+ObjectSpace.each_object(Class) do |klass|
+  resource_types << klass.name if klass < ApplicationRecord && !klass.abstract_class? && klass.name.present?
+end
+
+# Fallback to manual list if automatic detection fails
+if resource_types.empty?
+  puts '  Warning: Could not automatically detect models, using manual list'
+  resource_types = %w[User Organization Role Permission Provider ComplianceFramework ComplianceRequirement
+                      ComplianceControl Document Regulation OrganizationRegulation Department Team Unit RiskAssessment]
+end
+
+puts "  Found #{resource_types.count} resource types: #{resource_types.join(', ')}"
+
+orgs.each do |org|
+  # Get the admin role for this organization
+  admin_role = Role.find_by(name: 'Admin', organization: org)
+  next unless admin_role
+
+  # Create permissions for each resource type
+  resource_types.each do |current_resource_type|
+    puts "    Creating permissions for resource_type: '#{current_resource_type}' (class: #{current_resource_type.class})"
+
+    # Skip if resource_type is blank
+    if current_resource_type.blank?
+      puts '    Skipping blank resource_type'
+      next
+    end
+
+    %w[create read update destroy manage assign delegate].each do |action|
+      puts "      Creating permission: #{action}_#{current_resource_type.underscore} with resource_type: '#{current_resource_type}'"
+
+      # Use raw SQL to bypass any potential interference from acts_as_tenant
+      sql = <<-SQL
+        INSERT INTO permissions (name, resource_type, resource_id, action, grantee_type, grantee_id, organization_id, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+      SQL
+
+      permission_name = "#{action}_#{current_resource_type.underscore}"
+
+      puts '        Permission attributes before save:'
+      puts "          name: '#{permission_name}'"
+      puts "          resource_type: '#{current_resource_type}'"
+      puts "          action: '#{action}'"
+      puts "          grantee: #{admin_role.class.name} (id: #{admin_role.id})"
+      puts "          organization: #{org.name} (id: #{org.id})"
+
+      ActiveRecord::Base.connection.execute(
+        ActiveRecord::Base.sanitize_sql([
+                                          sql,
+                                          permission_name,
+                                          current_resource_type,
+                                          nil, # resource_id
+                                          action,
+                                          'Role',
+                                          admin_role.id,
+                                          org.id
+                                        ])
+      )
+
+      # Get the created permission for the array
+      permission = Permission.find_by(name: permission_name, organization: org)
+      permissions << permission if permission
+    end
   end
 end
 
-# Create platform-wide providers
-puts 'Creating platform-wide providers...'
-platform_providers = [
-  {
-    name: 'Securities and Exchange Commission (SEC)',
-    code: 'SEC',
-    description: 'Federal securities regulator for the United States',
-    website: 'https://www.sec.gov',
-    jurisdiction: 'US',
-    state: nil,
-    country: 'United States',
-    contact_info: {
-      email: 'help@sec.gov',
-      phone: '+1-202-551-6551'
-    },
-    provider_type: 'platform_wide',
-    status: 'active'
-  },
-  {
-    name: 'Financial Industry Regulatory Authority (FINRA)',
-    code: 'FINRA',
-    description: 'Self-regulatory organization for broker-dealers',
-    website: 'https://www.finra.org',
-    jurisdiction: 'US',
-    state: nil,
-    country: 'United States',
-    contact_info: {
-      email: 'support@finra.org',
-      phone: '+1-301-590-6500'
-    },
-    provider_type: 'platform_wide',
-    status: 'active'
-  },
-  {
-    name: 'Federal Reserve Board',
-    code: 'FRB',
-    description: 'Central bank of the United States',
-    website: 'https://www.federalreserve.gov',
-    jurisdiction: 'US',
-    state: nil,
-    country: 'United States',
-    contact_info: {
-      email: 'info@federalreserve.gov',
-      phone: '+1-202-452-3000'
-    },
-    provider_type: 'platform_wide',
-    status: 'active'
-  },
-  {
-    name: 'Office of the Comptroller of the Currency (OCC)',
-    code: 'OCC',
-    description: 'Federal bank regulator',
-    website: 'https://www.occ.gov',
-    jurisdiction: 'US',
-    state: nil,
-    country: 'United States',
-    contact_info: {
-      email: 'occ@occ.gov',
-      phone: '+1-202-649-6800'
-    },
-    provider_type: 'platform_wide',
-    status: 'active'
-  },
-  {
-    name: 'Consumer Financial Protection Bureau (CFPB)',
-    code: 'CFPB',
-    description: 'Consumer financial protection regulator',
-    website: 'https://www.consumerfinance.gov',
-    jurisdiction: 'US',
-    state: nil,
-    country: 'United States',
-    contact_info: {
-      email: 'info@consumerfinance.gov',
-      phone: '+1-855-411-2372'
-    },
-    provider_type: 'platform_wide',
-    status: 'active'
-  },
-  {
-    name: 'European Banking Authority (EBA)',
-    code: 'EBA',
-    description: 'EU banking regulator',
-    website: 'https://www.eba.europa.eu',
-    jurisdiction: 'EU',
-    state: nil,
-    country: 'France',
-    contact_info: {
-      email: 'info@eba.europa.eu',
-      phone: '+33-1-86-52-70-00'
-    },
-    provider_type: 'platform_wide',
-    status: 'active'
-  },
-  {
-    name: 'Financial Conduct Authority (FCA)',
-    code: 'FCA',
-    description: 'UK financial services regulator',
-    website: 'https://www.fca.org.uk',
-    jurisdiction: 'UK',
-    state: nil,
-    country: 'United Kingdom',
-    contact_info: {
-      email: 'consumer.queries@fca.org.uk',
-      phone: '+44-20-7066-1000'
-    },
-    provider_type: 'platform_wide',
-    status: 'active'
-  },
-  {
-    name: 'Office of the Superintendent of Financial Institutions (OSFI)',
-    code: 'OSFI',
-    description: 'Canadian financial regulator',
-    website: 'https://www.osfi-bsif.gc.ca',
-    jurisdiction: 'CA',
-    state: nil,
-    country: 'Canada',
-    contact_info: {
-      email: 'information@osfi-bsif.gc.ca',
-      phone: '+1-613-990-7788'
-    },
-    provider_type: 'platform_wide',
-    status: 'active'
-  },
-  {
-    name: 'Australian Prudential Regulation Authority (APRA)',
-    code: 'APRA',
-    description: 'Australian financial regulator',
-    website: 'https://www.apra.gov.au',
-    jurisdiction: 'AU',
-    state: nil,
-    country: 'Australia',
-    contact_info: {
-      email: 'info@apra.gov.au',
-      phone: '+61-2-9210-3000'
-    },
-    provider_type: 'platform_wide',
-    status: 'active'
-  }
-]
+# Create providers
+puts 'Creating providers...'
+providers = []
 
-# Create platform-wide providers without tenant scoping
-Provider.unscoped do
-  platform_providers.each do |provider_data|
-    Provider.create!(provider_data.merge(organization_id: nil))
-  end
-end
+# Platform-wide providers
+providers << Provider.create!(
+  name: 'Securities and Exchange Commission',
+  code: 'SEC',
+  description: 'Federal securities regulator',
+  jurisdiction: 'US',
+  country: 'United States',
+  provider_type: 'platform_wide',
+  website: 'https://www.sec.gov',
+  contact_info: {
+    email: 'info@sec.gov',
+    primary_contact: 'SEC Information Office'
+  },
+  organization: nil
+)
 
-# Create organization-specific providers
-puts 'Creating organization-specific providers...'
-organizations.each do |org|
-  org_provider = Provider.create!(
+providers << Provider.create!(
+  name: 'Financial Industry Regulatory Authority',
+  code: 'FINRA',
+  description: 'Self-regulatory organization for broker-dealers',
+  jurisdiction: 'US',
+  country: 'United States',
+  provider_type: 'platform_wide',
+  website: 'https://www.finra.org',
+  contact_info: {
+    email: 'info@finra.org',
+    primary_contact: 'FINRA Information Office'
+  },
+  organization: nil
+)
+
+providers << Provider.create!(
+  name: 'European Banking Authority',
+  code: 'EBA',
+  description: 'EU banking regulator',
+  jurisdiction: 'EU',
+  country: 'European Union',
+  provider_type: 'platform_wide',
+  website: 'https://www.eba.europa.eu',
+  contact_info: {
+    email: 'info@eba.europa.eu',
+    primary_contact: 'EBA Information Office'
+  },
+  organization: nil
+)
+
+# Organization-specific providers
+orgs.each do |org|
+  # Generate a shorter code that fits within 20 characters
+  org_code = org.name.upcase.gsub(/\s+/, '').first(12) # Take first 12 chars of org name
+  provider_code = "#{org_code}_COMP" # Total: max 17 chars (12 + 5)
+
+  providers << Provider.create!(
     name: "#{org.name} Internal Compliance",
-    code: "#{org.name.upcase.gsub(/\s+/, '')}_COMPLIANCE".first(20),
-    description: "Internal compliance department for #{org.name}",
-    website: org.settings[:website],
-    jurisdiction: org.settings[:jurisdiction].presence || 'US',
-    state: org.settings[:state],
-    country: org.settings[:country].presence || 'United States',
-    contact_info: {
-      email: "compliance@#{org.name.downcase.gsub(/\s+/, '')}.com",
-      phone: org.settings[:contact_phone]
-    },
+    code: provider_code,
+    description: "Internal compliance team for #{org.name}",
+    jurisdiction: org.settings['jurisdiction'] || 'US',
+    country: org.settings['country'] || 'United States',
     provider_type: 'organization_specific',
-    organization: org,
-    status: 'active'
+    website: org.settings['website'],
+    contact_info: {
+      email: org.settings['contact_email'],
+      primary_contact: "#{org.name} Compliance Team"
+    },
+    organization: org
   )
 end
 
@@ -534,7 +464,7 @@ if sec_provider
     enforcement_date: Date.new(2001, 7, 1),
     potentially_impacted_departments: 'IT, Legal, Compliance, Operations',
     status: 'active',
-    organization: organizations.first,
+    organization: orgs.first,
     settings: {
       framework_type: 'privacy',
       effective_date: Date.new(2000, 11, 13),
@@ -556,7 +486,7 @@ if sec_provider
     enforcement_date: Date.new(2013, 11, 20),
     potentially_impacted_departments: 'IT, Security, Compliance, Customer Service',
     status: 'active',
-    organization: organizations.second,
+    organization: orgs.second,
     settings: {
       framework_type: 'security',
       effective_date: Date.new(2013, 5, 20),
@@ -582,7 +512,7 @@ if finra_provider
     enforcement_date: Date.new(2015, 3, 1),
     potentially_impacted_departments: 'Compliance, Supervision, Operations, Legal',
     status: 'active',
-    organization: organizations.third,
+    organization: orgs.third,
     settings: {
       framework_type: 'supervision',
       effective_date: Date.new(2015, 3, 1),
@@ -592,7 +522,7 @@ if finra_provider
   )
 end
 
-# GDPR Framework (Note: Using 'Guidance' instead of 'Regulation' since 'Regulation' is not in the enum)
+# GDPR Framework
 eba_provider = Provider.find_by(code: 'EBA')
 if eba_provider
   frameworks << ComplianceFramework.create!(
@@ -602,13 +532,13 @@ if eba_provider
     version: '1.0',
     jurisdiction: 'EU',
     provider: eba_provider,
-    issuance_type: 'Guidance', # Changed from 'Regulation' to 'Guidance' since 'Regulation' is not in the enum
+    issuance_type: 'Guidance',
     publication_date: Date.new(2016, 4, 27),
     provider_url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32016R0679',
     enforcement_date: Date.new(2018, 5, 25),
     potentially_impacted_departments: 'IT, Legal, Compliance, HR, Marketing',
     status: 'active',
-    organization: organizations.first, # Back to first org since we only have 3 orgs
+    organization: orgs.first,
     settings: {
       framework_type: 'privacy',
       effective_date: Date.new(2018, 5, 25),
@@ -668,7 +598,7 @@ end
 
 # Generate sample documents
 puts 'Generating sample documents...'
-organizations.each do |org|
+orgs.each do |org|
   puts "  Generating documents for organization: #{org.name}"
   generator = DocumentGeneratorService.new(org)
 
@@ -684,6 +614,189 @@ organizations.each do |org|
   end
 end
 
+# Create sample regulations for testing auto-assignment
+puts "\nCreating sample regulations..."
+regulations = []
+
+# Financial Services Regulations
+regulations << Regulation.create!(
+  title: 'Sarbanes-Oxley Act (SOX) Section 404',
+  agency: 'SEC',
+  jurisdiction: 'US',
+  reg_type: 'federal_law',
+  version: 1,
+  effective_date: Date.new(2002, 7, 30),
+  status: 'active',
+  external_id: 'SOX-404',
+  full_text: {
+    'main' => 'Section 404 of the Sarbanes-Oxley Act requires management and the external auditor to report on the adequacy of the company\'s internal control on financial reporting.',
+    'sections' => {
+      '404a' => 'Management Assessment of Internal Controls',
+      '404b' => 'Auditor Attestation of Internal Controls'
+    }
+  },
+  files: {
+    'pdf' => 'https://www.sec.gov/about/laws/soa2002.pdf',
+    'summary' => 'https://www.sec.gov/spotlight/sarbanes-oxley.htm'
+  },
+  metadata: {
+    'industries' => %w[financial_services technology healthcare],
+    'sectors' => %w[public_companies accounting],
+    'data_types' => %w[financial_data personal_data],
+    'geographic_scope' => %w[domestic international],
+    'risk_level' => 'high',
+    'keywords' => %w[SOX internal_controls financial_reporting audit],
+    'source_url' => 'https://www.sec.gov/about/laws/soa2002.pdf',
+    'tags' => %w[financial compliance audit internal_controls]
+  }
+)
+
+regulations << Regulation.create!(
+  title: 'Gramm-Leach-Bliley Act (GLBA) Privacy Rule',
+  agency: 'FTC',
+  jurisdiction: 'US',
+  reg_type: 'federal_law',
+  version: 1,
+  effective_date: Date.new(2000, 5, 12),
+  status: 'active',
+  external_id: 'GLBA-PRIVACY',
+  full_text: {
+    'main' => 'The GLBA Privacy Rule requires financial institutions to provide customers with a clear, conspicuous, and accurate statement of their information-sharing practices.',
+    'sections' => {
+      'privacy_notice' => 'Requirements for Privacy Notices',
+      'opt_out' => 'Customer Opt-Out Rights',
+      'safeguards' => 'Information Security Safeguards'
+    }
+  },
+  files: {
+    'pdf' => 'https://www.ftc.gov/enforcement/rules/rulemaking-regulatory-reform-proceedings/privacy-consumer-financial-information',
+    'summary' => 'https://www.ftc.gov/tips-advice/business-center/privacy-and-security/gramm-leach-bliley-act'
+  },
+  metadata: {
+    'industries' => %w[financial_services banking insurance],
+    'sectors' => %w[consumer_finance privacy],
+    'data_types' => %w[personal_data financial_data],
+    'geographic_scope' => ['domestic'],
+    'risk_level' => 'high',
+    'keywords' => %w[GLBA privacy financial_institutions consumer_data],
+    'source_url' => 'https://www.ftc.gov/enforcement/rules/rulemaking-regulatory-reform-proceedings/privacy-consumer-financial-information',
+    'tags' => %w[privacy financial consumer_protection]
+  }
+)
+
+# Healthcare Regulations
+regulations << Regulation.create!(
+  title: 'Health Insurance Portability and Accountability Act (HIPAA) Privacy Rule',
+  agency: 'HHS',
+  jurisdiction: 'US',
+  reg_type: 'federal_law',
+  version: 1,
+  effective_date: Date.new(2003, 4, 14),
+  status: 'active',
+  external_id: 'HIPAA-PRIVACY',
+  full_text: {
+    'main' => 'The HIPAA Privacy Rule establishes national standards to protect individuals\' medical records and other personal health information.',
+    'sections' => {
+      'covered_entities' => 'Definition of Covered Entities',
+      'protected_health_information' => 'Definition of PHI',
+      'permitted_uses' => 'Permitted Uses and Disclosures'
+    }
+  },
+  files: {
+    'pdf' => 'https://www.hhs.gov/hipaa/for-professionals/privacy/index.html',
+    'summary' => 'https://www.hhs.gov/hipaa/for-individuals/index.html'
+  },
+  metadata: {
+    'industries' => %w[healthcare insurance],
+    'sectors' => %w[healthcare_providers health_plans healthcare_clearinghouses],
+    'data_types' => %w[health_data personal_data],
+    'geographic_scope' => ['domestic'],
+    'risk_level' => 'high',
+    'keywords' => %w[HIPAA privacy health_data PHI],
+    'source_url' => 'https://www.hhs.gov/hipaa/for-professionals/privacy/index.html',
+    'tags' => %w[healthcare privacy PHI compliance]
+  }
+)
+
+# Technology Regulations
+regulations << Regulation.create!(
+  title: 'California Consumer Privacy Act (CCPA)',
+  agency: 'California Attorney General',
+  jurisdiction: 'CA',
+  reg_type: 'state_law',
+  version: 1,
+  effective_date: Date.new(2020, 1, 1),
+  status: 'active',
+  external_id: 'CCPA-2020',
+  full_text: {
+    'main' => 'The CCPA gives California residents the right to know what personal information is being collected about them and whether it is sold or disclosed.',
+    'sections' => {
+      'consumer_rights' => 'Consumer Rights Under CCPA',
+      'business_obligations' => 'Business Obligations',
+      'enforcement' => 'Enforcement and Penalties'
+    }
+  },
+  files: {
+    'pdf' => 'https://oag.ca.gov/privacy/ccpa',
+    'summary' => 'https://oag.ca.gov/privacy/ccpa-resources'
+  },
+  metadata: {
+    'industries' => %w[technology retail financial_services],
+    'sectors' => %w[consumer_privacy data_protection],
+    'data_types' => %w[personal_data consumer_data],
+    'geographic_scope' => ['domestic'],
+    'risk_level' => 'medium',
+    'keywords' => %w[CCPA privacy consumer_rights data_protection],
+    'source_url' => 'https://oag.ca.gov/privacy/ccpa',
+    'tags' => %w[privacy consumer_rights data_protection]
+  }
+)
+
+# Update organization compliance profiles for testing
+puts 'Updating organization compliance profiles for auto-assignment testing...'
+
+# Acme Corporation (Technology)
+acme = orgs.first
+acme.update!(settings: acme.settings.merge({
+                                             'compliance_jurisdictions' => %w[US CA],
+                                             'compliance_industries' => %w[technology software],
+                                             'compliance_sectors' => %w[SaaS enterprise_software],
+                                             'compliance_company_size' => 'large',
+                                             'compliance_data_types' => %w[personal_data business_data],
+                                             'compliance_geographic_scope' => %w[domestic international],
+                                             'compliance_risk_level' => 'medium',
+                                             'auto_assignment_enabled' => true,
+                                             'assignment_priority_threshold' => 3
+                                           }))
+
+# Global Financial Services
+gfs = orgs.second
+gfs.update!(settings: gfs.settings.merge({
+                                           'compliance_jurisdictions' => ['US'],
+                                           'compliance_industries' => %w[financial_services banking],
+                                           'compliance_sectors' => %w[investment_management consumer_finance],
+                                           'compliance_company_size' => 'large',
+                                           'compliance_data_types' => %w[financial_data personal_data],
+                                           'compliance_geographic_scope' => %w[domestic international],
+                                           'compliance_risk_level' => 'high',
+                                           'auto_assignment_enabled' => true,
+                                           'assignment_priority_threshold' => 5
+                                         }))
+
+# Healthcare Solutions Inc
+hsi = orgs.third
+hsi.update!(settings: hsi.settings.merge({
+                                           'compliance_jurisdictions' => ['US'],
+                                           'compliance_industries' => ['healthcare'],
+                                           'compliance_sectors' => %w[healthcare_providers health_technology],
+                                           'compliance_company_size' => 'medium',
+                                           'compliance_data_types' => %w[health_data personal_data],
+                                           'compliance_geographic_scope' => ['domestic'],
+                                           'compliance_risk_level' => 'high',
+                                           'auto_assignment_enabled' => true,
+                                           'assignment_priority_threshold' => 4
+                                         }))
+
 puts "\n✓ Seed data creation complete!"
 puts 'Created:'
 puts "- #{Organization.count} organizations"
@@ -695,6 +808,7 @@ puts "- #{ComplianceFramework.count} compliance frameworks"
 puts "- #{ComplianceRequirement.count} compliance requirements"
 puts "- #{ComplianceControl.count} compliance controls"
 puts "- #{Document.count} documents"
+puts "- #{Regulation.count} regulations"
 
 # Verify super admin user
 super_admin_user = User.find_by(email: 'admin1@example.com')
@@ -711,3 +825,6 @@ end
 puts "\nDefault login credentials:"
 puts 'Email: admin1@example.com'
 puts 'Password: password123'
+
+puts "✓ Created #{regulations.count} sample regulations"
+puts '✓ Updated organization compliance profiles'

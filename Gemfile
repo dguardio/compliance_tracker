@@ -78,10 +78,12 @@ gem 'pdf-reader', '~> 2.11'
 # Document Preview and Processing
 gem 'activestorage-office-previewer', '~> 0.1' # Office file previews
 gem 'creek', '~> 2.6' # Excel file processing (alternative)
+gem 'docsplit', '~> 0.7' # Document conversion for older formats
 gem 'docx', '~> 0.7' # Word document processing
+gem 'pdfjs_viewer-rails', '~> 0.1' # PDF.js viewer for Rails
 gem 'roo', '~> 2.10' # Excel/Spreadsheet processing
-gem 'ruby-ole', '~> 1.2'                # OLE file handling for older Office formats
-gem 'rubyzip', '~> 2.4'                 # ZIP file handling for Office Open XML
+gem 'ruby-ole', '~> 1.2' # OLE file handling for older Office formats
+gem 'rubyzip' # ZIP file handling for Office Open XML
 
 # API and JSON
 gem 'jsonapi-serializer', '~> 2.2'

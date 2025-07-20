@@ -72,7 +72,7 @@ class DocumentPreviewService
         size: @file.byte_size,
         format: 'PDF'
       },
-      actions: %w[open_new_tab embed_viewer]
+      actions: %w[open_new_tab pdfjs_viewer embed_viewer]
     }
   end
 
@@ -179,8 +179,31 @@ class DocumentPreviewService
   end
 
   def extract_doc_content
-    # For older .doc files, we'll return a message since they're harder to parse
-    'Content preview not available for older .doc format. Please use the online viewer.'
+    temp_file = download_to_temp
+
+    begin
+      # Try to use docsplit for older DOC files
+      require 'docsplit'
+
+      # Convert DOC to PDF first, then extract text
+      Docsplit.extract_text(temp_file.path, output: File.dirname(temp_file.path))
+
+      # Read the extracted text file
+      text_file = temp_file.path.gsub(/\.doc$/i, '.txt')
+      if File.exist?(text_file)
+        content = File.read(text_file)
+        File.delete(text_file) # Clean up
+
+        content.length > 1000 ? content[0..1000] + "\n\n... (content truncated)" : content
+      else
+        'Content preview not available for older .doc format. Please use the online viewer.'
+      end
+    rescue StandardError => e
+      "Error processing DOC file: #{e.message}"
+    ensure
+      temp_file.close
+      temp_file.unlink
+    end
   end
 
   def extract_excel_content
@@ -283,55 +306,98 @@ class DocumentPreviewService
   def extract_powerpoint_content
     return { slides: [], notes: [] } unless @file.content_type.include?('powerpoint')
 
-    if @file.content_type.include?('openxmlformats')
-      extract_pptx_content
-    else
-      extract_ppt_content
-    end
+    # Use docsplit for both .ppt and .pptx files
+    extract_powerpoint_with_docsplit
   rescue StandardError => e
     { error: "Error extracting PowerPoint content: #{e.message}" }
   end
 
-  def extract_pptx_content
+  def extract_powerpoint_with_docsplit
     temp_file = download_to_temp
 
     begin
-      Zip::File.open(temp_file.path) do |zip_file|
-        slides = []
-        notes = []
+      require 'docsplit'
 
-        # Extract slide content
-        zip_file.glob('ppt/slides/slide*.xml').each do |entry|
-          doc = Nokogiri::XML(entry.get_input_stream.read)
-          text_elements = doc.xpath('//a:t') # Text elements in PowerPoint
-          slide_text = text_elements.map(&:text).join(' ')
-          slides << { text: slide_text } if slide_text.present?
-        end
+      # Convert PowerPoint to PDF first, then extract text
+      Docsplit.extract_text(temp_file.path, output: File.dirname(temp_file.path))
 
-        # Extract notes content
-        zip_file.glob('ppt/notesSlides/notesSlide*.xml').each do |entry|
-          doc = Nokogiri::XML(entry.get_input_stream.read)
-          text_elements = doc.xpath('//a:t')
-          note_text = text_elements.map(&:text).join(' ')
-          notes << { text: note_text } if note_text.present?
-        end
+      # Read the extracted text file
+      text_file = temp_file.path.gsub(/\.(ppt|pptx)$/i, '.txt')
+      if File.exist?(text_file)
+        content = File.read(text_file)
+        File.delete(text_file) # Clean up
 
-        return {
+        # Split content into slides (rough approximation)
+        slides = split_content_into_slides(content)
+
+        {
           slides: slides,
-          notes: notes
+          notes: [],
+          converted: true,
+          total_slides: slides.count
         }
+      else
+        { error: 'Content preview not available for this PowerPoint format. Please use the online viewer.' }
       end
     rescue StandardError => e
-      { error: "Error reading PPTX file: #{e.message}" }
+      { error: "Error processing PowerPoint file: #{e.message}" }
     ensure
       temp_file.close
       temp_file.unlink
     end
   end
 
-  def extract_ppt_content
-    # For older .ppt files, return a message
-    { error: 'Content preview not available for older .ppt format. Please use the online viewer.' }
+  def split_content_into_slides(content)
+    # This is a simple heuristic to split content into slides
+    # In a real implementation, you might want to use more sophisticated parsing
+
+    # Split by common slide indicators
+    slide_indicators = [
+      /\n\s*Slide\s+\d+\s*\n/i,
+      /\n\s*Page\s+\d+\s*\n/i,
+      /\n\s*\d+\.\s*\n/,
+      /\n\s*[A-Z][A-Z\s]*\n/ # All caps headers
+    ]
+
+    slides = []
+    current_slide = content.strip
+
+    slide_indicators.each do |indicator|
+      next unless content.match(indicator)
+
+      parts = content.split(indicator)
+      slides = parts.map.with_index do |part, index|
+        next if part.strip.empty?
+
+        {
+          content: part.strip,
+          slide_number: index + 1,
+          title: extract_slide_title(part)
+        }
+      end.compact
+      break
+    end
+
+    # If no clear slide breaks found, treat the whole content as one slide
+    if slides.empty?
+      slides = [{
+        content: content.strip,
+        slide_number: 1,
+        title: extract_slide_title(content)
+      }]
+    end
+
+    slides
+  end
+
+  def extract_slide_title(content)
+    # Extract the first line as a potential title
+    first_line = content.lines.first&.strip
+    return 'Slide' unless first_line
+
+    # Clean up the title
+    title = first_line.gsub(/[^\w\s]/, '').strip
+    title.length > 50 ? title[0..50] + '...' : title
   end
 
   def pdf_page_count

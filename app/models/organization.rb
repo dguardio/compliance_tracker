@@ -15,6 +15,8 @@ class Organization < ApplicationRecord
   has_many :providers, dependent: :destroy
   has_many :memberships, dependent: :destroy
   has_many :users, through: :memberships
+  has_many :organization_regulations, dependent: :destroy
+  has_many :regulations, through: :organization_regulations
 
   # Validations
   validates :name, presence: true, length: { minimum: 2, maximum: 100 }
@@ -26,6 +28,7 @@ class Organization < ApplicationRecord
 
   # Callbacks
   before_validation :generate_slug, if: :name_changed?
+  after_update :trigger_regulation_auto_assignment, if: :compliance_profile_changed?
 
   # JSONB Settings
   jsonb_accessor :settings,
@@ -70,6 +73,17 @@ class Organization < ApplicationRecord
                  default_compliance_framework: :string,
                  auto_approval_enabled: :boolean,
                  document_expiry_warning_days: :integer,
+
+                 # Compliance Profile & Auto-Assignment
+                 compliance_jurisdictions: [:string],
+                 compliance_industries: [:string],
+                 compliance_sectors: [:string],
+                 compliance_company_size: :string,
+                 compliance_data_types: [:string],
+                 compliance_geographic_scope: [:string],
+                 compliance_risk_level: :string,
+                 auto_assignment_enabled: :boolean,
+                 assignment_priority_threshold: :integer,
 
                  # Notifications & Communication
                  notification_preferences: :json,
@@ -155,6 +169,30 @@ class Organization < ApplicationRecord
 
   def provider_count
     providers.count
+  end
+
+  def regulation_count
+    regulations.count
+  end
+
+  def active_regulation_count
+    organization_regulations.active.count
+  end
+
+  def pending_regulation_count
+    organization_regulations.pending.count
+  end
+
+  def high_priority_regulations
+    organization_regulations.where('priority >= ?', 6).by_priority
+  end
+
+  def regulations_by_framework(framework)
+    organization_regulations.where(compliance_framework: framework)
+  end
+
+  def regulations_without_framework
+    organization_regulations.without_framework
   end
 
   def available_providers
@@ -379,7 +417,78 @@ class Organization < ApplicationRecord
     }
   end
 
+  # Compliance Profile helper methods
+  def compliance_jurisdictions
+    settings['compliance_jurisdictions'] || []
+  end
+
+  def compliance_industries
+    settings['compliance_industries'] || []
+  end
+
+  def compliance_sectors
+    settings['compliance_sectors'] || []
+  end
+
+  def compliance_company_size
+    settings['compliance_company_size'] || 'medium'
+  end
+
+  def compliance_data_types
+    settings['compliance_data_types'] || []
+  end
+
+  def compliance_geographic_scope
+    settings['compliance_geographic_scope'] || ['domestic']
+  end
+
+  def compliance_risk_level
+    settings['compliance_risk_level'] || 'medium'
+  end
+
+  def auto_assignment_enabled
+    settings['auto_assignment_enabled'] || true
+  end
+
+  def assignment_priority_threshold
+    settings['assignment_priority_threshold'] || 5
+  end
+
+  def compliance_profile
+    {
+      jurisdictions: compliance_jurisdictions,
+      industries: compliance_industries,
+      sectors: compliance_sectors,
+      company_size: compliance_company_size,
+      data_types: compliance_data_types,
+      geographic_scope: compliance_geographic_scope,
+      risk_level: compliance_risk_level,
+      keywords: compliance_keywords,
+      exclusion_terms: exclusion_terms
+    }
+  end
+
+  def has_compliance_profile?
+    compliance_jurisdictions.any? || compliance_industries.any? || compliance_sectors.any?
+  end
+
+  def compliance_profile_changed?
+    return false unless saved_change_to_settings?
+
+    # For now, let's simplify this and just return true if settings changed
+    # since the exact comparison is complex with JSONB fields
+    true
+  end
+
   private
+
+  def trigger_regulation_auto_assignment
+    return unless auto_assignment_enabled?
+
+    RegulationAutoAssignmentService.new.update_organization_assignments(self)
+  rescue StandardError => e
+    Rails.logger.error "Failed to trigger regulation auto-assignment: #{e.message}"
+  end
 
   def generate_slug
     self.slug = name.parameterize if name.present?

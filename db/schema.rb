@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_15_072555) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_17_163534) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -169,6 +169,27 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_15_072555) do
     t.index ["recipient_type", "recipient_id"], name: "index_noticed_notifications_on_recipient"
   end
 
+  create_table "organization_regulations", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "regulation_id", null: false
+    t.bigint "compliance_framework_id"
+    t.integer "priority", default: 0
+    t.string "status", default: "pending"
+    t.datetime "assigned_at"
+    t.bigint "assigned_by_id"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assigned_by_id"], name: "index_organization_regulations_on_assigned_by_id"
+    t.index ["compliance_framework_id"], name: "index_organization_regulations_on_compliance_framework_id"
+    t.index ["organization_id", "priority"], name: "index_organization_regulations_on_organization_id_and_priority"
+    t.index ["organization_id", "regulation_id"], name: "index_org_regs_on_org_and_reg_unique", unique: true
+    t.index ["organization_id", "status"], name: "index_organization_regulations_on_organization_id_and_status"
+    t.index ["organization_id"], name: "index_organization_regulations_on_organization_id"
+    t.index ["regulation_id", "status"], name: "index_organization_regulations_on_regulation_id_and_status"
+    t.index ["regulation_id"], name: "index_organization_regulations_on_regulation_id"
+  end
+
   create_table "organizations", force: :cascade do |t|
     t.string "name"
     t.string "slug"
@@ -217,6 +238,27 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_15_072555) do
     t.index ["organization_id"], name: "index_providers_on_organization_id"
     t.index ["settings"], name: "index_providers_on_settings", using: :gin
     t.index ["status"], name: "index_providers_on_status"
+  end
+
+  create_table "regulations", force: :cascade do |t|
+    t.string "external_id"
+    t.string "title", null: false
+    t.string "agency", null: false
+    t.string "jurisdiction", null: false
+    t.string "reg_type"
+    t.date "effective_date"
+    t.date "publication_date"
+    t.string "status"
+    t.integer "version", default: 1
+    t.bigint "previous_version_id"
+    t.jsonb "full_text", default: {}
+    t.jsonb "files", default: {}
+    t.jsonb "metadata", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agency", "jurisdiction", "external_id", "version"], name: "idx_on_agency_jurisdiction_external_id_version_17f2981086", unique: true
+    t.index ["external_id"], name: "index_regulations_on_external_id"
+    t.index ["previous_version_id"], name: "index_regulations_on_previous_version_id"
   end
 
   create_table "risk_assessments", force: :cascade do |t|
@@ -341,8 +383,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_15_072555) do
   add_foreign_key "documents", "users", column: "uploaded_by_id"
   add_foreign_key "memberships", "organizations"
   add_foreign_key "memberships", "users"
+  add_foreign_key "organization_regulations", "compliance_frameworks"
+  add_foreign_key "organization_regulations", "organizations"
+  add_foreign_key "organization_regulations", "regulations"
+  add_foreign_key "organization_regulations", "users", column: "assigned_by_id"
   add_foreign_key "permissions", "organizations"
   add_foreign_key "providers", "organizations"
+  add_foreign_key "regulations", "regulations", column: "previous_version_id"
   add_foreign_key "risk_assessments", "compliance_controls"
   add_foreign_key "risk_assessments", "compliance_frameworks"
   add_foreign_key "risk_assessments", "compliance_requirements"

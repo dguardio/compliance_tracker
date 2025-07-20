@@ -191,6 +191,7 @@ GEM
       devise (>= 4.9.0)
       rails-i18n
     diff-lcs (1.6.2)
+    docsplit (0.7.6)
     docx (0.9.1)
       nokogiri (~> 1.13, >= 1.13.0)
       rubyzip (~> 2.0)
@@ -438,6 +439,10 @@ GEM
       hashery (~> 2.0)
       ruby-rc4
       ttfunk
+    pdfjs_viewer-rails (0.3.2)
+      json (> 1.8.4)
+      rails (> 4.2.0)
+      sassc-rails (>= 2.1)
     pg (1.5.9)
     pg_search (2.3.7)
       activerecord (>= 6.1)
@@ -599,6 +604,14 @@ GEM
     rufus-scheduler (3.9.2)
       fugit (~> 1.1, >= 1.11.1)
     safe_shell (1.1.0)
+    sassc (2.4.0)
+      ffi (~> 1.9)
+    sassc-rails (2.1.2)
+      railties (>= 4.0.0)
+      sassc (>= 2.0)
+      sprockets (> 3.0)
+      sprockets-rails
+      tilt
     securerandom (0.4.1)
     selenium-webdriver (4.10.0)
       rexml (~> 3.2, >= 3.2.5)
@@ -725,6 +738,7 @@ DEPENDENCIES
   debug
   devise (~> 4.9)
   devise-i18n
+  docsplit (~> 0.7)
   docx (~> 0.7)
   dry-monads (~> 1.6)
   dry-transaction (~> 0.15)
@@ -755,6 +769,7 @@ DEPENDENCIES
   paper_trail (~> 15.0)
   pdf-forms (~> 1.4)
   pdf-reader (~> 2.11)
+  pdfjs_viewer-rails (~> 0.1)
   pg (~> 1.1)
   pg_search (~> 2.3)
   puma (>= 5.0)
@@ -772,7 +787,7 @@ DEPENDENCIES
   rubocop-rspec (~> 2.20)
   ruby-ole (~> 1.2)
   ruby-openai (~> 6.0)
-  rubyzip (~> 2.4)
+  rubyzip
   selenium-webdriver (~> 4.10)
   sentry-rails (~> 5.0)
   sentry-ruby (~> 5.0)

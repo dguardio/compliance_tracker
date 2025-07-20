@@ -1,24 +1,66 @@
-# README
+# Compliance Tracker
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+A comprehensive compliance management application built with Ruby on Rails.
 
-Things you may want to cover:
+## Features
 
-* Ruby version
+- Multi-organization support with tenant isolation
+- Document management with version control
+- Compliance framework management
+- Risk assessment and tracking
+- User role management and permissions
+- Real-time notifications
+- Document preview for multiple file types
 
-* System dependencies
+## Document Preview Support
 
-* Configuration
+The application supports in-app preview for the following file types:
 
-* Database creation
+- **Images**: JPEG, PNG, GIF
+- **PDFs**: Using PDF.js viewer
+- **Text files**: Plain text and CSV
+- **Word documents**: DOC and DOCX (using docx gem and docsplit for older formats)
+- **Excel spreadsheets**: XLS and XLSX (using roo and creek gems)
+- **PowerPoint presentations**: PPT and PPTX (using docsplit for conversion)
 
-* Database initialization
+## System Dependencies
 
-* How to run the test suite
+For document preview functionality, you'll need to install the following system dependencies:
 
-* Services (job queues, cache servers, search engines, etc.)
+### Ubuntu/Debian:
+```bash
+sudo apt-get update
+sudo apt-get install -y \
+  poppler-utils \
+  tesseract-ocr \
+  tesseract-ocr-eng \
+  libreoffice \
+  ghostscript \
+  imagemagick
+```
 
-* Deployment instructions
+### macOS:
+```bash
+brew install poppler tesseract tesseract-lang libreoffice ghostscript imagemagick
+```
 
-* ...
+### CentOS/RHEL:
+```bash
+sudo yum install -y poppler-utils tesseract tesseract-langpack-eng libreoffice ghostscript ImageMagick
+```
+
+## Installation
+
+1. Clone the repository
+2. Install Ruby dependencies: `bundle install`
+3. Install system dependencies (see above)
+4. Set up the database: `rails db:create db:migrate db:seed`
+5. Start the server: `rails server`
+
+## Usage
+
+Visit `http://localhost:3000` to access the application.
+
+## License
+
+This project is licensed under the MIT License.

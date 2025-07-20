@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  namespace :admin do
+    resources :regulations
+  end
   devise_for :users
 
   # Provider management (top-level resource)
