@@ -17,6 +17,12 @@ class ApplicationController < ActionController::Base
   # Handle Pundit authorization errors
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
+  helper_method :current_organization
+
+  def current_organization
+    current_user.organization
+  end
+
   private
 
   def set_current_tenant

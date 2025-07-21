@@ -135,7 +135,7 @@
                     </div>
                   </div>
                   <div class="flex-1 min-w-0">
-                    <p class="text-sm text-gray-900"><%= notification.message %></p>
+                    <p class="text-sm text-gray-900"><%= notification.event.notifier.message %></p>
                     <p class="text-xs text-gray-500"><%= time_ago_in_words(notification.created_at) %> ago</p>
                   </div>
                 </div>

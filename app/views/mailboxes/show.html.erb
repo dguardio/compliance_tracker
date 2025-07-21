@@ -20,7 +20,7 @@
 
       <div class="px-6 py-4">
         <div class="prose max-w-none">
-          <p class="text-gray-700 mb-4"><%= @notification.event.message %></p>
+          <p class="text-gray-700 mb-4"><%= @notification.event.notifier.message %></p>
           
           <% if @notification.event.url.present? %>
             <div class="mt-4">
