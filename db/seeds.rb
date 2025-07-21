@@ -176,30 +176,53 @@ orgs << Organization.create!(
   }
 )
 
-# Create users for each organization
+# Create admin users for each organization
 puts 'Creating users...'
 users = []
 
 orgs.each_with_index do |org, index|
-  # Create admin user
-  admin_user = User.create!(
-    email: "admin#{index + 1}@example.com",
-    password: 'password123',
-    password_confirmation: 'password123',
-    organization: org,
-    settings: {
-      first_name: 'Admin',
-      last_name: 'User',
-      job_title: 'System Administrator',
-      phone: "+1-555-000#{index + 1}",
-      timezone: org.settings['timezone'],
-      notification_settings: {
-        email: true,
-        in_app: true,
-        frequency: 'immediate'
+  if index == 0
+    # Create super admin user assigned to first organization but with global permissions
+    admin_user = User.create!(
+      email: "admin#{index + 1}@example.com",
+      password: 'password123',
+      password_confirmation: 'password123',
+      organization: org, # Assign to first organization to satisfy DB constraint
+      settings: {
+        first_name: Faker::Name.first_name,
+        last_name: Faker::Name.last_name,
+        job_title: 'Super Administrator',
+        phone: Faker::PhoneNumber.phone_number,
+        timezone: org.settings['timezone'],
+        notification_settings: {
+          email: true,
+          in_app: true,
+          frequency: 'daily'
+        }
       }
-    }
-  )
+    )
+    puts "✓ Created Super Admin user: #{admin_user.email} (assigned to #{org.name} but will have global permissions)"
+  else
+    # Create regular admin users with organization
+    admin_user = User.create!(
+      email: "admin#{index + 1}@example.com",
+      password: 'password123',
+      password_confirmation: 'password123',
+      organization: org,
+      settings: {
+        first_name: Faker::Name.first_name,
+        last_name: Faker::Name.last_name,
+        job_title: 'Administrator',
+        phone: Faker::PhoneNumber.phone_number,
+        timezone: org.settings['timezone'],
+        notification_settings: {
+          email: true,
+          in_app: true,
+          frequency: 'daily'
+        }
+      }
+    )
+  end
   users << admin_user
 
   # Create regular users
@@ -268,10 +291,11 @@ end
 puts 'Assigning roles to users...'
 
 # Assign super admin role to first admin user
-super_admin_role = Role.find_by(name: 'Super Admin', organization: nil)
-if super_admin_role && users.first
-  users.first.add_role(super_admin_role)
-  puts "✓ Assigned Super Admin role to #{users.first.email}"
+if users.first
+  puts "  Assigning Super Admin role to #{users.first.email} (organization: #{users.first.organization&.name || 'None'})"
+  users.first.add_role('Super Admin')
+  puts "  ✓ Assigned Super Admin role to #{users.first.email}"
+  puts "  User roles after assignment: #{users.first.roles.pluck(:name).join(', ')}"
 end
 
 # Assign organization-specific roles
@@ -280,22 +304,20 @@ orgs.each_with_index do |org, org_index|
   next unless admin_user
 
   # Assign Admin role to admin user
-  admin_role = Role.find_by(name: 'Admin', organization: org)
-  if admin_role
-    admin_user.add_role(admin_role)
-    puts "✓ Assigned Admin role to #{admin_user.email} in #{org.name}"
-  end
+  puts "  Assigning Admin role to #{admin_user.email} in #{org.name}"
+  admin_user.add_role('Admin', org)
+  puts "  ✓ Assigned Admin role to #{admin_user.email} in #{org.name}"
+  puts "  User roles after assignment: #{admin_user.roles.pluck(:name).join(', ')}"
 
   # Assign other roles to regular users
   org_users = users.select { |u| u.organization == org && u != admin_user }
-  org_roles = Role.where(organization: org).where.not(name: 'Admin')
+  role_names = ['Compliance Manager', 'Document Manager', 'User']
 
   org_users.each_with_index do |user, user_index|
-    role = org_roles[user_index % org_roles.count]
-    if role
-      user.add_role(role)
-      puts "✓ Assigned #{role.name} role to #{user.email} in #{org.name}"
-    end
+    role_name = role_names[user_index % role_names.count]
+    puts "  Assigning #{role_name} role to #{user.email} in #{org.name}"
+    user.add_role(role_name, org)
+    puts "  ✓ Assigned #{role_name} role to #{user.email} in #{org.name}"
   end
 end
 
@@ -319,6 +341,58 @@ end
 
 puts "  Found #{resource_types.count} resource types: #{resource_types.join(', ')}"
 
+# Create global permissions for Super Admin role
+puts 'Creating global permissions for Super Admin...'
+super_admin_role = Role.find_by(name: 'Super Admin', organization: nil)
+if super_admin_role
+  resource_types.each do |current_resource_type|
+    puts "    Creating global permissions for resource_type: '#{current_resource_type}'"
+
+    # Skip if resource_type is blank
+    if current_resource_type.blank?
+      puts '    Skipping blank resource_type'
+      next
+    end
+
+    %w[create read update destroy manage assign delegate].each do |action|
+      puts "      Creating global permission: #{action}_#{current_resource_type.underscore}"
+
+      # Use raw SQL to create global permissions (no organization_id)
+      sql = <<-SQL
+        INSERT INTO permissions (name, resource_type, resource_id, action, grantee_type, grantee_id, organization_id, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+      SQL
+
+      permission_name = "global_#{action}_#{current_resource_type.underscore}"
+
+      puts '        Global permission attributes before save:'
+      puts "          name: '#{permission_name}'"
+      puts "          resource_type: '#{current_resource_type}'"
+      puts "          action: '#{action}'"
+      puts "          grantee: #{super_admin_role.class.name} (id: #{super_admin_role.id})"
+      puts '          organization_id: NULL (global)'
+
+      ActiveRecord::Base.connection.execute(
+        ActiveRecord::Base.sanitize_sql([
+                                          sql,
+                                          permission_name,
+                                          current_resource_type,
+                                          nil, # resource_id
+                                          action,
+                                          'Role',
+                                          super_admin_role.id,
+                                          nil # organization_id for global permissions
+                                        ])
+      )
+
+      # Get the created permission for the array
+      permission = Permission.find_by(name: permission_name, organization_id: nil)
+      permissions << permission if permission
+    end
+  end
+end
+
+# Create organization-specific permissions
 orgs.each do |org|
   # Get the admin role for this organization
   admin_role = Role.find_by(name: 'Admin', organization: org)
@@ -815,9 +889,20 @@ super_admin_user = User.find_by(email: 'admin1@example.com')
 if super_admin_user
   puts "\nSuper Admin User Verification:"
   puts "- Email: #{super_admin_user.email}"
-  puts "- Super Admin?: #{super_admin_user.super_admin?}"
-  puts "- Roles: #{super_admin_user.roles.pluck(:name).join(', ')}"
   puts "- Organization: #{super_admin_user.organization&.name || 'None'}"
+  puts "- Super Admin?: #{super_admin_user.super_admin?}"
+  puts "- Has Super Admin role?: #{super_admin_user.has_role?('Super Admin')}"
+  puts "- All roles: #{super_admin_user.roles.pluck(:name).join(', ')}"
+  puts "- Role objects: #{super_admin_user.roles.map(&:inspect).join(', ')}"
+  puts "- Roles count: #{super_admin_user.roles.count}"
+
+  # Check if roles exist in the database
+  super_admin_role = Role.find_by(name: 'Super Admin', organization: nil)
+  puts "- Super Admin role exists?: #{super_admin_role.present?}"
+  if super_admin_role
+    puts "- Super Admin role ID: #{super_admin_role.id}"
+    puts "- Users with Super Admin role: #{super_admin_role.users.pluck(:email).join(', ')}"
+  end
 else
   puts "\n⚠️  Warning: Super admin user (admin1@example.com) not found!"
 end

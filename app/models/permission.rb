@@ -23,6 +23,8 @@ class Permission < ApplicationRecord
 
   # Scopes
   scope :global, -> { where(resource: nil) }
+  scope :global_permissions, -> { where(organization_id: nil) }
+  scope :organization_permissions, -> { where.not(organization_id: nil) }
   scope :for_resource, ->(resource) { where(resource: resource) }
   scope :for_action, ->(action) { where(action: action) }
   scope :for_resource_type, ->(type) { where(resource_type: type) }
@@ -61,7 +63,9 @@ class Permission < ApplicationRecord
   end
 
   def can_perform?(user, target_resource = nil)
-    return false unless user.organization == organization
+    # For global permissions (organization_id is nil), allow access
+    # For organization-specific permissions, check organization match
+    return false if organization_id.present? && !(user.organization_id == organization_id)
 
     # Direct user permission
     return check_conditions(user, target_resource) if granted_to_user? && grantee_id == user.id

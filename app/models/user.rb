@@ -60,11 +60,11 @@ class User < ApplicationRecord
   end
 
   def super_admin?
-    has_role?(:super_admin) || has_role?(:super_admin, nil)
+    has_role?('Super Admin') || has_role?('Super Admin', nil)
   end
 
   def organization_admin?
-    has_role?(:org_admin, organization)
+    has_role?(:org_admin, organization) || has_role?('Admin', organization)
   end
 
   def department_admin?
@@ -189,6 +189,15 @@ class User < ApplicationRecord
   def has_permission?(action, resource_type, resource = nil)
     return true if super_admin?
 
+    # Check global permissions first (permissions with organization_id = nil)
+    global_permissions = Permission.global_permissions.for_action(action).for_resource_type(resource_type)
+    global_permissions.each do |permission|
+      return true if permission.can_perform?(self, resource)
+    end
+
+    # Check organization-specific permissions
+    return false unless organization
+
     # Check direct permissions
     direct_permissions = organization.permissions.for_user(self).for_action(action).for_resource_type(resource_type)
     direct_permissions.each do |permission|
@@ -214,16 +223,21 @@ class User < ApplicationRecord
   end
 
   def permissions_for_resource(resource_type, resource = nil)
-    return [] unless organization
-
     permissions = []
 
-    # Direct permissions
-    permissions += organization.permissions.for_user(self).for_resource_type(resource_type)
+    # Global permissions (permissions with organization_id = nil)
+    global_permissions = Permission.global_permissions.for_resource_type(resource_type)
+    permissions += global_permissions
 
-    # Role-based permissions
-    roles.each do |role|
-      permissions += organization.permissions.for_role(role).for_resource_type(resource_type)
+    # Organization-specific permissions
+    if organization
+      # Direct permissions
+      permissions += organization.permissions.for_user(self).for_resource_type(resource_type)
+
+      # Role-based permissions
+      roles.each do |role|
+        permissions += organization.permissions.for_role(role).for_resource_type(resource_type)
+      end
     end
 
     # Filter by resource if specified
@@ -247,7 +261,7 @@ class User < ApplicationRecord
   private
 
   def requires_organization?
-    # Only require organization for non-super-admin users
-    !has_role?(:super_admin)
+    # All users now require an organization (super admins are assigned to one but have global permissions)
+    true
   end
 end
