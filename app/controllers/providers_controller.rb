@@ -153,7 +153,7 @@ class ProvidersController < ApplicationController
       contact_info: [:email, :phone, :address, :primary_contact, :secondary_contact],
       settings: [:provider_category, :regulatory_authority, :enforcement_powers, 
                  :reporting_requirements, :filing_deadlines, :fee_structure, 
-                 :compliance_areas, :custom_fields]
+                 :compliance_areas, :custom_fields, :llm_scraping_enabled]
     ]
     
     # Only super admins can set organization_id

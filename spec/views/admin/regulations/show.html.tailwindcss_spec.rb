@@ -2,18 +2,17 @@ require 'rails_helper'
 
 RSpec.describe "admin/regulations/show", type: :view do
   before(:each) do
-    assign(:admin_regulation, Admin::Regulation.create!(
+    assign(:regulation, Regulation.create!(
       title: "Title",
       agency: "Agency",
       jurisdiction: "Jurisdiction",
       reg_type: "Reg Type",
       version: 2,
       status: "Status",
-      full_text: "",
+      full_text: { "content": "MyText" },
       files: "",
       metadata: "",
-      external_id: "External",
-      previous_version_id: 3
+      previous_version: nil
     ))
   end
 
@@ -28,7 +27,6 @@ RSpec.describe "admin/regulations/show", type: :view do
     expect(rendered).to match(//)
     expect(rendered).to match(//)
     expect(rendered).to match(//)
-    expect(rendered).to match(/External/)
-    expect(rendered).to match(/3/)
+    expect(rendered).to match(//)
   end
 end

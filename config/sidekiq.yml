@@ -1,0 +1,16 @@
+# Sidekiq configuration file
+# See https://github.com/sidekiq/sidekiq/wiki/Configuration
+
+:concurrency: 5
+:queues:
+  - default
+  - mailers
+
+# Schedule for recurring jobs
+# See https://github.com/sidekiq-scheduler/sidekiq-scheduler
+:schedule:
+  scrape_regulations_job:
+    cron: '0 */6 * * *' # Runs every 6 hours
+    class: ScrapeRegulationsJob
+    queue: default
+    description: "Scrapes all regulatory authorities for new and updated regulations."

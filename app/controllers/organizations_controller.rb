@@ -79,23 +79,15 @@ class OrganizationsController < ApplicationController
   end
 
   def organization_params
-    # Convert comma-separated strings to arrays for settings
-    params_hash = params.require(:organization).permit(
+    params.require(:organization).permit(
       :name, :slug, :domain, :status,
-      :industry, :jurisdiction, :compliance_keywords, :exclusion_terms
-    ).to_h
-
-    # Process settings
-    settings = {}
-    settings[:industry] = params_hash[:industry] if params_hash[:industry].present?
-    settings[:jurisdiction] = params_hash[:jurisdiction] if params_hash[:jurisdiction].present?
-    settings[:compliance_keywords] = params_hash[:compliance_keywords]&.split(',')&.map(&:strip)&.reject(&:blank?) || []
-    settings[:exclusion_terms] = params_hash[:exclusion_terms]&.split(',')&.map(&:strip)&.reject(&:blank?) || []
-    settings[:notification_preferences] = {}
-    settings[:ai_settings] = {}
-    settings[:branding] = {}
-
-    # Remove settings keys from main params and add settings hash
-    params_hash.except(:industry, :jurisdiction, :compliance_keywords, :exclusion_terms).merge(settings: settings)
+      settings: [
+        :auto_assignment_enabled,
+        compliance_industries: [],
+        compliance_jurisdictions: [],
+        compliance_keywords: [],
+        exclusion_terms: []
+      ]
+    )
   end
 end

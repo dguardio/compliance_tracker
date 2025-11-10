@@ -485,9 +485,9 @@ class Organization < ApplicationRecord
   def trigger_regulation_auto_assignment
     return unless auto_assignment_enabled?
 
-    RegulationAutoAssignmentService.new.update_organization_assignments(self)
+    UpdateOrganizationAssignmentsJob.perform_later(id)
   rescue StandardError => e
-    Rails.logger.error "Failed to trigger regulation auto-assignment: #{e.message}"
+    Rails.logger.error "Failed to enqueue UpdateOrganizationAssignmentsJob for Organization ID #{id}: #{e.message}"
   end
 
   def generate_slug

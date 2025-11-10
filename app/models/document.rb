@@ -449,7 +449,7 @@ class Document < ApplicationRecord
       DocumentNotificationNotifier.with(
         document: self,
         action: :expired,
-        actor: nil
+        actor: recipient
       ).deliver_later(recipient)
     end
   end

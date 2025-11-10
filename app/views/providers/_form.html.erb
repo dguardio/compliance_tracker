@@ -1,0 +1,69 @@
+<%= form_with(model: provider, class: "space-y-8") do |form| %>
+  <% if provider.errors.any? %>
+    <div id="error_explanation" class="bg-red-50 text-red-700 border border-red-200 p-4 rounded-lg">
+      <h2 class="text-lg font-bold mb-2"><%= pluralize(provider.errors.count, "error") %> prohibited this provider from being saved:</h2>
+
+      <ul class="list-disc pl-5">
+        <% provider.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="space-y-4">
+    <div>
+      <%= form.label :name, class: "block text-sm font-medium text-gray-700" %>
+      <%= form.text_field :name, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+    </div>
+
+    <div>
+      <%= form.label :website, class: "block text-sm font-medium text-gray-700" %>
+      <%= form.url_field :website, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+    </div>
+
+    <div>
+      <%= form.label :jurisdiction, class: "block text-sm font-medium text-gray-700" %>
+      <%= form.text_field :jurisdiction, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+    </div>
+    
+    <div>
+      <%= form.label :country, class: "block text-sm font-medium text-gray-700" %>
+      <%= form.text_field :country, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+    </div>
+
+    <div>
+      <%= form.label :description, class: "block text-sm font-medium text-gray-700" %>
+      <%= form.text_area :description, rows: 4, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+    </div>
+  </div>
+
+  <div class="space-y-4 pt-8 border-t border-gray-200">
+    <h3 class="text-lg font-semibold text-gray-900">Scraping Settings</h3>
+    <%= form.fields_for :settings, provider.settings do |settings_fields| %>
+      <div class="relative flex items-start">
+        <div class="flex h-5 items-center">
+          <%= settings_fields.check_box :regulatory_authority, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" %>
+        </div>
+        <div class="ml-3 text-sm">
+          <%= settings_fields.label :regulatory_authority, "Regulatory Authority", class: "font-medium text-gray-700" %>
+          <p class="text-gray-500">Enable to identify this provider as a source for scraping regulations.</p>
+        </div>
+      </div>
+
+      <div class="relative flex items-start">
+        <div class="flex h-5 items-center">
+          <%= settings_fields.check_box :llm_scraping_enabled, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" %>
+        </div>
+        <div class="ml-3 text-sm">
+          <%= settings_fields.label :llm_scraping_enabled, "Enable LLM-based Scraping", class: "font-medium text-gray-700" %>
+          <p class="text-gray-500">Use an LLM to parse the provider's website instead of traditional scraping methods.</p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="flex justify-end pt-5">
+    <%= form.submit class: "cursor-pointer rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
+  </div>
+<% end %>

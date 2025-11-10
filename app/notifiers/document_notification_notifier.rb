@@ -1,10 +1,8 @@
 class DocumentNotificationNotifier < ApplicationNotifier
-  deliver_by :database
   deliver_by :email, mailer: 'DocumentMailer', method: :document_notification
 
-  param :document
-  param :action
-  param :actor, optional: true
+  required_param :document
+  required_param :action
 
   def message
     doc = params[:document]

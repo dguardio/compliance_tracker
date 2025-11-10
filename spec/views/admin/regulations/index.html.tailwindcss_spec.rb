@@ -2,39 +2,37 @@ require 'rails_helper'
 
 RSpec.describe "admin/regulations/index", type: :view do
   before(:each) do
-    assign(:admin_regulations, [
-      Admin::Regulation.create!(
+    assign(:regulations, [
+      Regulation.create!(
         title: "Title",
         agency: "Agency",
         jurisdiction: "Jurisdiction",
         reg_type: "Reg Type",
         version: 2,
         status: "Status",
-        full_text: "",
+        full_text: { "content": "MyText" },
         files: "",
         metadata: "",
-        external_id: "External",
-        previous_version_id: 3
+        previous_version: nil
       ),
-      Admin::Regulation.create!(
+      Regulation.create!(
         title: "Title",
         agency: "Agency",
         jurisdiction: "Jurisdiction",
         reg_type: "Reg Type",
         version: 2,
         status: "Status",
-        full_text: "",
+        full_text: { "content": "MyText" },
         files: "",
         metadata: "",
-        external_id: "External",
-        previous_version_id: 3
+        previous_version: nil
       )
     ])
   end
 
-  it "renders a list of admin/regulations" do
+  it "renders a list of regulations" do
     render
-    cell_selector = 'div>p'
+    cell_selector = Rails::VERSION::STRING >= '7' ? 'div>p' : 'tr>td'
     assert_select cell_selector, text: Regexp.new("Title".to_s), count: 2
     assert_select cell_selector, text: Regexp.new("Agency".to_s), count: 2
     assert_select cell_selector, text: Regexp.new("Jurisdiction".to_s), count: 2
@@ -44,7 +42,6 @@ RSpec.describe "admin/regulations/index", type: :view do
     assert_select cell_selector, text: Regexp.new("".to_s), count: 2
     assert_select cell_selector, text: Regexp.new("".to_s), count: 2
     assert_select cell_selector, text: Regexp.new("".to_s), count: 2
-    assert_select cell_selector, text: Regexp.new("External".to_s), count: 2
-    assert_select cell_selector, text: Regexp.new(3.to_s), count: 2
+    assert_select cell_selector, text: Regexp.new(nil.to_s), count: 2
   end
 end

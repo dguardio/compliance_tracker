@@ -122,6 +122,11 @@ gem 'kaminari'
 gem 'paper_trail', '~> 15.0'
 gem 'virtus', '~> 2.0'
 
+# Regulation Intake Feature Gems
+gem 'dotenv-rails', groups: %i[development test]
+gem 'pgvector'
+gem 'ruby_llm'
+
 # Testing
 gem 'factory_bot_rails', '~> 6.4'
 gem 'faker', '~> 3.2'
@@ -159,6 +164,8 @@ group :development do
 end
 
 group :test do
+  gem 'simplecov', require: false
+  gem 'simplecov-lcov', require: false
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem 'capybara', '~> 3.39'
   gem 'selenium-webdriver', '~> 4.10'
