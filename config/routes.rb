@@ -1,6 +1,18 @@
 Rails.application.routes.draw do
   namespace :admin do
-    resources :regulations
+    resources :regulations do
+      collection do
+        delete :bulk_delete
+      end
+      member do
+        get 'versions/:version_id', to: 'regulations#version', as: 'version'
+      end
+    end
+    resources :regulatory_data_sources do
+    collection do
+      delete :bulk_delete
+    end
+  end
   end
   devise_for :users
 
@@ -32,8 +44,15 @@ Rails.application.routes.draw do
 
     # Compliance management
     resources :compliance_frameworks do
+      member do
+        post :suggest_requirements
+      end
       resources :compliance_requirements, only: %i[index show new create edit update destroy] do
         resources :compliance_controls, only: %i[index show new create edit update destroy] do
+          member do
+            get :assignment_form
+            post :assign
+          end
           resources :risk_assessments, only: %i[index show new create edit update destroy]
         end
       end
@@ -76,6 +95,17 @@ Rails.application.routes.draw do
         get :get_controls
       end
     end
+
+    # Workflow management
+    resources :workflow_templates do
+      resources :workflow_steps, only: %i[create edit update destroy] do
+        member do
+          patch :update_position
+          get :condition_form
+        end
+      end
+      resources :workflow_transitions, only: %i[create destroy]
+    end
   end
 
   post 'switch_organization', to: 'organizations#switch_organization', as: :switch_organization
@@ -113,6 +143,20 @@ Rails.application.routes.draw do
 
   # Risk Dashboard
   get 'risk_dashboard', to: 'risk_dashboard#index', as: :risk_dashboard
+
+  # Regulation Reviews
+  resources :regulation_reviews, only: %i[index show update] do
+    member do
+      post :classify
+    end
+  end
+
+  # My Tasks (Kanban)
+  resources :tasks, only: [:index, :show]
+  patch 'tasks/:id/update_status', to: 'tasks#update_status', as: :update_task_status
+
+  # Feedbacks
+  resources :feedbacks
 
   # Mailbox
   resources :mailboxes, only: %i[index show destroy] do

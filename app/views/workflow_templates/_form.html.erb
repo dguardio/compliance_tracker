@@ -1,0 +1,39 @@
+<%= form_with(model: [organization, workflow_template], class: "space-y-6") do |form| %>
+  <% if workflow_template.errors.any? %>
+    <div id="error_explanation" class="bg-red-50 text-red-700 border border-red-200 p-4 rounded-md">
+      <h2 class="text-lg font-medium"><%= pluralize(workflow_template.errors.count, "error") %> prohibited this template from being saved:</h2>
+      <ul class="mt-3 list-disc list-inside text-sm">
+        <% workflow_template.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :name, class: "block text-sm font-medium text-gray-700" %>
+    <div class="mt-1">
+      <%= form.text_field :name, class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+    </div>
+  </div>
+
+  <div>
+    <%= form.label :description, class: "block text-sm font-medium text-gray-700" %>
+    <div class="mt-1">
+      <%= form.text_area :description, rows: 3, class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+    </div>
+  </div>
+
+  <div class="relative flex items-start">
+    <div class="flex h-5 items-center">
+      <%= form.check_box :is_default, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" %>
+    </div>
+    <div class="ml-3 text-sm">
+      <%= form.label :is_default, "Set as default template for this organization", class: "font-medium text-gray-700" %>
+    </div>
+  </div>
+
+  <div class="flex justify-end">
+    <%= form.submit "Save Template", class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+  </div>
+<% end %>

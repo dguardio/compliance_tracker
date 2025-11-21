@@ -1,0 +1,36 @@
+<div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+  <div class="pb-5 border-b border-gray-200">
+    <h1 class="text-3xl font-bold text-gray-900"><%= @regulation.title %></h1>
+    <p class="mt-1 text-sm text-gray-500">Regulation Review</p>
+  </div>
+
+  <div data-controller="tabs">
+    <!-- Tab Buttons -->
+    <div class="border-b border-gray-200">
+      <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+        <button data-action="click->tabs#switch" data-tabs-target="button" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          AI Summary & Actions
+        </button>
+        <button data-action="click->tabs#switch" data-tabs-target="button" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Full Text
+        </button>
+        <button data-action="click->tabs#switch" data-tabs-target="button" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Review History
+        </button>
+      </nav>
+    </div>
+
+    <!-- Tab Panels -->
+    <div class="py-6">
+      <div data-tabs-target="panel">
+        <%= render 'ai_summary_and_actions', regulation: @regulation, regulation_review: @regulation_review, current_step: @current_step, compliance_frameworks: @compliance_frameworks %>
+      </div>
+      <div data-tabs-target="panel" class="hidden">
+        <%= render 'full_text', regulation: @regulation %>
+      </div>
+      <div data-tabs-target="panel" class="hidden">
+        <%= render 'review_history', regulation_review: @regulation_review %>
+      </div>
+    </div>
+  </div>
+</div>

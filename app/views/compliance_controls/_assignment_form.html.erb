@@ -1,0 +1,15 @@
+<%= form_with(model: @compliance_control, url: assign_organization_compliance_framework_compliance_requirement_compliance_control_path(@organization, @compliance_framework, @compliance_requirement, @compliance_control), method: :post) do |form| %>
+  <div class="space-y-4">
+    <div>
+      <%= form.label :assignee_id, "Assign to", class: "block text-sm font-medium text-gray-700" %>
+      <%= form.collection_select :assignee_id, @users, :id, :full_name, { include_blank: 'Select a user' }, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+    </div>
+    <div>
+      <%= form.label :due_date, class: "block text-sm font-medium text-gray-700" %>
+      <%= form.date_field :due_date, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+    </div>
+  </div>
+  <div class="mt-6 text-right">
+    <%= form.submit "Assign Control", class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+  </div>
+<% end %>

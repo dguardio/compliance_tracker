@@ -1,0 +1,50 @@
+<turbo-frame id="modal">
+  <%= render 'shared/modal', title: "Set Transition Condition" do %>
+    <div data-controller="condition-form" 
+         data-condition-form-source-id-value="step-<%= params[:id] %>"
+         data-condition-form-target-id-value="<%= params[:target_id] %>"
+         data-condition-form-source-anchor-type-value="<%= params[:source_anchor_type] %>"
+         data-condition-form-target-anchor-type-value="<%= params[:target_anchor_type] %>">
+
+      <p class="text-sm text-gray-600 mb-4">
+        You are creating a transition from <strong><%= @workflow_step.name %></strong>. 
+        Please select the condition that should trigger this transition.
+      </p>
+
+      <%= form_with url: '#', method: :post, html: { data: { condition_form_target: "form", action: "submit->condition-form#submit" } } do |form| %>
+        <div class="space-y-4">
+          <fieldset>
+            <legend class="text-base font-medium text-gray-900">Condition</legend>
+            <div class="mt-4 space-y-4">
+              <div class="flex items-center">
+                <%= form.radio_button :condition, '', checked: true, class: "h-4 w-4 text-indigo-600 border-gray-300" %>
+                <%= form.label :condition_on_completion, 'On Completion (default)', class: "ml-3 block text-sm font-medium text-gray-700" %>
+              </div>
+              <% if @workflow_step.decision_options.any? %>
+                <% @workflow_step.decision_options.each do |option| %>
+                  <div class="flex items-center">
+                    <%= form.radio_button :condition, option, class: "h-4 w-4 text-indigo-600 border-gray-300" %>
+                    <%= form.label "condition_#{option.parameterize.underscore}", option, class: "ml-3 block text-sm font-medium text-gray-700" %>
+                  </div>
+                <% end %>
+              <% else %>
+                <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+                  <p class="text-sm text-yellow-700">
+                    There are no decision options for this step. To add decision options, edit the
+                    <strong><%= @workflow_step.name %></strong> step and add them in the "Decision Options" field.
+                  </p>
+                </div>
+              <% end %>
+            </div>
+          </fieldset>
+          <div class="mt-6 flex justify-end space-x-3">
+            <button type="button" data-action="click->modal#close" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
+              Cancel
+            </button>
+            <%= form.submit "Set Condition", class: "bg-indigo-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-indigo-700" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</turbo-frame>

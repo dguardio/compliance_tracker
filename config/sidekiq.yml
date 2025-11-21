@@ -8,9 +8,10 @@
 
 # Schedule for recurring jobs
 # See https://github.com/sidekiq-scheduler/sidekiq-scheduler
-:schedule:
-  scrape_regulations_job:
-    cron: '0 */6 * * *' # Runs every 6 hours
-    class: ScrapeRegulationsJob
-    queue: default
-    description: "Scrapes all regulatory authorities for new and updated regulations."
+:scheduler:
+  :schedule:
+    scrape_regulations_job:
+      cron: '*/1 * * * *' # Runs every minute for testing
+      class: ScrapeRegulationsJob
+      queue: default
+      description: "Scrapes all regulatory authorities for new and updated regulations."

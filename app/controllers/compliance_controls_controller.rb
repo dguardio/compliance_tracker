@@ -2,7 +2,7 @@ class ComplianceControlsController < ApplicationController
   before_action :set_organization
   before_action :set_compliance_framework
   before_action :set_compliance_requirement
-  before_action :set_compliance_control, only: %i[show edit update destroy]
+  before_action :set_compliance_control, only: %i[show edit update destroy assignment_form assign]
   before_action :authorize_compliance_control
 
   def index
@@ -53,6 +53,28 @@ class ComplianceControlsController < ApplicationController
                 notice: 'Compliance control was successfully deleted.'
   end
 
+  def assignment_form
+    @users = @organization.users.order(:first_name, :last_name)
+    render partial: 'assignment_form'
+  end
+
+  def assign
+    assignee_id = params.dig(:compliance_control, :assignee_id)
+    due_date = params.dig(:compliance_control, :due_date)
+
+    if @compliance_control.update(assignee_id: assignee_id, due_date: due_date)
+      # Send notification to assignee
+      ControlAssignedNotifier.with(compliance_control: @compliance_control, assigned_by: current_user).deliver_later(@compliance_control.assignee)
+      
+      redirect_to organization_compliance_framework_compliance_requirement_path(@organization, @compliance_framework, @compliance_requirement),
+                  notice: "Control was successfully assigned to #{@compliance_control.assignee.full_name}."
+    else
+      # Handle error
+      redirect_to organization_compliance_framework_compliance_requirement_path(@organization, @compliance_framework, @compliance_requirement),
+                  alert: "Failed to assign control."
+    end
+  end
+
   private
 
   def set_organization
@@ -72,7 +94,7 @@ class ComplianceControlsController < ApplicationController
   end
 
   def compliance_control_params
-    params.require(:compliance_control).permit(:name, :control_type, :description, :effectiveness, :status, :settings)
+    params.require(:compliance_control).permit(:name, :control_type, :description, :effectiveness, :status, :settings, :assignee_id, :due_date)
   end
 
   def authorize_compliance_control
@@ -89,6 +111,8 @@ class ComplianceControlsController < ApplicationController
       authorize @compliance_control, :update?
     when 'destroy'
       authorize @compliance_control, :destroy?
+    when 'assignment_form', 'assign'
+      authorize @compliance_control, :update? # Reuse update policy for assigning
     end
   end
 

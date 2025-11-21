@@ -12,6 +12,7 @@
       </div>
       <div class="flex space-x-2">
         <% if policy(@compliance_control).update? %>
+          <%= link_to "Provide Feedback", new_feedback_path(feedbackable_type: 'ComplianceControl', feedbackable_id: @compliance_control.id), data: { turbo_frame: "modal" }, class: "bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded" %>
           <%= link_to "Edit", edit_organization_compliance_framework_compliance_requirement_compliance_control_path(@organization, @compliance_framework, @compliance_requirement, @compliance_control), 
                       class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
         <% end %>

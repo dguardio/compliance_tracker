@@ -4,6 +4,7 @@ class OrganizationRegulation < ApplicationRecord
   belongs_to :regulation
   belongs_to :compliance_framework, optional: true
   belongs_to :assigned_by, class_name: 'User', optional: true
+  has_one :regulation_review, dependent: :destroy
 
   # Validations
   validates :organization_id, presence: true
@@ -35,6 +36,7 @@ class OrganizationRegulation < ApplicationRecord
 
   # Callbacks
   before_create :set_assigned_at, if: -> { assigned_at.nil? }
+  after_create :create_regulation_review
 
   # Instance methods
   def display_name
@@ -98,4 +100,27 @@ class OrganizationRegulation < ApplicationRecord
   def set_assigned_at
     self.assigned_at = Time.current
   end
+
+  def create_regulation_review
+    template = organization.workflow_templates.default.first
+    unless template
+      Rails.logger.warn "No default workflow template found for organization #{organization.id}. Cannot create regulation review."
+      return
+    end
+
+    first_step = template.workflow_steps.first
+    unless first_step
+      Rails.logger.warn "Default workflow template for organization #{organization.id} has no steps. Cannot create regulation review."
+      return
+    end
+
+    RegulationReview.create!(
+      organization_regulation: self,
+      workflow_template: template,
+      workflow_state: first_step.name.parameterize.underscore
+    )
+  rescue StandardError => e
+    Rails.logger.error "Failed to create regulation review for OrganizationRegulation #{id}: #{e.message}"
+  end
 end
+

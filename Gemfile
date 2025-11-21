@@ -70,6 +70,7 @@ gem 'httparty', '~> 0.21'
 gem 'langchainrb', '~> 0.7'
 gem 'nokogiri', '~> 1.15'
 gem 'ruby-openai', '~> 6.0'
+gem 'rss'
 
 # PDF Processing
 gem 'pdf-forms', '~> 1.4'
@@ -121,6 +122,7 @@ gem 'interactor', '~> 3.1'
 gem 'kaminari'
 gem 'paper_trail', '~> 15.0'
 gem 'virtus', '~> 2.0'
+gem 'workflow', '~> 2.0'
 
 # Regulation Intake Feature Gems
 gem 'dotenv-rails', groups: %i[development test]

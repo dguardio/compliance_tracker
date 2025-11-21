@@ -1,0 +1,39 @@
+<div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-gray-900">Workflow Templates for <%= @organization.name %></h1>
+    <%= link_to 'New Template', new_organization_workflow_template_path(@organization), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700" %>
+  </div>
+
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <ul role="list" class="divide-y divide-gray-200">
+      <% @workflow_templates.each do |template| %>
+        <li>
+          <%= link_to organization_workflow_template_path(@organization, template), class: "block hover:bg-gray-50" do %>
+            <div class="px-4 py-4 sm:px-6">
+              <div class="flex items-center justify-between">
+                <p class="text-lg font-medium text-indigo-600 truncate"><%= template.name %></p>
+                <div class="ml-2 flex-shrink-0 flex">
+                  <% if template.is_default? %>
+                    <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                      Default
+                    </p>
+                  <% end %>
+                </div>
+              </div>
+              <div class="mt-2 sm:flex sm:justify-between">
+                <div class="sm:flex">
+                  <p class="flex items-center text-sm text-gray-500">
+                    <%= template.description %>
+                  </p>
+                </div>
+                <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                  <p><%= pluralize(template.workflow_steps.count, "step") %></p>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>

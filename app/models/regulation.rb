@@ -1,14 +1,10 @@
 class Regulation < ApplicationRecord
+  include PgSearch::Model
+  has_paper_trail
+
   # Associations
   has_many :organization_regulations, dependent: :destroy
   has_many :organizations, through: :organization_regulations
-
-  # For future: associations to compliance frameworks, requirements, controls
-  # has_many :compliance_framework_regulations
-  # has_many :compliance_frameworks, through: :compliance_framework_regulations
-  # has_many :compliance_requirements, through: :compliance_framework_regulations
-  # has_many :compliance_controls, through: :compliance_framework_regulations
-
   belongs_to :previous_version, class_name: 'Regulation', optional: true
 
   # Validations
@@ -22,6 +18,27 @@ class Regulation < ApplicationRecord
   scope :by_jurisdiction, ->(jurisdiction) { where(jurisdiction: jurisdiction) }
   scope :by_type, ->(reg_type) { where(reg_type: reg_type) }
 
+  # PgSearch Configuration
+  pg_search_scope :search_by_all,
+                  against: [:title, :agency, :jurisdiction],
+                  using: {
+                    tsearch: { prefix: true, dictionary: 'english' },
+                    trigram: { threshold: 0.2 }
+                  }
+
+  # Ransack Configuration
+  def self.ransackable_attributes(auth_object = nil)
+    %w[title agency jurisdiction status created_at keywords_contains]
+  end
+
+  ransacker :keywords_contains,
+    formatter: proc { |v| v.to_json },
+    validator: proc { |v| v.present? },
+    type: :string do |parent|
+    Arel.sql("metadata->'keywords' @> ?")
+  end
+
+
   # Callbacks
   after_create :trigger_auto_assignment_to_organizations
 
@@ -29,7 +46,7 @@ class Regulation < ApplicationRecord
   def main_text
     full_text['main']
   end
-
+  # ... (rest of the methods remain the same)
   def section_text(section)
     full_text.dig('sections', section)
   end
@@ -73,7 +90,7 @@ class Regulation < ApplicationRecord
   private
 
   def trigger_auto_assignment_to_organizations
-    RegulationAutoAssignmentService.new.assign_regulation_to_organizations(self)
+    RegulationAutoAssignmentService.new.process_new_regulation(self)
   rescue StandardError => e
     Rails.logger.error "Failed to trigger auto-assignment for regulation #{id}: #{e.message}"
   end

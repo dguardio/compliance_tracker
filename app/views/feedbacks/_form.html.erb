@@ -1,0 +1,16 @@
+<%= form_with(model: feedback, url: feedbacks_path, class: "space-y-4") do |form| %>
+  <%= form.hidden_field :feedbackable_type %>
+  <%= form.hidden_field :feedbackable_id %>
+
+  <div>
+    <%= form.label :content, "Your Feedback", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.text_area :content, rows: 5, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm", placeholder: "Describe your feedback or suggestion..." %>
+    <% feedback.errors.full_messages_for(:content).each do |message| %>
+      <p class="mt-2 text-sm text-red-600"><%= message %></p>
+    <% end %>
+  </div>
+
+  <div class="flex justify-end">
+    <%= form.submit "Submit Feedback", class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+  </div>
+<% end %>

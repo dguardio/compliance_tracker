@@ -4,6 +4,7 @@ class OrganizationsController < ApplicationController
   
   before_action :authenticate_user!
   before_action :set_organization, only: %i[show edit update destroy]
+  before_action :prepare_settings_arrays, only: %i[create update]
 
   def index
     @organizations = if current_user.super_admin?
@@ -76,6 +77,17 @@ class OrganizationsController < ApplicationController
 
   def set_organization
     @organization = Organization.find(params[:id])
+  end
+
+  def prepare_settings_arrays
+    settings = params.dig(:organization, :settings)
+    return unless settings
+
+    %i[compliance_industries compliance_jurisdictions compliance_keywords exclusion_terms].each do |key|
+      if settings[key].is_a?(String)
+        settings[key] = settings[key].split(',').map(&:strip).reject(&:blank?)
+      end
+    end
   end
 
   def organization_params

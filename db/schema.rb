@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_20_131542) do
+ActiveRecord::Schema[7.1].define(version: 2025_11_14_162908) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -54,6 +54,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_20_131542) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "risk_level"
+    t.bigint "assignee_id"
+    t.date "due_date"
+    t.index ["assignee_id"], name: "index_compliance_controls_on_assignee_id"
     t.index ["compliance_requirement_id"], name: "index_compliance_controls_on_compliance_requirement_id"
     t.index ["organization_id"], name: "index_compliance_controls_on_organization_id"
   end
@@ -132,6 +135,18 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_20_131542) do
     t.index ["settings"], name: "index_documents_on_settings", using: :gin
     t.index ["status"], name: "index_documents_on_status"
     t.index ["uploaded_by_id"], name: "index_documents_on_uploaded_by_id"
+  end
+
+  create_table "feedbacks", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "feedbackable_type", null: false
+    t.bigint "feedbackable_id", null: false
+    t.text "content", null: false
+    t.string "status", default: "open", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["feedbackable_type", "feedbackable_id"], name: "index_feedbacks_on_feedbackable"
+    t.index ["user_id"], name: "index_feedbacks_on_user_id"
   end
 
   create_table "memberships", force: :cascade do |t|
@@ -240,6 +255,36 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_20_131542) do
     t.index ["status"], name: "index_providers_on_status"
   end
 
+  create_table "regulation_review_decisions", force: :cascade do |t|
+    t.bigint "regulation_review_id", null: false
+    t.bigint "workflow_step_id", null: false
+    t.bigint "user_id", null: false
+    t.string "decision", null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["regulation_review_id"], name: "index_regulation_review_decisions_on_regulation_review_id"
+    t.index ["user_id"], name: "index_regulation_review_decisions_on_user_id"
+    t.index ["workflow_step_id"], name: "index_regulation_review_decisions_on_workflow_step_id"
+  end
+
+  create_table "regulation_reviews", force: :cascade do |t|
+    t.bigint "organization_regulation_id", null: false
+    t.bigint "workflow_template_id", null: false
+    t.string "workflow_state", null: false
+    t.string "status", default: "in_progress", null: false
+    t.bigint "assignee_id"
+    t.datetime "completed_at"
+    t.text "decision_notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assignee_id"], name: "index_regulation_reviews_on_assignee_id"
+    t.index ["organization_regulation_id"], name: "index_regulation_reviews_on_organization_regulation_id", unique: true
+    t.index ["status"], name: "index_regulation_reviews_on_status"
+    t.index ["workflow_state"], name: "index_regulation_reviews_on_workflow_state"
+    t.index ["workflow_template_id"], name: "index_regulation_reviews_on_workflow_template_id"
+  end
+
   create_table "regulations", force: :cascade do |t|
     t.string "external_id"
     t.string "title", null: false
@@ -259,6 +304,22 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_20_131542) do
     t.index ["agency", "jurisdiction", "external_id", "version"], name: "idx_on_agency_jurisdiction_external_id_version_17f2981086", unique: true
     t.index ["external_id"], name: "index_regulations_on_external_id"
     t.index ["previous_version_id"], name: "index_regulations_on_previous_version_id"
+  end
+
+  create_table "regulatory_data_sources", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.string "source_type", null: false
+    t.string "url", null: false
+    t.integer "status", default: 0, null: false
+    t.jsonb "settings", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "provider_id", null: false
+    t.index ["name"], name: "index_regulatory_data_sources_on_name", unique: true
+    t.index ["provider_id"], name: "index_regulatory_data_sources_on_provider_id"
+    t.index ["source_type"], name: "index_regulatory_data_sources_on_source_type"
+    t.index ["status"], name: "index_regulatory_data_sources_on_status"
   end
 
   create_table "risk_assessments", force: :cascade do |t|
@@ -366,10 +427,50 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_20_131542) do
     t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
   end
 
+  create_table "workflow_steps", force: :cascade do |t|
+    t.string "name", null: false
+    t.bigint "workflow_template_id", null: false
+    t.bigint "role_id", null: false
+    t.string "step_type", null: false
+    t.text "description"
+    t.jsonb "settings", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.jsonb "decision_options", default: []
+    t.integer "position_x"
+    t.integer "position_y"
+    t.index ["role_id"], name: "index_workflow_steps_on_role_id"
+    t.index ["workflow_template_id"], name: "index_workflow_steps_on_workflow_template_id"
+  end
+
+  create_table "workflow_templates", force: :cascade do |t|
+    t.string "name", null: false
+    t.bigint "organization_id", null: false
+    t.boolean "is_default", default: false, null: false
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "name"], name: "index_workflow_templates_on_organization_id_and_name", unique: true
+    t.index ["organization_id"], name: "index_workflow_templates_on_organization_id"
+  end
+
+  create_table "workflow_transitions", force: :cascade do |t|
+    t.bigint "workflow_step_id", null: false
+    t.bigint "next_step_id", null: false
+    t.string "condition"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "source_anchor_type"
+    t.string "target_anchor_type"
+    t.index ["next_step_id"], name: "index_workflow_transitions_on_next_step_id"
+    t.index ["workflow_step_id"], name: "index_workflow_transitions_on_workflow_step_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "compliance_controls", "compliance_requirements"
   add_foreign_key "compliance_controls", "organizations"
+  add_foreign_key "compliance_controls", "users", column: "assignee_id"
   add_foreign_key "compliance_frameworks", "organizations"
   add_foreign_key "compliance_frameworks", "providers"
   add_foreign_key "compliance_requirements", "compliance_frameworks"
@@ -381,6 +482,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_20_131542) do
   add_foreign_key "documents", "organizations"
   add_foreign_key "documents", "users", column: "approved_by_id"
   add_foreign_key "documents", "users", column: "uploaded_by_id"
+  add_foreign_key "feedbacks", "users"
   add_foreign_key "memberships", "organizations"
   add_foreign_key "memberships", "users"
   add_foreign_key "organization_regulations", "compliance_frameworks"
@@ -389,7 +491,14 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_20_131542) do
   add_foreign_key "organization_regulations", "users", column: "assigned_by_id"
   add_foreign_key "permissions", "organizations"
   add_foreign_key "providers", "organizations"
+  add_foreign_key "regulation_review_decisions", "regulation_reviews"
+  add_foreign_key "regulation_review_decisions", "users"
+  add_foreign_key "regulation_review_decisions", "workflow_steps"
+  add_foreign_key "regulation_reviews", "organization_regulations"
+  add_foreign_key "regulation_reviews", "users", column: "assignee_id"
+  add_foreign_key "regulation_reviews", "workflow_templates"
   add_foreign_key "regulations", "regulations", column: "previous_version_id"
+  add_foreign_key "regulatory_data_sources", "providers"
   add_foreign_key "risk_assessments", "compliance_controls"
   add_foreign_key "risk_assessments", "compliance_frameworks"
   add_foreign_key "risk_assessments", "compliance_requirements"
@@ -403,4 +512,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_20_131542) do
   add_foreign_key "users", "organizations"
   add_foreign_key "users", "teams"
   add_foreign_key "users", "units"
+  add_foreign_key "workflow_steps", "roles"
+  add_foreign_key "workflow_steps", "workflow_templates"
+  add_foreign_key "workflow_templates", "organizations"
+  add_foreign_key "workflow_transitions", "workflow_steps"
+  add_foreign_key "workflow_transitions", "workflow_steps", column: "next_step_id"
 end

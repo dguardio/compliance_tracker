@@ -1,0 +1,21 @@
+<%= form_with(model: [@organization, @workflow_template, workflow_step], class: "space-y-4") do |form| %>
+  <div>
+    <%= form.label :name, class: "block text-sm font-medium text-gray-700" %>
+    <%= form.text_field :name, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+  </div>
+  <div>
+    <%= form.label :role_id, "Assign to Role", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.collection_select :role_id, @organization.roles, :id, :name, { include_blank: 'Select a role' }, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+  </div>
+  <div>
+    <%= form.label :step_type, class: "block text-sm font-medium text-gray-700" %>
+    <%= form.select :step_type, ['review', 'decision', 'classification', 'acknowledgement'], {}, { class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" } %>
+  </div>
+  <div>
+    <%= form.label :decision_options, "Decision Options", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.text_field :decision_options, value: workflow_step.decision_options.join(','), "data-controller": "tagify", class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm", placeholder: "e.g., Applicable, Not Applicable, Escalate" %>
+  </div>
+  <div class="text-right">
+    <%= form.submit "Save Step", class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+  </div>
+<% end %>

@@ -18,14 +18,36 @@ class ComplianceRequirementsController < ApplicationController
   end
 
   def create
-    @compliance_requirement = @compliance_framework.compliance_requirements.build(compliance_requirement_params)
-    @compliance_requirement.organization = @organization
-
-    if @compliance_requirement.save
-      redirect_to organization_compliance_framework_compliance_requirement_path(@organization, @compliance_framework, @compliance_requirement),
-                  notice: 'Compliance requirement was successfully created.'
+    if params[:requirements].present?
+      created_count = 0
+      total_count = 0
+      
+      params[:requirements].each do |_, req_params|
+        total_count += 1
+        if req_params[:create] == "1"
+          req = @compliance_framework.compliance_requirements.build(
+            name: req_params[:name],
+            description: req_params[:description],
+            priority: req_params[:priority],
+            requirement_type: req_params[:requirement_type],
+            organization: @organization
+          )
+          created_count += 1 if req.save
+        end
+      end
+      
+      redirect_to organization_compliance_framework_path(@organization, @compliance_framework),
+                  notice: "#{created_count} of #{total_count} suggested requirements were successfully created."
     else
-      render :new, status: :unprocessable_entity
+      @compliance_requirement = @compliance_framework.compliance_requirements.build(compliance_requirement_params)
+      @compliance_requirement.organization = @organization
+
+      if @compliance_requirement.save
+        redirect_to organization_compliance_framework_compliance_requirement_path(@organization, @compliance_framework, @compliance_requirement),
+                    notice: 'Compliance requirement was successfully created.'
+      else
+        render :new, status: :unprocessable_entity
+      end
     end
   end
 

@@ -1,0 +1,10 @@
+// Create a container for the suggestions
+var suggestionsContainer = document.createElement('div');
+suggestionsContainer.id = 'suggestion-container';
+suggestionsContainer.innerHTML = '<%= j render("suggested_requirements_form") %>';
+
+// Replace the associated regulations section with the suggestions
+var associatedRegulationsSection = document.querySelector('.bg-white.rounded-lg.shadow-md.p-6.mb-8');
+if (associatedRegulationsSection) {
+  associatedRegulationsSection.replaceWith(suggestionsContainer);
+}

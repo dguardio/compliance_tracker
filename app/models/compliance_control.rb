@@ -5,7 +5,9 @@ class ComplianceControl < ApplicationRecord
 
   # Associations
   belongs_to :compliance_requirement
+  belongs_to :assignee, class_name: 'User', optional: true
   has_many :risk_assessments, dependent: :destroy
+  has_many :feedbacks, as: :feedbackable, dependent: :destroy
 
   # Validations
   validates :name, presence: true, length: { minimum: 2, maximum: 200 }
@@ -24,9 +26,11 @@ class ComplianceControl < ApplicationRecord
   }
 
   enum status: {
-    active: 0,
-    inactive: 1,
-    draft: 2
+    draft: 'draft',
+    in_progress: 'in_progress',
+    implemented: 'implemented',
+    needs_review: 'needs_review',
+    inactive: 'inactive'
   }
 
   enum effectiveness: {
@@ -64,6 +68,10 @@ class ComplianceControl < ApplicationRecord
   scope :high_effectiveness, -> { where(effectiveness: :high) }
   scope :needs_review, -> { where("settings->>'next_review_date' < ?", Date.current.to_s) }
   scope :for_category, ->(category) { where("settings->>'control_category' = ?", category) }
+  scope :assigned_to, ->(user) { where(assignee: user) }
+  scope :unassigned, -> { where(assignee_id: nil) }
+  scope :due_soon, -> { where('due_date BETWEEN ? AND ?', Date.current, 7.days.from_now) }
+  scope :overdue, -> { where('due_date < ?', Date.current) }
 
   # Instance methods
   def display_name

@@ -1,0 +1,22 @@
+.json-container {
+  padding-left: 20px;
+  border-left: 1px solid #eee;
+}
+
+.json-entry {
+  margin-bottom: 5px;
+}
+
+.json-key {
+  font-weight: bold;
+  color: #333;
+}
+
+.json-value {
+  color: #555;
+}
+
+.json-array {
+  padding-left: 20px;
+  border-left: 1px solid #eee;
+}

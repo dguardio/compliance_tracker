@@ -21,6 +21,7 @@ class DashboardController < ApplicationController
     @compliance_frameworks = @organization.compliance_frameworks.includes(:compliance_requirements)
     @risk_assessments = @organization.risk_assessments.includes(:created_by, :assigned_to, :compliance_framework,
                                                                 :compliance_requirement, :compliance_control)
+    @compliance_controls = @organization.compliance_controls
 
     @stats = {
       departments: @organization.department_count,
@@ -33,8 +34,16 @@ class DashboardController < ApplicationController
       overdue_risk_assessments: @organization.risk_assessments.where('next_review_date < ?', Date.current).count,
       documents: @organization.documents.count,
       documents_needing_review: @organization.documents.where(status: 'review').count,
-      documents_expiring_soon: @organization.documents.expiring_soon.count
+      documents_expiring_soon: @organization.documents.expiring_soon.count,
+      
+      # New Task-related stats
+      total_tasks: @compliance_controls.count,
+      tasks_by_status: @compliance_controls.group(:status).count,
+      overdue_tasks: @compliance_controls.overdue.count,
+      due_soon_tasks: @compliance_controls.due_soon.count
     }
+
+    @overdue_tasks = @compliance_controls.overdue.includes(:assignee, :compliance_requirement).order(due_date: :asc).limit(5)
 
     # Recent activity (placeholder for future implementation)
     @recent_activity = []

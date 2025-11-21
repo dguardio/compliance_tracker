@@ -1,0 +1,4 @@
+<%= turbo_stream.remove "modal" %>
+<%= turbo_stream.replace "step-#{@workflow_step.id}" do %>
+  <%= render 'workflow_steps/workflow_step', workflow_step: @workflow_step %>
+<% end %>

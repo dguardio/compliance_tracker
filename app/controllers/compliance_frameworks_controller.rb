@@ -10,6 +10,7 @@ class ComplianceFrameworksController < ApplicationController
 
   def show
     @compliance_requirements = @compliance_framework.compliance_requirements.includes(:compliance_controls)
+    @associated_regulations = @compliance_framework.organization.organization_regulations.includes(:regulation)
   end
 
   def new
@@ -45,6 +46,15 @@ class ComplianceFrameworksController < ApplicationController
                 notice: 'Compliance framework was successfully deleted.'
   end
 
+  def suggest_requirements
+    @regulation = Regulation.find(params[:regulation_id])
+    @suggested_requirements = RequirementSuggestionService.new(@regulation).suggest
+    
+    respond_to do |format|
+      format.js
+    end
+  end
+
   private
 
   def set_organization
@@ -71,6 +81,8 @@ class ComplianceFrameworksController < ApplicationController
       authorize @compliance_framework, :update?
     when 'destroy'
       authorize @compliance_framework, :destroy?
+    when 'suggest_requirements'
+      authorize @compliance_framework, :update? # Or a more specific policy
     end
   end
 end

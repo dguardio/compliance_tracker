@@ -1,0 +1,4 @@
+<%= turbo_stream.remove "modal" %>
+<%= turbo_stream.append "workflow-canvas" do %>
+  <%= render 'workflow_steps/workflow_step', workflow_step: @workflow_step %>
+<% end %>

@@ -63,6 +63,8 @@ class RegulationAutoAssignmentService
       if created
         Rails.logger.info "Assigned regulation to #{organization.name}."
         assigned_orgs << organization
+      elsif org_reg.errors.any?
+        Rails.logger.error "Failed to assign regulation #{regulation.id} to #{organization.name}: #{org_reg.errors.full_messages.join(', ')}"
       end
     end
     

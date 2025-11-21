@@ -562,6 +562,8 @@ GEM
       rspec-mocks (~> 3.13)
       rspec-support (~> 3.13)
     rspec-support (3.13.4)
+    rss (0.2.9)
+      rexml
     rubocop (1.77.0)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
@@ -736,6 +738,7 @@ GEM
       base64
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
+    workflow (2.0.2)
     xpath (3.2.0)
       nokogiri (~> 1.8)
     zeitwerk (2.7.3)
@@ -808,6 +811,7 @@ DEPENDENCIES
   rolify (~> 6.0)
   roo (~> 2.10)
   rspec-rails (~> 6.0)
+  rss
   rubocop (~> 1.50)
   rubocop-rails (~> 2.19)
   rubocop-rspec (~> 2.20)
@@ -835,6 +839,7 @@ DEPENDENCIES
   web-console
   webdrivers (~> 5.3)
   webmock (~> 3.18)
+  workflow (~> 2.0)
 
 RUBY VERSION
    ruby 3.2.1p31

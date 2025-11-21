@@ -3,6 +3,7 @@ class Provider < ApplicationRecord
 
   # Associations
   has_many :compliance_frameworks, dependent: :restrict_with_error
+  has_many :regulatory_data_sources, dependent: :destroy
 
   # Validations
   validates :name, presence: true, length: { minimum: 2, maximum: 100 }

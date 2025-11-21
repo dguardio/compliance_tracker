@@ -12,6 +12,8 @@ class User < ApplicationRecord
   # Risk assessment associations
   has_many :created_risk_assessments, class_name: 'RiskAssessment', foreign_key: 'created_by_id', dependent: :destroy
   has_many :assigned_risk_assessments, class_name: 'RiskAssessment', foreign_key: 'assigned_to_id', dependent: :destroy
+  has_many :assigned_controls, class_name: 'ComplianceControl', foreign_key: 'assignee_id', dependent: :nullify
+  has_many :feedbacks, dependent: :destroy
 
   # Multi-tenancy associations
   # DEPRECATED: organization_id is now optional and replaced by memberships

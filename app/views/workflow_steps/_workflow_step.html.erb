@@ -1,0 +1,19 @@
+<div id="step-<%= workflow_step.id %>" 
+     data-workflow-editor-target="step" 
+     class="absolute bg-white shadow-lg rounded-lg p-4 w-48 min-h-[100px] cursor-grab border border-gray-300"
+     data-position-x="<%= workflow_step.position_x || 50 %>"
+     data-position-y="<%= workflow_step.position_y || (defined?(index) ? (index * 100) + 20 : 20) %>">
+  
+  <div class="flex justify-between items-start">
+    <div>
+      <p class="font-bold text-gray-800"><%= workflow_step.name %></p>
+      <p class="text-sm text-gray-600">Role: <%= workflow_step.role.name %></p>
+    </div>
+    <%= link_to edit_organization_workflow_template_workflow_step_path(@organization, @workflow_template, workflow_step), 
+                data: { turbo_frame: "modal" }, 
+                class: "text-gray-400 hover:text-indigo-600 edit-step-button" do %>
+      <i class="fas fa-pencil-alt fa-xs"></i>
+    <% end %>
+  </div>
+  <p class="text-xs text-gray-400 mt-2">Type: <%= workflow_step.step_type.humanize %></p>
+</div>

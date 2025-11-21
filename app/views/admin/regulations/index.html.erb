@@ -3,19 +3,105 @@
     <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-lg inline-block" id="notice"><%= notice %></p>
   <% end %>
 
-  <% content_for :title, "Regulations" %>
-
-  <div class="flex justify-between items-center">
+  <div class="flex justify-between items-center mb-6">
     <h1 class="font-bold text-4xl">Regulations</h1>
-    <%= link_to "New regulation", new_admin_regulation_path, class: "rounded-lg py-3 px-5 bg-blue-600 text-white block font-medium" %>
+    <%= link_to "New Regulation", new_admin_regulation_path, class: "rounded-lg py-3 px-5 bg-blue-600 text-white block font-medium" %>
   </div>
 
-  <div id="regulations" class="min-w-full">
-    <% @regulations.each do |regulation| %>
-      <%= render regulation %>
-      <p>
-        <%= link_to "Show this regulation", admin_regulation_path(regulation), class: "ml-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
-      </p>
+  <!-- Search and Filter Form -->
+  <div class="bg-white p-4 rounded-lg shadow mb-6">
+    <h3 class="font-bold text-xl mb-4">Filter Regulations</h3>
+    <%= search_form_for @q, url: admin_regulations_path, method: :get, class: "space-y-4" do |f| %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div>
+          <%= label_tag :search_by_all, "General Search", class: "block text-sm font-medium text-gray-700" %>
+          <%= text_field_tag :search_by_all, params[:search_by_all], class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" %>
+        </div>
+        <div>
+          <%= f.label :title_cont, "Title", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.search_field :title_cont, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" %>
+        </div>
+        <div>
+          <%= f.label :agency_cont, "Agency", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.search_field :agency_cont, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" %>
+        </div>
+        <div>
+          <%= f.label :jurisdiction_cont, "Jurisdiction", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.search_field :jurisdiction_cont, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" %>
+        </div>
+        <div>
+          <%= f.label :keywords_contains, "Keywords", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.search_field :keywords_contains, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50", placeholder: "e.g., data privacy" %>
+        </div>
+      </div>
+      <div class="flex items-center justify-end space-x-4">
+        <%= link_to "Clear", admin_regulations_path, class: "rounded-lg py-2 px-4 bg-gray-200 text-gray-800 inline-block font-medium" %>
+        <%= f.submit "Search", class: "rounded-lg py-2 px-4 bg-blue-600 text-white inline-block font-medium cursor-pointer" %>
+      </div>
     <% end %>
   </div>
+
+  <%= form_with url: bulk_delete_admin_regulations_path, method: :delete, data: { confirm: "Are you sure you want to delete the selected regulations?" } do |form| %>
+    <div class="flex justify-end mb-4">
+      <%= form.submit "Delete Selected", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
+    </div>
+
+    <!-- Regulations Table -->
+    <div id="regulations" class="min-w-full bg-white shadow overflow-hidden sm:rounded-lg">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <input type="checkbox" id="select-all-regulations">
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agency</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jurisdiction</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Effective Date</th>
+            <th scope="col" class="relative px-6 py-3">
+              <span class="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @regulations.each do |regulation| %>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <%= check_box_tag "regulation_ids[]", regulation.id %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= link_to regulation.title, admin_regulation_path(regulation), class: "text-blue-600 hover:text-blue-800" %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= regulation.agency %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= regulation.jurisdiction %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <%= 'bg-green-100 text-green-800' if regulation.status == 'active' %> <%= 'bg-yellow-100 text-yellow-800' if regulation.status == 'pending_review' %>">
+                  <%= regulation.status.humanize %>
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= regulation.effective_date&.strftime('%Y-%m-%d') || 'N/A' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <%= link_to 'Show', admin_regulation_path(regulation), class: "text-indigo-600 hover:text-indigo-900" %>
+                <%= link_to 'Edit', edit_admin_regulation_path(regulation), class: "ml-4 text-indigo-600 hover:text-indigo-900" %>
+                <%= link_to 'Destroy', admin_regulation_path(regulation), method: :delete, data: { confirm: 'Are you sure?' }, class: "ml-4 text-red-600 hover:text-red-900" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+  
+  <!-- Pagination -->
+  <div class="mt-6">
+    <%= paginate @regulations %>
+  </div>
+
+  <script>
+    document.getElementById('select-all-regulations').addEventListener('change', function(event) {
+      var checkboxes = document.querySelectorAll('input[name="regulation_ids[]"]');
+      checkboxes.forEach(function(checkbox) {
+        checkbox.checked = event.target.checked;
+      });
+    });
+  </script>
 </div>

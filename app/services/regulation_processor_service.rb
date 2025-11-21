@@ -14,12 +14,21 @@ class RegulationProcessorService
     # 2. Extract metadata from the text.
     extracted_metadata = extract_metadata(cleaned_text)
     
-    # 3. Update the regulation record.
-    # We might add a 'processed_text' column in the future, but for now
-    # we'll just update the metadata field.
-    regulation.update(
+    return if extracted_metadata.blank?
+
+    # 3. Update the regulation record with both top-level attributes and the full metadata blob.
+    update_attributes = {
+      jurisdiction: extracted_metadata[:jurisdiction] || regulation.jurisdiction,
+      agency: extracted_metadata[:agency] || regulation.agency,
+      effective_date: extracted_metadata[:effective_date] || regulation.effective_date,
       metadata: regulation.metadata.merge(extracted_metadata)
-    )
+    }
+    
+    if regulation.update(update_attributes)
+      Rails.logger.info "Successfully updated regulation ##{regulation.id} with AI-extracted metadata."
+    else
+      Rails.logger.error "Failed to update regulation ##{regulation.id}: #{regulation.errors.full_messages.join(', ')}"
+    end
     
     Rails.logger.info "Finished processing regulation: #{regulation.title}"
   end
@@ -47,8 +56,6 @@ class RegulationProcessorService
   def extract_metadata(text)
     return {} if text.blank?
 
-    llm = LLM.chat
-
     prompt = <<~PROMPT
       You are an expert in regulatory compliance. Your task is to extract key metadata from the following regulation text.
       Provide the output in a JSON format with the following keys:
@@ -66,7 +73,7 @@ class RegulationProcessorService
     PROMPT
 
     begin
-      response = llm.ask(prompt)
+      response = LLM.ask(prompt)
       parsed_response = JSON.parse(response.content)
       Rails.logger.info "LLM successfully extracted metadata for regulation."
       parsed_response.deep_transform_keys!(&:underscore).symbolize_keys

@@ -1,13 +1,50 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+@import 'json_viewer.css';
 
-/*
+/* Add custom styles here */
 
-@layer components {
-  .btn-primary {
-    @apply py-2 px-4 bg-blue-200;
-  }
+.endpoint {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #9CA3AF; /* gray-400 */
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  transition: background-color 0.2s;
 }
 
-*/
+.endpoint:hover {
+  background-color: #3B82F6; /* blue-500 */
+}
+
+.right-endpoint {
+  top: 50%;
+  right: -5px;
+  transform: translateY(-50%);
+}
+
+.left-endpoint {
+  top: 50%;
+  left: -5px;
+  transform: translateY(-50%);
+}
+
+.top-endpoint {
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bottom-endpoint {
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.connecting {
+  border-color: #3B82F6 !important; /* blue-500 */
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
