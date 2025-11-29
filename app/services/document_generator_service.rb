@@ -225,39 +225,30 @@ class DocumentGeneratorService
   end
 
   def create_xlsx_file(data)
-    temp_file = Tempfile.new(['spreadsheet', '.xlsx'])
+    require 'axlsx'
+    p = Axlsx::Package.new
+    wb = p.workbook
 
-    Zip::File.open(temp_file.path, Zip::File::CREATE) do |zipfile|
-      # Add content types
-      zipfile.get_output_stream('[Content_Types].xml') do |f|
-        f.write(<<~XML)
-          <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-          <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-            <Default Extension="xml" ContentType="application/xml"/>
-            <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-            <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
-          </Types>
-        XML
-      end
-
-      # Add workbook
-      zipfile.get_output_stream('xl/workbook.xml') do |f|
-        f.write(<<~XML)
-          <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-          <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-            <sheets>
-              #{data.keys.each_with_index.map { |name, i| "<sheet name=\"#{name}\" sheetId=\"#{i + 1}\" r:id=\"rId#{i + 1}\"/>" }.join("\n")}
-            </sheets>
-          </workbook>
-        XML
+    data.each do |sheet_name, rows|
+      wb.add_worksheet(name: sheet_name) do |sheet|
+        rows.each do |row|
+          sheet.add_row row
+        end
       end
     end
 
-    temp_file.rewind
+    temp_file = Tempfile.new(['spreadsheet', '.xlsx'])
+    p.serialize(temp_file.path)
     temp_file
   end
 
   def create_pptx_file(slides)
+    # For now, we'll stick to the simple XML approach but ensure it's valid enough.
+    # Or better, we can create a simple text file and rename it if we don't have a PPTX writer.
+    # But let's try to keep the XML approach but maybe simplify it or ensure it's correct.
+    # Actually, the previous XML was very minimal.
+    # Let's just use the previous implementation but ensure we close files.
+    
     temp_file = Tempfile.new(['presentation', '.pptx'])
 
     Zip::File.open(temp_file.path, Zip::File::CREATE) do |zipfile|
@@ -291,12 +282,14 @@ class DocumentGeneratorService
   end
 
   def create_pdf_file(content)
-    # Create a simple PDF file
+    # Use WickedPdf to generate a valid PDF
+    pdf_content = WickedPdf.new.pdf_from_string(
+      "<h1>Generated Document</h1><p>#{content.gsub("\n", '<br>')}</p>",
+      encoding: 'UTF-8'
+    )
+    
     temp_file = Tempfile.new(['document', '.pdf'])
-
-    # This is a minimal PDF structure - in production you'd use a proper PDF library
-    pdf_content = "%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Kids [3 0 R]\n/Count 1\n>>\nendobj\n3 0 obj\n<<\n/Type /Page\n/Parent 2 0 R\n/MediaBox [0 0 612 792]\n/Contents 4 0 R\n>>\nendobj\n4 0 obj\n<<\n/Length 44\n>>\nstream\nBT\n/F1 12 Tf\n72 720 Td\n(#{content[0..50]}) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \n0000000204 00000 n \ntrailer\n<<\n/Size 5\n/Root 1 0 R\n>>\nstartxref\n297\n%%EOF"
-
+    temp_file.binmode
     temp_file.write(pdf_content)
     temp_file.rewind
     temp_file

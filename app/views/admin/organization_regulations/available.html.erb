@@ -1,0 +1,116 @@
+<div class="w-full">
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="font-bold text-4xl">Add Regulations</h1>
+      <p class="text-gray-600 mt-2">Browse and add regulations to your organization</p>
+    </div>
+    <%= link_to "Back to My Regulations", admin_organization_regulations_path, class: "rounded-lg py-3 px-5 bg-gray-600 text-white inline-block font-medium" %>
+  </div>
+
+  <!-- Search and Filter -->
+  <div class="bg-white shadow sm:rounded-lg p-6 mb-6">
+    <%= search_form_for @q, url: available_admin_organization_regulations_path, method: :get do |f| %>
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <!-- Search Input -->
+        <div class="md:col-span-4">
+          <%= f.label :title_cont, "Search", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.search_field :title_cont, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", placeholder: "Keywords..." %>
+          
+          <!-- Smart Search Toggle -->
+          <div class="flex items-center mt-2">
+            <%= check_box_tag :smart_search, '1', params[:smart_search] == '1', class: "h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" %>
+            <%= label_tag :smart_search, "AI Smart Search", class: "ml-2 block text-sm text-gray-900" %>
+            <div class="group relative flex items-center ml-1">
+              <svg class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-900 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
+                Expands your search with related terms using AI (e.g., "banking" -> "finance", "credit").
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Agency Filter -->
+        <div class="md:col-span-3">
+          <%= f.label :agency_in, "Agencies", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <% 
+            agency_value = params.dig(:q, :agency_in)
+            if agency_value.is_a?(Array)
+              # Clean up any JSON-encoded strings that might have slipped in
+              agency_value = agency_value.map { |v| v.start_with?('[') ? JSON.parse(v) : v }.flatten
+            end
+            agency_value = agency_value&.join(',')
+          %>
+          <%= text_field_tag 'q[agency_in][]', agency_value, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", data: { controller: "tagify", tagify_whitelist_value: @agencies } %>
+        </div>
+
+        <!-- Jurisdiction Filter -->
+        <div class="md:col-span-3">
+          <%= f.label :jurisdiction_in, "Jurisdictions", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <% 
+            jurisdiction_value = params.dig(:q, :jurisdiction_in)
+            if jurisdiction_value.is_a?(Array)
+              jurisdiction_value = jurisdiction_value.map { |v| v.start_with?('[') ? JSON.parse(v) : v }.flatten
+            end
+            jurisdiction_value = jurisdiction_value&.join(',')
+          %>
+          <%= text_field_tag 'q[jurisdiction_in][]', jurisdiction_value, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", data: { controller: "tagify", tagify_whitelist_value: @jurisdictions } %>
+        </div>
+
+        <!-- Actions -->
+        <div class="md:col-span-2 flex flex-col justify-end space-y-2">
+          <%= f.submit "Search", class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+          <%= link_to "Clear", available_admin_organization_regulations_path, class: "w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Regulations List -->
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agency</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jurisdiction</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+          <th scope="col" class="relative px-6 py-3">
+            <span class="sr-only">Actions</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <% @regulations.each do |regulation| %>
+          <tr>
+            <td class="px-6 py-4 text-sm font-medium text-gray-900">
+              <%= link_to regulation.title, admin_regulation_path(regulation), class: "text-blue-600 hover:text-blue-800", target: "_blank" %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= regulation.agency %></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= regulation.jurisdiction %></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= regulation.status == 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+                <%= regulation.status.humanize %>
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <%= button_to 'Add to Organization', admin_organization_regulations_path(regulation_id: regulation.id), method: :post, class: "inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500" %>
+            </td>
+          </tr>
+        <% end %>
+        <% if @regulations.empty? %>
+          <tr>
+            <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+              No regulations found. Try adjusting your search criteria.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-4">
+    <%= paginate @regulations %>
+  </div>
+</div>

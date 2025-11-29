@@ -23,73 +23,46 @@
 - Role display and super admin access
 - Active Storage host configuration
 - Document preview URL generation
+- Workflow Editor `this` context issue (fixed by using arrow functions)
+- **Active Tables (Tabular Interface)**: Implemented dynamic table view for regulations with custom AI-extracted columns.
+- **Organization Regulation Management**: Added ability for organizations to manage their own regulation library (`/admin/organization_regulations`).
+- **Inline Custom Column Creation**: Added modal for creating custom columns directly within Active Tables.
+- **Auto-Assignment**: Updated auto-assignment logic to work with organization regulation management and show "System" added regulations.
 
 ---
 
-## 🚀 **Updated Implementation Plan: Regulatory Change Management Workflow**
+## 🚀 **Refined Ingestion Pipeline Plan**
 
-This plan integrates the centralized ingestion model with the workflow provided in the "Regulatory change identification" diagram.
+This plan focuses on implementing the "Golden Source" and "Intelligence Layer" strategy.
 
-### **Phase 1: Automated Ingestion and Initial Processing**
-*Goal: Establish a pipeline that automatically ingests regulatory changes, processes them, and stores them in a central library.*
+### **Phase 1: Refined Ingestion Engine (Current Focus)**
+*Goal: Upgrade the ingestion engine to support generic APIs and enhanced AI segmentation.*
+- [x] **Generic API Scraper:**
+    - [x] Implement `scrape_api` in `RegulatoryScraperService` to handle JSON sources.
+    - [x] Add configuration in `RegulatoryDataSource` for mapping API fields (results, title, url).
+    - [x] Support basic pagination strategies (page number, offset).
+- [x] **Intelligence Layer (Segmentation):**
+    - [x] Update `RegulationProcessorService` to segment full text into individual "Requirements".
+    - [x] Configure LLM to extract "Obligations" (Actions) and "Entity Types" (Applicability).
+- [x] **Data Drift Resilience:**
+    - [x] Implement checks for `effective_date` and `status` changes to handle versioning.
 
-- [x] **Regulatory Change Identification & Ingestion:**
-    - [x] Build admin interface for managing regulatory data sources (URLs, APIs, document repositories).
-    - [x] Implement a robust scraping engine for US federal, state, and local agencies.
-    - [x] Set up versioning and change tracking for all ingested regulations.
-- [x] **AI-Powered Metadata Tagging:**
-    - [x] Implement an AI preprocessing pipeline to clean and structure raw regulatory data.
-    - [x] Enrich regulations with AI-powered metadata (summary, keywords, etc.).
-    - *Note: The original task "Develop 'Cube tagging'" was a reference to a competitor's feature. The goal was to implement a similar enrichment process, which is now complete. This includes extracting key metadata, displaying it to the user, enabling search/filtering, and feeding it into the auto-assignment workflow.*
-- [x] **Central Regulation Library:**
-    - [x] Design and implement a schema for the central, versioned regulation repository (the "reg library").
-    - [x] Store both raw and processed regulation data with rich metadata.
-- [x] **Organization-Specific Filtering:**
-    - [x] Build a wizard for organization profile setup (industry, jurisdiction, etc.).
-    - [x] Implement a filtering engine to create an initial association of regulations to organizations.
+### **Phase 2: Golden Source Integration**
+*Goal: Connect to high-value official APIs.*
+- [ ] **US Federal:** Configure `RegulatoryDataSource` for **Regulations.gov** API.
+- [ ] **US State:** Configure integration with **OpenStates.org** (GraphQL).
+- [ ] **EU/UK:** Assess feasibility of **legislation.gov.uk** XML ingestion.
 
-### **Phase 2: Stakeholder Review and Decision Workflow**
-*Goal: Create a structured process for subject-matter experts to review, classify, and decide on the applicability of new regulations.*
+### **Phase 3: Advanced Intelligence & Standardization**
+*Goal: Improve accuracy and interoperability.*
+- [ ] **Legal-BERT Integration:** Explore fine-tuning BERT models for better classification of "Risk" and "Topic".
+- [ ] **Akoma Ntoso Mapping:** Map internal data models to LegalDocML standards.
 
-- [x] **Intake Record Creation & Notification:**
-    - [x] For each newly associated regulation, automatically create an "Intake Record" for the organization.
-    - [x] Notify designated stakeholders (e.g., Legal, Compliance Specialists) that a new regulation requires review.
-- [x] **Stakeholder Review Interface:**
-    - [x] Build a dedicated UI for stakeholders to review the regulation's text, AI summary, and metadata.
-    - [x] Allow reviewers to add comments, and annotations, and collaborate.
-- [x] **Decision Matrix & Applicability:**
-    - [x] Implement a "Decision Matrix" tool to guide reviewers in determining if a regulation is applicable.
-    - [x] Capture the "Yes/No" decision. If "No," the regulation is archived with a justification, and no further action is taken for that organization.
-- [x] **Regulation Classification:**
-    - [x] If "Yes," allow reviewers to perform a final classification, linking the regulation to internal business units, products, or compliance frameworks.
+### **Phase 4: Commercial Expansion (Future)**
+*Goal: Scale global coverage.*
+- [ ] **vLex Integration:** Evaluate licensing **vLex Iceberg API** for global jurisdiction coverage.
+- [ ] **Juriscraper:** Consider introducing Python/Juriscraper for complex non-API sources.
 
-### **Phase 3: Implementation, Task Management, and Reporting**
-*Goal: Break down applicable regulations into actionable tasks, assign ownership, and monitor progress through dashboards.*
-
-- [x] **Implementation Workflow (Regulation Breakdown):**
-    - [x] Create a workflow tool that allows compliance managers to break down a regulation into specific requirements and actionable tasks.
-    - [x] Link these tasks to existing compliance controls or create new ones.
-- [x] **Task Assignment and Ownership:**
-    - [x] Develop a system for assigning tasks to individuals or teams.
-    - [x] Implement notifications and reminders for task owners.
-    - [x] Create a UI for users to view and update their assigned tasks. (Kanban board implemented)
-- [x] **Reporting and Dashboards:**
-    - [x] Enhance the compliance dashboard to track the status of regulatory implementation tasks.
-    - [x] Develop reports showing progress, bottlenecks, and ownership.
-- [ ] **Feedback Loop and Continuous Improvement:**
-    - [ ] Implement a feedback mechanism where task owners can report issues or suggest improvements to the implementation plan.
-    - [ ] Use this feedback to refine AI models and improve the classification and breakdown process over time.
-
-### **Phase 4: Advanced Analytics and Integrations**
-*Goal: Enhance the platform with advanced reporting, trend analysis, and external system integrations.*
-
-- [ ] **Compliance Analytics & Trend Analysis:**
-    - [ ] Develop AI-powered guidance and trend analysis based on regulatory changes.
-    - [ ] Create a timeline view to visualize a regulation's history and amendments.
-- [ ] **External System Integration (e.g., SharePoint):**
-    - [ ] Build an integration to sync intake records and their status with external trackers like a SharePoint list, if required by an organization.
-- [ ] **Automated Reporting:**
-    - [ ] Implement automated generation and export of compliance reports for auditors and executives.
 
 ---
 
@@ -149,6 +122,32 @@ This section outlines areas for further enhancement and polish based on the curr
 ### **Reporting & Analytics**
 - **Advanced Dashboard Views**: Expand the compliance dashboard with more detailed reports, filtering options (by framework, user, date range), and user-specific views.
 - **Customizable Reports**: Allow users to create and save custom reports based on various compliance data points.
+
+### **Active Tables Enhancements**
+- **Editable Cells**: Allow users to manually edit cells in the Active Tables view (except for the Regulation title) after AI extraction. This enables users to refine or add information before exporting.
+- **Real-time Extraction Status**: Implement status tracking (Queued, Processing, Completed) for AI extractions with real-time UI updates via Turbo Streams.
+
+---
+
+## ⚖️ **Legal & Compliance Enhancements (Roadmap)**
+
+### **1. The "Golden Thread" of Traceability**
+- [ ] **Policy Management Module**: Create `Policy` model with linking to `Regulation` citations.
+- [ ] **Gap Analysis**: Visual view showing Regulations with no linked Policies.
+- [ ] **Evidence Request Workflow**: Secure upload portal for non-users (auditors/contractors).
+
+### **2. Collaboration & "Redlining"**
+- [ ] **Granular Commenting**: Comment on specific lines of Regulation/Policy text.
+- [ ] **Visual Redlining (Diff View)**: Side-by-side redline of Regulation changes (Old vs. New).
+- [ ] **Approval Chains**: Multi-stage approvals (Draft -> Legal -> CISO -> Board).
+
+### **3. Audit & Assurance**
+- [ ] **Immutable Audit Logs**: User-facing audit trail for every object.
+- [ ] **Snapshotting**: Point-in-time compliance snapshots for audits.
+
+### **4. Intelligence & Reporting**
+- [ ] **Board-Ready Reports**: One-click executive summary PDF generation.
+- [ ] **Regulatory Horizon Scanning**: AI-driven impact assessment for new regulations.
 
 ---
 

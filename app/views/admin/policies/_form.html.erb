@@ -1,0 +1,58 @@
+<%= form_with(model: [:admin, policy], class: "space-y-8 divide-y divide-gray-200") do |form| %>
+  <div class="space-y-8 divide-y divide-gray-200">
+    <div>
+      <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+        <div class="sm:col-span-4">
+          <%= form.label :title, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= form.text_field :title, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+          </div>
+        </div>
+
+        <div class="sm:col-span-6">
+          <%= form.label :description, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= form.text_area :description, rows: 3, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+          </div>
+          <p class="mt-2 text-sm text-gray-500">Brief summary of the policy's purpose.</p>
+        </div>
+
+        <div class="sm:col-span-6">
+          <%= form.label :file, "Upload Policy Document (PDF or Word)", class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= form.file_field :file, accept: ".pdf,.docx", class: "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" %>
+          </div>
+          <p class="mt-2 text-sm text-gray-500">Uploading a file will automatically extract text to the content area below.</p>
+        </div>
+
+        <div class="sm:col-span-6">
+          <%= form.label :content, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= form.rich_text_area :content, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm min-h-[300px]" %>
+          </div>
+        </div>
+
+        <div class="sm:col-span-3">
+          <%= form.label :status, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= form.select :status, Policy.statuses.keys.map { |s| [s.humanize, s] }, {}, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+          </div>
+        </div>
+
+        <div class="sm:col-span-3">
+          <%= form.label :effective_date, class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= form.date_field :effective_date, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pt-5">
+    <div class="flex justify-end">
+      <%= link_to "Cancel", admin_policies_path, class: "rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" %>
+      <%= form.submit class: "ml-3 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" %>
+    </div>
+  </div>
+<% end %>

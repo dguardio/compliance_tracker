@@ -75,6 +75,9 @@ gem 'rss'
 # PDF Processing
 gem 'pdf-forms', '~> 1.4'
 gem 'pdf-reader', '~> 2.11'
+gem 'wicked_pdf', '~> 2.8'
+gem 'wkhtmltopdf-binary', '~> 0.12'
+gem 'diffy', '~> 3.4'
 
 # Document Preview and Processing
 gem 'activestorage-office-previewer', '~> 0.1' # Office file previews
@@ -173,3 +176,6 @@ group :test do
   gem 'selenium-webdriver', '~> 4.10'
   gem 'webdrivers', '~> 5.3'
 end
+
+gem "caxlsx", "~> 4.4"
+gem "caxlsx_rails", "~> 0.6.4"

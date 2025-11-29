@@ -1,9 +1,10 @@
 class Document < ApplicationRecord
-  acts_as_tenant(:organization)
+  acts_as_tenant(:organization, optional: true)
   has_paper_trail
 
   # Associations
-  belongs_to :organization
+  belongs_to :organization, optional: true
+  belongs_to :regulation, optional: true
   belongs_to :compliance_framework, optional: true
   belongs_to :compliance_requirement, optional: true
   belongs_to :compliance_control, optional: true
@@ -18,6 +19,7 @@ class Document < ApplicationRecord
   validates :category, presence: true
   validates :status, presence: true
   validates :uploaded_by, presence: true
+  validates :organization, presence: true, unless: -> { regulation.present? }
   validates :file, presence: true, on: :create
   validate :file_type_allowed
   validate :file_size_limit
@@ -171,7 +173,7 @@ class Document < ApplicationRecord
   def days_until_expiry
     return nil unless expires_at
 
-    (expires_at - Date.current).to_i
+    (expires_at.to_date - Date.current).to_i
   end
 
   def compliance_hierarchy
@@ -399,7 +401,7 @@ class Document < ApplicationRecord
   private
 
   def update_version
-    self.version += 1
+    self.version = (self.version || 0) + 1
   end
 
   def check_expiration

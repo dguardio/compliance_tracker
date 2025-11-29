@@ -10,8 +10,8 @@ class SourceDiscoveryAgent
       Ensure the output is only the JSON array, with no other text or explanation.
     PROMPT
 
-    response = RubyLLM::Client.new.chat(prompt: prompt)
-    parse_response(response)
+    response = RubyLLM.chat.ask(prompt)
+    parse_response(response.content)
   end
 
   private

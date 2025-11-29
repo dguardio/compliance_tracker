@@ -25,3 +25,5 @@ pin "chart.js/auto", to: "https://ga.jspm.io/npm:chart.js@4.4.0/auto/auto.js"
 pin "@kurkle/color", to: "https://ga.jspm.io/npm:@kurkle/color@0.3.2/dist/color.esm.js"
 
 
+pin "trix"
+pin "@rails/actiontext", to: "actiontext.esm.js"

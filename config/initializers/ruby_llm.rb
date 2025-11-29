@@ -20,7 +20,7 @@ if gemini_api_key.blank?
 else
   RubyLLM.configure do |config|
     config.gemini_api_key = gemini_api_key
-    config.default_model = 'gemini-1.5-pro-latest'
+    config.default_model = 'gemini-2.0-flash-001'
   end
   
   Rails.logger.info 'LLM service configured with Google Gemini as the provider.'

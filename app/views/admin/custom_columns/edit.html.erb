@@ -1,0 +1,8 @@
+<div class="w-full">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="font-bold text-4xl">Edit Custom Column</h1>
+    <%= link_to "Back", admin_custom_columns_path, class: "rounded-lg py-3 px-5 bg-gray-600 text-white inline-block font-medium" %>
+  </div>
+
+  <%= render "form", custom_column: @custom_column %>
+</div>

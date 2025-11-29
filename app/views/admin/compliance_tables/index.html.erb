@@ -1,0 +1,455 @@
+<div class="flex h-screen bg-gray-100 overflow-hidden" data-controller="ai-assistant modal">
+  <!-- Sidebar Filters -->
+
+
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <header class="bg-white border-b border-gray-200 py-4 px-6">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-4">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">Compliance Table</h1>
+            <p class="text-sm text-gray-500 mt-1">Showing <%= @regulations.count %> results</p>
+          </div>
+          
+          <!-- Search Bar -->
+          <div class="w-96">
+            <%= search_form_for @q, url: admin_compliance_tables_path, method: :get do |f| %>
+              <div class="relative rounded-md shadow-sm">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <%= f.search_field :title_cont, 
+                    class: "block w-full rounded-md border-0 py-1.5 pl-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6",
+                    placeholder: "Search regulations..." %>
+                <!-- Preserve custom columns in search -->
+                <% @selected_column_ids.each do |id| %>
+                  <%= hidden_field_tag "custom_column_ids[]", id %>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        <div class="flex items-center space-x-3">
+          <!-- Actions -->
+          <div class="flex items-center space-x-2">
+            <%= link_to admin_compliance_tables_path(format: :xlsx, custom_column_ids: @selected_column_ids, q: params[:q]), 
+                class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" do %>
+              Export Excel
+            <% end %>
+
+            <%= button_to extract_all_admin_custom_columns_path, 
+                params: { custom_column_ids: @selected_column_ids },
+                method: :post,
+                class: "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" do %>
+              Run AI Extraction
+            <% end %>
+            
+            <button type="button" 
+                    data-action="click->modal#open"
+                    data-modal-target-param="saveTemplateModal"
+                    class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+              Save View
+            </button>
+          </div>
+
+          <!-- Column Selector Dropdown -->
+          <div class="relative" data-controller="dropdown">
+            <button type="button" 
+                    data-action="click->dropdown#toggle"
+                    class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+              Columns
+              <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+              </svg>
+            </button>
+
+            <div data-dropdown-target="menu" class="hidden absolute right-0 z-20 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+              <%= form_with url: admin_compliance_tables_path, method: :get, class: "p-4" do |f| %>
+                <div class="mb-4 max-h-60 overflow-y-auto space-y-2">
+                  <% @available_columns.each do |column| %>
+                    <div class="flex items-start">
+                      <div class="flex h-5 items-center">
+                        <%= check_box_tag "custom_column_ids[]", column.id, @selected_column_ids.include?(column.id.to_s), id: "col_#{column.id}", class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" %>
+                      </div>
+                      <div class="ml-3 text-sm">
+                        <label for="col_<%= column.id %>" class="font-medium text-gray-700"><%= column.name %></label>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+                <%= f.submit "Update View", class: "w-full rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+              <% end %>
+            </div>
+          </div>
+          <button type="button" 
+                  data-action="click->modal#open"
+                  data-modal-target-param="newColumnModal"
+                  class="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500">
+            + New Column
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Data Grid -->
+    <div class="flex-1 overflow-hidden">
+      <div class="h-full overflow-x-auto overflow-y-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50 sticky top-0 z-10">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Regulation</th>
+              <% @custom_columns.each do |column| %>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider whitespace-nowrap bg-indigo-50 group">
+                  <div class="flex items-center justify-between space-x-2">
+                    <span><%= column.name %></span>
+                    <%= link_to admin_compliance_tables_path(custom_column_ids: @selected_column_ids - [column.id.to_s], q: params[:q]), 
+                        class: "text-indigo-400 hover:text-indigo-900 opacity-0 group-hover:opacity-100 transition-opacity",
+                        title: "Remove column" do %>
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    <% end %>
+                  </div>
+                </th>
+              <% end %>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% if @regulations.any? %>
+              <% @regulations.each do |regulation| %>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-6 py-4 text-sm font-medium text-gray-900">
+                    <%= link_to regulation.title, admin_regulation_path(regulation), class: "text-blue-600 hover:text-blue-800 block max-w-md truncate", title: regulation.title %>
+                    <div class="text-xs text-gray-500 mt-1">
+                      <%= regulation.agency %> • <%= regulation.jurisdiction %>
+                    </div>
+                  </td>
+                   <!-- Custom Columns -->
+                 <% @custom_columns.each do |column| %>
+                   <% extraction = regulation.regulation_extractions.find { |e| e.custom_column_id == column.id } %>
+                   <td class="px-6 py-4 text-sm text-gray-900 bg-indigo-50/30" data-controller="expandable-cell">
+                     <% if extraction %>
+                       <div class="flex items-center justify-between">
+                         <div class="flex-1">
+                           <%= extraction.display_value&.truncate(50) || 'Not extracted' %>
+                           <% if extraction.confidence_score %>
+                             <% color = extraction.confidence_score > 0.8 ? 'green' : (extraction.confidence_score > 0.5 ? 'yellow' : 'red') %>
+                             <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-<%= color %>-100 text-<%= color %>-800">
+                               <%= (extraction.confidence_score * 100).to_i %>%
+                             </span>
+                           <% end %>
+                         </div>
+                         <button type="button" 
+                                 data-action="click->expandable-cell#toggle"
+                                 class="ml-2 text-indigo-600 hover:text-indigo-900">
+                           <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                           </svg>
+                         </button>
+                       </div>
+                       <!-- Expandable Details -->
+                       <div data-expandable-cell-target="details" class="hidden mt-3 p-3 bg-white border border-indigo-200 rounded-md shadow-sm">
+                         <div class="space-y-3">
+                           <div>
+                             <p class="text-xs font-semibold text-gray-700 uppercase">Full Answer</p>
+                             <p class="mt-1 text-sm text-gray-900"><%= extraction.extracted_value %></p>
+                           </div>
+                           <% if extraction.reasoning.present? %>
+                             <div>
+                               <p class="text-xs font-semibold text-gray-700 uppercase">AI Reasoning</p>
+                               <p class="mt-1 text-sm text-gray-600"><%= extraction.reasoning %></p>
+                             </div>
+                           <% end %>
+                           <% if extraction.source_text.present? %>
+                             <div>
+                               <p class="text-xs font-semibold text-gray-700 uppercase">Source Text</p>
+                               <p class="mt-1 text-sm text-gray-600 italic">"<%= extraction.source_text.truncate(200) %>"</p>
+                             </div>
+                           <% end %>
+                           <% if extraction.confidence_score %>
+                             <div>
+                               <p class="text-xs font-semibold text-gray-700 uppercase">Confidence</p>
+                               <div class="mt-1 flex items-center">
+                                 <div class="flex-1 bg-gray-200 rounded-full h-2">
+                                   <div class="bg-indigo-600 h-2 rounded-full" style="width: <%= (extraction.confidence_score * 100).round %>%"></div>
+                                 </div>
+                                 <span class="ml-2 text-sm text-gray-600"><%= (extraction.confidence_score * 100).round %>%</span>
+                               </div>
+                             </div>
+                           <% end %>
+                         </div>
+                       </div>
+                     <% else %>
+                       <span class="text-gray-400 italic">Not extracted</span>
+                     <% end %>
+                   </td>
+                 <% end %>
+               </tr>
+            <% end %>
+            <% else %>
+              <tr>
+                <td colspan="<%= 1 + @custom_columns.count %>" class="px-6 py-12 text-center">
+                  <div class="flex flex-col items-center justify-center">
+                    <svg class="h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Regulations Added</h3>
+                    <p class="text-sm text-gray-500 mb-4 max-w-md">
+                      Your organization hasn't added any regulations yet. Add regulations to your organization to start analyzing them in Active Tables.
+                    </p>
+                    <%= link_to admin_organization_regulations_path, class: "inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" do %>
+                      <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                      </svg>
+                      Add Regulations to Organization
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Footer Pagination -->
+    <div class="bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between sm:px-6">
+       <%= paginate @regulations %>
+    </div>
+  </div>
+  
+  <!-- AI Assistant Sidebar -->
+  <div data-ai-assistant-target="sidebar" class="hidden w-96 bg-white border-l border-gray-200 flex flex-col">
+    <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+      <h2 class="text-lg font-bold text-gray-900">AI Assistant</h2>
+      <button type="button" data-action="click->ai-assistant#toggleSidebar" class="text-gray-400 hover:text-gray-600">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Chat Messages -->
+    <div data-ai-assistant-target="messages" class="flex-1 overflow-y-auto p-4 space-y-4">
+      <div class="text-sm text-gray-500 text-center">
+        Ask me anything about the regulations you're viewing!
+      </div>
+    </div>
+    
+    <!-- Input Form -->
+    <div class="p-4 border-t border-gray-200">
+      <form data-action="submit->ai-assistant#sendMessage" class="flex space-x-2">
+        <input type="text" 
+               data-ai-assistant-target="input"
+               placeholder="Ask a question..."
+               class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" />
+        <button type="submit" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+          Send
+        </button>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Floating Assistant Button -->
+  <button type="button" 
+          data-action="click->ai-assistant#toggleSidebar"
+          class="fixed bottom-6 right-6 bg-indigo-600 text-white rounded-full p-4 shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+    </svg>
+  </button>
+
+  <!-- New Column Modal -->
+  <div data-modal-target="newColumnModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" data-action="click->modal#close"></div>
+
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+      <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+        <div class="absolute top-0 right-0 pt-4 pr-4">
+          <button type="button" data-action="click->modal#close" class="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <span class="sr-only">Close</span>
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        <div class="sm:flex sm:items-start">
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+              Add Custom Column
+            </h3>
+            <div class="mt-2">
+              <p class="text-sm text-gray-500 mb-4">
+                Define a new column to extract specific information from regulations using AI, or choose from our Active Table templates below.
+              </p>
+
+              <!-- Active Table Templates Section -->
+              <% if @workflow_templates.any? %>
+                <div class="mb-6">
+                  <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Active Table Templates</h4>
+                  <div class="space-y-4 max-h-60 overflow-y-auto pr-2">
+                    <% @workflow_templates.each do |category, templates| %>
+                      <div>
+                        <h5 class="text-xs font-medium text-gray-400 mb-2"><%= category %> Templates</h5>
+                        <div class="grid grid-cols-1 gap-3">
+                          <% templates.each do |template| %>
+                            <div class="relative rounded-lg border border-gray-300 bg-white px-3 py-3 shadow-sm flex items-start space-x-3 hover:border-indigo-500 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                              <div class="flex-1 min-w-0">
+                                <span class="absolute inset-0" aria-hidden="true"></span>
+                                <p class="text-sm font-medium text-gray-900"><%= template.name %></p>
+                                <p class="text-xs text-gray-500 mt-1"><%= template.description %></p>
+                                <div class="mt-2 flex flex-wrap gap-1">
+                                  <% template.columns.first(3).each do |col| %>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                      <%= col['name'] %>
+                                    </span>
+                                  <% end %>
+                                  <% if template.columns.count > 3 %>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                      +<%= template.columns.count - 3 %> more
+                                    </span>
+                                  <% end %>
+                                </div>
+                              </div>
+                              <%= button_to apply_admin_table_template_path(template), 
+                                  params: { current_selection: @selected_column_ids },
+                                  method: :post,
+                                  class: "inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 relative z-10" do %>
+                                Apply Template
+                              <% end %>
+                            </div>
+                          <% end %>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+                <div class="relative mb-6">
+                  <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-gray-300"></div>
+                  </div>
+                  <div class="relative flex justify-center">
+                    <span class="px-2 bg-white text-sm text-gray-500">Or create custom column</span>
+                  </div>
+                </div>
+              <% end %>
+              
+              <%= form_with model: CustomColumn.new, url: admin_custom_columns_path, local: true, data: { turbo: false } do |f| %>
+                <% @selected_column_ids.each do |id| %>
+                  <%= hidden_field_tag "current_selection[]", id %>
+                <% end %>
+                <%= hidden_field_tag :redirect_to, request.original_url %>
+                
+                <div class="space-y-4">
+                  <div>
+                    <%= f.label :name, class: "block text-sm font-medium text-gray-700" %>
+                    <%= f.text_field :name, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", placeholder: "e.g., Penalties" %>
+                  </div>
+                  
+                  <div>
+                    <%= f.label :prompt, "Extraction Prompt", class: "block text-sm font-medium text-gray-700" %>
+                    <%= f.text_area :prompt, rows: 3, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", placeholder: "e.g., What are the penalties for non-compliance?" %>
+                  </div>
+                  
+                  <div>
+                    <%= f.label :column_type, class: "block text-sm font-medium text-gray-700" %>
+                    <%= f.select :column_type, [['Text', 'text'], ['Number', 'number'], ['Date', 'date'], ['Boolean', 'boolean']], {}, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+                  </div>
+                  
+                  <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                    <%= f.submit "Create Column", class: "w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm" %>
+                    <button type="button" data-action="click->modal#close" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm">
+                      Cancel
+                    </button>
+
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- Save Template Modal -->
+  <div data-modal-target="saveTemplateModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" data-action="click->modal#close"></div>
+
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+      <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+        <div class="absolute top-0 right-0 pt-4 pr-4">
+          <button type="button" data-action="click->modal#close" class="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <span class="sr-only">Close</span>
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        <div class="sm:flex sm:items-start">
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+              Save View as Template
+            </h3>
+            <div class="mt-2">
+              <p class="text-sm text-gray-500 mb-4">
+                Save your current column configuration as a reusable template.
+              </p>
+              
+              <%= form_with model: TableTemplate.new, url: admin_table_templates_path, local: true, data: { turbo: false } do |f| %>
+                <% @selected_column_ids.each do |id| %>
+                  <%= hidden_field_tag "column_ids[]", id %>
+                <% end %>
+                
+                <div class="space-y-4">
+                  <div>
+                    <%= f.label :name, class: "block text-sm font-medium text-gray-700" %>
+                    <%= f.text_field :name, required: true, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", placeholder: "e.g., My Risk Analysis" %>
+                  </div>
+                  
+                  <div>
+                    <%= f.label :description, class: "block text-sm font-medium text-gray-700" %>
+                    <%= f.text_area :description, rows: 2, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", placeholder: "Optional description" %>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Save as</label>
+                    <div class="mt-2 space-y-2">
+                      <div class="flex items-center">
+                        <%= radio_button_tag :scope, 'personal', true, class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" %>
+                        <label for="scope_personal" class="ml-3 block text-sm font-medium text-gray-700">
+                          Personal Template (Only visible to you)
+                        </label>
+                      </div>
+                      <div class="flex items-center">
+                        <%= radio_button_tag :scope, 'organization', false, class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" %>
+                        <label for="scope_organization" class="ml-3 block text-sm font-medium text-gray-700">
+                          Organization Template (Visible to everyone in <%= current_user.organization.name %>)
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                    <%= f.submit "Save Template", class: "w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm" %>
+                    <button type="button" data-action="click->modal#close" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm">
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

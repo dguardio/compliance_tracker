@@ -1,0 +1,22 @@
+wb = xlsx_package.workbook
+
+wb.add_worksheet(name: "Compliance Table") do |sheet|
+  # Headers
+  headers = ["Regulation", "Agency", "Jurisdiction"]
+  @custom_columns.each do |column|
+    headers << column.name
+  end
+  sheet.add_row headers
+
+  # Data
+  @regulations.each do |regulation|
+    row = [regulation.title, regulation.agency, regulation.jurisdiction]
+    
+    @custom_columns.each do |column|
+      extraction = regulation.regulation_extractions.find { |e| e.custom_column_id == column.id }
+      row << (extraction&.extracted_value || "")
+    end
+    
+    sheet.add_row row
+  end
+end

@@ -6,7 +6,7 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
-
+    <%= stylesheet_link_tag "actiontext", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <link href="https://cdn.jsdelivr.net/npm/jsplumb@2.15.6/css/jsplumbtoolkit-defaults.min.css" rel="stylesheet">
     <%= javascript_importmap_tags %>
@@ -151,7 +151,8 @@
                   </button>
                   <div class="absolute left-0 top-full w-56 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                     <%= link_to "Compliance Frameworks", organization_compliance_frameworks_path(current_user.organization), class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                    <%= link_to "Regulation Library", admin_regulations_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
+                    <%= link_to "Regulation Library", admin_organization_regulations_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
+                    <%= link_to "Policy Management", admin_policies_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
                     <%= link_to "Documents", organization_documents_path(current_user.organization), class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
                   </div>
                 </div>

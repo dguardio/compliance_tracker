@@ -1,18 +1,62 @@
 Rails.application.routes.draw do
   namespace :admin do
+    resources :policies do
+      resources :policy_links, only: [:new, :create, :destroy]
+      resources :comments, only: [:create, :destroy]
+    end
     resources :regulations do
+      resources :comments, only: [:create, :destroy]
       collection do
         delete :bulk_delete
       end
       member do
-        get 'versions/:version_id', to: 'regulations#version', as: 'version'
+        get 'versions/:version_id', to: 'regulations#version', as: :version
+        get 'diff/:id', to: 'regulations#download_diff', as: :diff
+        get :workspace
+        get :evidence
       end
     end
-    resources :regulatory_data_sources do
-    collection do
-      delete :bulk_delete
+
+    resources :compliance_tables, only: [:index]
+    
+    resources :custom_columns do
+      collection do
+        post :extract_all
+      end
+      member do
+        post :extract
+        post :use_template
+      end
     end
-  end
+    
+    resources :table_templates, only: [:create] do
+      member do
+        post :apply
+      end
+    end
+    
+    resource :compliance_assistant, only: [] do
+      post :chat
+    end
+    
+    resources :organization_regulations, only: [:index, :create, :destroy] do
+      collection do
+        get :available
+      end
+      member do
+        patch :update_status
+      end
+    end
+    
+    resources :regulatory_data_sources do
+      collection do
+        delete :bulk_delete
+        get :discover
+        post :discover
+      end
+    end
+
+    resources :evidence, only: [:index]
   end
   devise_for :users
 
@@ -48,7 +92,9 @@ Rails.application.routes.draw do
         post :suggest_requirements
       end
       resources :compliance_requirements, only: %i[index show new create edit update destroy] do
+        resources :comments, only: [:create, :destroy]
         resources :compliance_controls, only: %i[index show new create edit update destroy] do
+          resources :comments, only: [:create, :destroy]
           member do
             get :assignment_form
             post :assign

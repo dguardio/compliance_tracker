@@ -11,7 +11,7 @@
 :scheduler:
   :schedule:
     scrape_regulations_job:
-      cron: '*/1 * * * *' # Runs every minute for testing
+      cron: '0 */12 * * *' # Runs every 12 hours
       class: ScrapeRegulationsJob
       queue: default
       description: "Scrapes all regulatory authorities for new and updated regulations."

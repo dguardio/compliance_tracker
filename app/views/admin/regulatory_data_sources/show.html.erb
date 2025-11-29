@@ -31,11 +31,63 @@
           </dd>
         </div>
         <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Settings</dt>
+          <dt class="text-sm font-medium text-gray-500">Sectors</dt>
           <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-            <pre class="bg-gray-100 p-3 rounded-md"><%= JSON.pretty_generate(@regulatory_data_source.settings) %></pre>
+            <% @regulatory_data_source.sectors.each do |sector| %>
+              <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"><%= sector %></span>
+            <% end %>
           </dd>
         </div>
+        <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Jurisdictions</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            <% @regulatory_data_source.jurisdictions.each do |jurisdiction| %>
+              <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"><%= jurisdiction %></span>
+            <% end %>
+          </dd>
+        </div>
+        <% if @regulatory_data_source.api? %>
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">API Configuration</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <div class="border border-gray-200 rounded-md overflow-hidden">
+                <dl class="divide-y divide-gray-200">
+                  <div class="px-4 py-3 bg-gray-50 sm:grid sm:grid-cols-3 sm:gap-4">
+                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Results Key</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @regulatory_data_source.settings['results_key'] %></dd>
+                  </div>
+                  <div class="px-4 py-3 bg-white sm:grid sm:grid-cols-3 sm:gap-4">
+                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Pagination Type</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @regulatory_data_source.settings['pagination_type']&.humanize %></dd>
+                  </div>
+                  <div class="px-4 py-3 bg-gray-50 sm:grid sm:grid-cols-3 sm:gap-4">
+                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Title Key</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @regulatory_data_source.settings['title_key'] %></dd>
+                  </div>
+                  <div class="px-4 py-3 bg-white sm:grid sm:grid-cols-3 sm:gap-4">
+                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Publication Date Key</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @regulatory_data_source.settings['publication_date_key'] %></dd>
+                  </div>
+                  <div class="px-4 py-3 bg-gray-50 sm:grid sm:grid-cols-3 sm:gap-4">
+                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">URL Key</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @regulatory_data_source.settings['url_key'] %></dd>
+                  </div>
+                  <div class="px-4 py-3 bg-white sm:grid sm:grid-cols-3 sm:gap-4">
+                    <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Full Text Key</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @regulatory_data_source.settings['full_text_key'].presence || '-' %></dd>
+                  </div>
+                </dl>
+              </div>
+            </dd>
+          </div>
+        <% else %>
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Settings</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <pre class="bg-gray-100 p-3 rounded-md overflow-x-auto"><%= JSON.pretty_generate(@regulatory_data_source.settings) %></pre>
+            </dd>
+          </div>
+        <% end %>
       </dl>
     </div>
   </div>

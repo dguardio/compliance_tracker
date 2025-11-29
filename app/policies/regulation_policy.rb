@@ -1,14 +1,14 @@
 class RegulationPolicy < ApplicationPolicy
   def index?
-    user.super_admin?
+    can?(:read, 'Regulation')
   end
 
   def show?
-    user.super_admin?
+    can?(:read, 'Regulation', record)
   end
 
   def create?
-    user.super_admin?
+    can?(:create, 'Regulation')
   end
 
   def new?
@@ -16,7 +16,7 @@ class RegulationPolicy < ApplicationPolicy
   end
 
   def update?
-    user.super_admin?
+    can?(:update, 'Regulation', record)
   end
 
   def edit?
@@ -24,14 +24,34 @@ class RegulationPolicy < ApplicationPolicy
   end
 
   def destroy?
-    user.super_admin?
+    can?(:destroy, 'Regulation', record)
   end
 
   def bulk_delete?
-    user.super_admin?
+    can?(:destroy, 'Regulation')
   end
 
   def version?
-    user.super_admin?
+    show?
+  end
+
+  def download_diff?
+    show?
+  end
+
+  def workspace?
+    show?
+  end
+
+  class Scope < Scope
+    def resolve
+      return scope.none unless user&.organization
+
+      if user.has_permission?(:read, 'Regulation')
+        scope.all
+      else
+        super
+      end
+    end
   end
 end

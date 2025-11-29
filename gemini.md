@@ -44,7 +44,7 @@ The project is a comprehensive, multi-tenant compliance management platform buil
 *   **Multiple Strategies**: It supports different `source_type`s, including:
     *   `web_scrape`: Can use either a specific CSS selector or an LLM for more robust link extraction, configured via the data source's `settings`.
     *   `rss`: Parses RSS feeds to find new regulation links.
-    *   `api`: A placeholder for future implementation of direct API ingestion.
+    *   `api`: **Implemented.** Supports generic JSON API ingestion with configurable field mapping and pagination via `RegulatoryDataSource` settings.
 *   **Admin Interface**: A new CRUD interface at `/admin/regulatory_data_sources` allows administrators to manage these configurations. It is accessible via a new "Admin" dropdown in the main navigation, which is only visible to super admins.
 
 ### AI Enrichment (formerly "Cube Tagging")
@@ -53,7 +53,8 @@ The project is a comprehensive, multi-tenant compliance management platform buil
     *   The `RegulationProcessorService` is triggered by the `ProcessRegulationJob` after a regulation is scraped.
     *   It uses an LLM to analyze the regulation's text and extract key metadata: `jurisdiction`, `agency`, `effective_date`, `summary`, `keywords`, `compliance_requirements_overview`, `potential_impacted_industries`, and `risk_level`.
     *   This data is used to populate both the top-level columns and the `metadata` JSONB field of the `Regulation` model.
-*   **Feature Set**: Based on this enriched data, the following features have been implemented:
+    *   **Segmentation & Classification**: The `RegulationProcessorService` now uses an LLM to segment full text into individual "Obligations" (Requirements) and classifies them by "Entity Type", "Topic", and "Risk Level".
+    *   **Data Drift**: The system now tracks `content_hash`, `effective_date`, and `agency` to detect changes and automatically create new `revision`s of regulations.
     1.  **Display**: The regulation `show` page in the admin section now displays the formatted AI-generated metadata.
     2.  **Search/Filter**: The admin `index` page for regulations now includes a comprehensive search and filter interface, allowing users to query by title, agency, jurisdiction, and keywords.
     3.  **Automation**: The `RegulationAutoAssignmentService` uses the `potential_impacted_industries` and `jurisdiction` metadata to automatically link new regulations to relevant organizations. Bugs in this existing service and its configuration have been fixed to make it operational.
@@ -76,6 +77,17 @@ The project is a comprehensive, multi-tenant compliance management platform buil
 *   **Task Assignment**: Compliance controls can now be assigned to individual users with a due date. Notifications are sent to assignees.
 *   **Task Management UI**: A "My Tasks" Kanban board provides a drag-and-drop interface for users to manage their assigned compliance controls and update their status.
 *   **Reporting & Dashboards**: The main dashboard has been enhanced with a new section for "Regulatory Task Implementation," displaying key metrics (total tasks, overdue, due soon) and a pie chart of tasks by status. A table of overdue tasks is also included.
+
+### Active Tables & Organization Regulation Management
+*   **Active Tables**: A dynamic tabular interface (`/admin/compliance_tables`) that allows users to analyze regulations using AI-extracted custom columns.
+    *   **Custom Columns**: Users can define columns with natural language prompts (e.g., "What are the penalties?"), and the system uses an LLM to extract the data from the regulation text.
+    *   **Inline Creation**: Custom columns can be created directly within the Active Tables view via a modal.
+*   **Organization Regulation Management**: A system for organizations to manage their own library of regulations (`/admin/organization_regulations`).
+    *   **Library Management**: Organizations can add/remove regulations from their library.
+    *   **Auto-Assignment**: Regulations are automatically assigned to organizations based on their compliance profile (jurisdiction, industry, etc.). These show as "System" added.
+    *   **Filtering**: Active Tables automatically filters to show only the regulations in the organization's library.
+    *   **Editable Cells (Planned)**: Future enhancement to allow users to manually edit extracted data cells before export.
+    *   **Real-time Status (Planned)**: Future enhancement to show "Thinking", "Processing", etc., in cells during AI extraction.
 
 ### Development Roadmap
 The immediate focus is on building the **Regulatory Change Management Workflow**, as detailed in `TODO.md`:
@@ -110,125 +122,50 @@ This section outlines areas for further enhancement and polish based on the curr
 ### **Error Handling & Robustness**
 - **Comprehensive Error Reporting**: Improve error reporting and user-facing messages for all new features, especially for form submissions and API interactions.
 - **Validation Feedback**: Enhance client-side and server-side validation feedback for forms.
+-   **Fixed Issues**:
+    -   Resolved `this` context binding issues in `WorkflowEditorController` by using arrow functions.
+    -   Fixed PDF export missing content by implementing server-side rendering (`HighlightedJsonRenderer`).
+    -   Fixed `NoMethodError` in Regulation views by correcting route helpers.
 
 ### **Authorization & Security**
 
-- **Pundit Policies**: Develop comprehensive Pundit policies for all new models and actions (e.g., `RegulationReview`, `WorkflowTemplate`, `WorkflowStep`, `ComplianceControl` assignment, `Task` management) to ensure granular access control.
+-   **Pundit Policies**: Comprehensive Pundit policies have been implemented for `Regulation`, `Policy`, and `Comment` models.
+    -   **Dynamic Permissions**: `RegulationPolicy` and `PolicyPolicy` now use the dynamic `Permission` model (via `can?` checks) instead of hardcoded roles.
+    -   **Multi-Tenancy**: `CommentPolicy` and `Admin::EvidenceController` have been secured to prevent cross-organization data leaks.
+    -   **Future Work**: Continue developing policies for remaining new models as they are added.
+
+### **Advanced Regulatory Data Ingestion Strategy**
+
+This strategy moves beyond simple scraping to a "Golden Source" and "Intelligence Layer" approach, ensuring high-quality, resilient data ingestion.
+
+#### **1. The "Golden Sources" (Official & Open APIs)**
+We prioritize official government APIs over scraping HTML, as they provide structured, reliable data.
+*   **United States**:
+    *   **Regulations.gov API**: Primary source for federal regulations, dockets, and comments.
+    *   **GovInfo API**: Source for the Federal Register and CFR in XML.
+    *   **OpenStates.org**: Aggregator for state-level legislation (GraphQL).
+*   **International**:
+    *   **legislation.gov.uk**: UK legislation in Akoma Ntoso XML.
+    *   **EUR-Lex**: EU law web services.
+    *   **WorldLII/AustLII**: Aggregators for global jurisdictions (bulk discovery).
+
+#### **2. The "Intelligence" Layer (AI/NLP)**
+Ingestion is not just downloading text; it is about extracting structured "Obligations".
+*   **Pipeline**:
+    1.  **Ingest**: Fetch data from API or Scraper.
+    2.  **Segment**: Break down full text into individual "Requirements" (Obligations) using AI.
+    3.  **Classify**: Tag each requirement with:
+        *   **Entity Type**: Who does this apply to?
+        *   **Topic/Risk**: What is the domain?
+        *   **Action**: What must be done (e.g., "Report", "Audit")?
+*   **Data Drift**: We treat regulations as versioned code (Git for Law), tracking `effective_date` and changes over time to prevent "drift".
+
+#### **3. Tech Stack & Architecture**
+*   **Current (Ruby)**: We are building the "Golden Source" capability within the existing Ruby stack (`HTTParty`, `Nokogiri`, `RubyLLM`) to maintain architectural consistency.
+*   **Future (Python)**: For complex, non-API sources, we may introduce **Juriscraper** (Python) and **Scrapy**.
+*   **Standardization**: We aim to map data to **Akoma Ntoso** (LegalDocML) standards where possible for interoperability.
+
+#### **4. Future Roadmap (Buy vs. Build)**
+*   **Commercial Data**: As the platform scales, we will consider licensing "base layer" data from providers like **vLex** (Iceberg API) to ensure global coverage without managing hundreds of scrapers.
+*   **Advanced NLP**: Fine-tuning **Legal-BERT** models for superior classification compared to generic LLMs.
 
-
-
-### **Advanced Regulatory Data Ingestion by Sector**
-
-
-
-This plan outlines a future refinement to the regulatory data ingestion process, moving from a source-specific approach to a more comprehensive, sector-based approach.
-
-
-
-**Phase 1: Discovery and Curation of Data Sources**
-
-
-
-1.  **Automated Source Discovery:**
-
-    *   Develop a "Source Discovery Agent" that uses web search and LLMs to find relevant regulatory bodies, government agencies, and other sources of regulatory information for a given sector and jurisdiction.
-
-    *   The agent would take a sector (e.g., "Healthcare", "Finance") and a jurisdiction (e.g., "USA", "EU") as input and return a list of potential data sources (websites, RSS feeds, API endpoints).
-
-    *   The agent would also attempt to identify the type of each source (e.g., `web_scrape`, `rss`, `api`).
-
-
-
-2.  **Source Curation and Management:**
-
-    *   Enhance the `RegulatoryDataSource` model to store more metadata about each source, such as the sectors and jurisdictions it covers.
-
-    *   Build a UI for administrators to review, approve, and curate the discovered data sources.
-
-    *   The UI would allow administrators to manually add, edit, and tag data sources with relevant sectors and jurisdictions.
-
-
-
-**Phase 2: Intelligent and Adaptive Data Ingestion**
-
-
-
-1.  **Generic Scraper with Adaptive Parsing:**
-
-    *   Refactor the `RegulatoryScraperService` to be more generic and adaptive.
-
-    *   Instead of relying on a specific CSS selector, the scraper would use an LLM to analyze the structure of a webpage and identify the relevant content to extract (e.g., the main body of a regulation, its title, publication date, etc.).
-
-    *   The scraper would be able to handle a wider variety of website layouts and structures without needing to be reconfigured for each source.
-
-
-
-2.  **Multi-Modal Data Ingestion:**
-
-    *   Extend the scraper to handle different types of content, including PDFs, Word documents, and other common formats.
-
-    *   Integrate with document processing libraries and services to extract text and metadata from these files.
-
-    *   For sources that provide APIs, develop a flexible API client that can be configured to work with different API specifications.
-
-
-
-**Phase 3: AI-Powered Processing and Enrichment**
-
-
-
-1.  **Sector and Topic Classification:**
-
-    *   Enhance the `RegulationProcessorService` to use an LLM to automatically classify each ingested regulation by sector, topic, and sub-topic.
-
-    *   The service would analyze the full text of the regulation and assign it to one or more predefined categories (e.g., "Healthcare > Medical Devices > FDA Regulations").
-
-    *   This would allow users to browse and search for regulations by sector and topic, without needing to know the specific source.
-
-
-
-2.  **Extraction of Key Information:**
-
-    *   Use an LLM to extract key information from each regulation, such as:
-
-        *   **Applicability:** Who the regulation applies to (e.g., specific industries, company sizes, etc.).
-
-        *   **Requirements:** The specific actions that need to be taken to comply with the regulation.
-
-        *   **Deadlines:** Any deadlines for compliance.
-
-        *   **Penalties:** The penalties for non-compliance.
-
-    *   This extracted information would be stored in a structured format in the database, making it easy to search and analyze.
-
-
-
-**Phase 4: Scalability, Monitoring, and Continuous Improvement**
-
-
-
-1.  **Scalable Architecture:**
-
-    *   Design the ingestion pipeline to be scalable and resilient.
-
-    *   Use a distributed task queue (like Sidekiq) to process the ingestion and processing jobs in parallel.
-
-    *   Implement robust error handling and retry mechanisms to handle failures gracefully.
-
-
-
-2.  **Monitoring and Alerting:**
-
-    *   Build a dashboard to monitor the health and performance of the ingestion pipeline.
-
-    *   The dashboard would show the status of each data source, the number of regulations being ingested, and any errors that have occurred.
-
-    *   Set up alerts to notify administrators of any failures or anomalies in the pipeline.
-
-
-
-3.  **Human-in-the-Loop Feedback:**
-
-    *   Build a UI for users to provide feedback on the accuracy of the AI-powered classification and information extraction.
-
-    *   This feedback would be used to fine-tune the LLM models and improve the accuracy of the system over time.

@@ -8,6 +8,7 @@ class ComplianceControl < ApplicationRecord
   belongs_to :assignee, class_name: 'User', optional: true
   has_many :risk_assessments, dependent: :destroy
   has_many :feedbacks, as: :feedbackable, dependent: :destroy
+  has_many :comments, as: :commentable, dependent: :destroy
 
   # Validations
   validates :name, presence: true, length: { minimum: 2, maximum: 200 }

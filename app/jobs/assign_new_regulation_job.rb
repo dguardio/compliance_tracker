@@ -3,6 +3,7 @@
 # Job to assign a newly processed regulation to all matching organizations.
 class AssignNewRegulationJob < ApplicationJob
   queue_as :default
+  retry_on StandardError, wait: :exponentially_longer, attempts: 10
 
   def perform(regulation_id)
     regulation = Regulation.find_by(id: regulation_id)

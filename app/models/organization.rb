@@ -195,6 +195,21 @@ class Organization < ApplicationRecord
   def regulations_without_framework
     organization_regulations.without_framework
   end
+  
+  def applicable_regulations
+    regulations.where(organization_regulations: { status: ['active', 'pending'] })
+  end
+  
+  def add_regulation(regulation, assigned_by:, notes: nil, priority: 0)
+    organization_regulations.create!(
+      regulation: regulation,
+      assigned_by_id: assigned_by.id,
+      assigned_at: Time.current,
+      notes: notes,
+      priority: priority,
+      status: 'pending'
+    )
+  end
 
   def available_providers
     Provider.available_for_organization(self)

@@ -22,6 +22,8 @@ class RegulationAutoAssignmentService
         organization.organization_regulations.create(
           regulation: reg,
           status: 'pending',
+          assigned_by_id: nil, # System assignment
+          assigned_at: Time.current,
           notes: 'Automatically assigned based on updated compliance profile.'
         )
         newly_assigned_regulations << reg
@@ -57,6 +59,8 @@ class RegulationAutoAssignmentService
         regulation: regulation
       ) do |new_org_reg|
         new_org_reg.status = 'pending'
+        new_org_reg.assigned_by_id = nil # System assignment
+        new_org_reg.assigned_at = Time.current
         new_org_reg.notes = 'Automatically assigned based on new regulation.'
       end
       

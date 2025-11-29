@@ -6,17 +6,22 @@ class Regulation < ApplicationRecord
   has_many :organization_regulations, dependent: :destroy
   has_many :organizations, through: :organization_regulations
   belongs_to :previous_version, class_name: 'Regulation', optional: true
+  has_many :regulation_extractions, dependent: :destroy
+  has_one :document, dependent: :destroy
+  has_many :comments, as: :commentable, dependent: :destroy
 
   # Validations
   validates :title, :agency, :jurisdiction, presence: true
   validates :full_text, presence: true
-  validates :version, numericality: { greater_than: 0 }
+  validates :revision, numericality: { greater_than: 0 }
 
   # Scopes
   scope :active, -> { where(status: 'active') }
   scope :by_agency, ->(agency) { where(agency: agency) }
   scope :by_jurisdiction, ->(jurisdiction) { where(jurisdiction: jurisdiction) }
   scope :by_type, ->(reg_type) { where(reg_type: reg_type) }
+  scope :for_organization, ->(org) { joins(:organization_regulations).where(organization_regulations: { organization_id: org.id }).where.not(organization_regulations: { status: 'archived' }) }
+  scope :available_for_organization, ->(org) { where.not(id: org.regulations.pluck(:id)) }
 
   # PgSearch Configuration
   pg_search_scope :search_by_all,

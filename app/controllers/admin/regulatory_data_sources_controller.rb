@@ -55,6 +55,18 @@ class Admin::RegulatoryDataSourcesController < ApplicationController
     redirect_to admin_regulatory_data_sources_url, notice: 'Selected data sources were successfully deleted.'
   end
 
+  def discover
+    authorize RegulatoryDataSource, :discover? # Authorize the action
+
+    if request.post?
+      sector = params[:sector]
+      jurisdiction = params[:jurisdiction]
+      @discovered_sources = SourceDiscoveryAgent.new.call(sector: sector, jurisdiction: jurisdiction)
+    end
+
+    # Renders discover.html.erb by default
+  end
+
   private
 
   def set_regulatory_data_source
@@ -66,6 +78,6 @@ class Admin::RegulatoryDataSourcesController < ApplicationController
   end
 
   def regulatory_data_source_params
-    params.require(:regulatory_data_source).permit(:name, :description, :source_type, :url, :status, :provider_id, settings: {})
+    params.require(:regulatory_data_source).permit(:name, :description, :source_type, :url, :status, :provider_id, sectors: [], jurisdictions: [], settings: {})
   end
 end

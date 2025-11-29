@@ -26,6 +26,9 @@ class RegulationProcessorService
     
     if regulation.update(update_attributes)
       Rails.logger.info "Successfully updated regulation ##{regulation.id} with AI-extracted metadata."
+      
+      # 4. Ensure a document is attached (downloaded or generated)
+      RegulationDocumentService.new.attach_document(regulation)
     else
       Rails.logger.error "Failed to update regulation ##{regulation.id}: #{regulation.errors.full_messages.join(', ')}"
     end
@@ -57,35 +60,38 @@ class RegulationProcessorService
     return {} if text.blank?
 
     prompt = <<~PROMPT
-      You are an expert in regulatory compliance. Your task is to extract key metadata from the following regulation text.
+      You are an expert in regulatory compliance. Your task is to analyze the following regulation text and extract key metadata and specific requirements.
+      
       Provide the output in a JSON format with the following keys:
       - jurisdiction: (e.g., "Federal", "California", "EU")
       - agency: (e.g., "EPA", "FDA", "SEC")
       - effective_date: (format YYYY-MM-DD, if available)
       - summary: (a concise summary of the regulation, max 200 words)
       - keywords: (an array of 5-10 relevant keywords)
-      - compliance_requirements_overview: (a brief overview of the main compliance obligations, max 150 words)
-      - potential_impacted_industries: (an array of industries most likely affected)
+      - sector: (e.g., "Healthcare", "Finance", "Technology")
+      - topic: (e.g., "Data Privacy", "Environmental Compliance", "Financial Reporting")
       - risk_level: (e.g., "Low", "Medium", "High")
+      - requirements: An array of objects, where each object represents a distinct obligation or requirement. Each object should have:
+        - title: Short title of the requirement.
+        - description: Detailed description of what must be done.
+        - entity_type: Who this requirement applies to (e.g., "All Companies", "Healthcare Providers").
+        - action_type: The type of action required (e.g., "Report", "Audit", "Policy Update").
+        - deadline: Specific deadline if applicable.
 
       Regulation Text:
       #{text}
     PROMPT
 
     begin
-      response = LLM.ask(prompt)
-      parsed_response = JSON.parse(response.content)
-      Rails.logger.info "LLM successfully extracted metadata for regulation."
-      parsed_response.deep_transform_keys!(&:underscore).symbolize_keys
-    rescue LLM::ApiError => e
-      Rails.logger.error "LLM API Error during metadata extraction: #{e.message}"
-      {} # Return empty hash on API error
-    rescue JSON::ParserError => e
-      Rails.logger.error "Failed to parse LLM response JSON: #{e.message}. Response: #{response.content}"
-      {} # Return empty hash on JSON parsing error
-    rescue StandardError => e
-      Rails.logger.error "An unexpected error occurred during LLM metadata extraction: #{e.message}"
-      {} # Catch any other unexpected errors
+      response = RubyLLM.chat.ask(prompt)
+      # Accommodate for the LLM sometimes returning JSON in a markdown block
+      content = response.content.gsub(/`{3}(json)?/, '').strip
+      parsed_response = JSON.parse(content)
+      Rails.logger.info "LLM successfully extracted metadata and requirements."
+      parsed_response.deep_transform_keys!(&:underscore).deep_symbolize_keys
+    rescue => e
+      Rails.logger.error "LLM API Error or JSON parsing error during metadata extraction: #{e.message}. Response: #{response&.content}"
+      {} # Return empty hash on error
     end
   end
 

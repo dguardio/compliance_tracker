@@ -10,9 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_11_14_162908) do
+ActiveRecord::Schema[7.1].define(version: 2025_11_28_172555) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "action_text_rich_texts", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "body"
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["record_type", "record_id", "name"], name: "index_action_text_rich_texts_uniqueness", unique: true
+  end
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -40,6 +50,25 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_14_162908) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "comments", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "commentable_type", null: false
+    t.bigint "commentable_id", null: false
+    t.text "content"
+    t.text "selected_text"
+    t.integer "start_index"
+    t.integer "end_index"
+    t.integer "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "comment_type", default: "comment"
+    t.text "suggested_text"
+    t.bigint "assignee_id"
+    t.index ["assignee_id"], name: "index_comments_on_assignee_id"
+    t.index ["commentable_type", "commentable_id"], name: "index_comments_on_commentable"
+    t.index ["user_id"], name: "index_comments_on_user_id"
   end
 
   create_table "compliance_controls", force: :cascade do |t|
@@ -98,6 +127,18 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_14_162908) do
     t.index ["organization_id"], name: "index_compliance_requirements_on_organization_id"
   end
 
+  create_table "custom_columns", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "name", null: false
+    t.text "prompt", null: false
+    t.string "column_type", default: "text"
+    t.boolean "is_template", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "name"], name: "index_custom_columns_on_user_id_and_name", unique: true
+    t.index ["user_id"], name: "index_custom_columns_on_user_id"
+  end
+
   create_table "departments", force: :cascade do |t|
     t.string "name"
     t.string "slug"
@@ -114,7 +155,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_14_162908) do
     t.text "description"
     t.string "category"
     t.integer "status", default: 0
-    t.bigint "organization_id", null: false
+    t.bigint "organization_id"
     t.bigint "compliance_framework_id"
     t.bigint "compliance_requirement_id"
     t.bigint "compliance_control_id"
@@ -126,12 +167,14 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_14_162908) do
     t.jsonb "settings", default: {}
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "regulation_id"
     t.index ["approved_by_id"], name: "index_documents_on_approved_by_id"
     t.index ["category"], name: "index_documents_on_category"
     t.index ["compliance_control_id"], name: "index_documents_on_compliance_control_id"
     t.index ["compliance_framework_id"], name: "index_documents_on_compliance_framework_id"
     t.index ["compliance_requirement_id"], name: "index_documents_on_compliance_requirement_id"
     t.index ["organization_id"], name: "index_documents_on_organization_id"
+    t.index ["regulation_id"], name: "index_documents_on_regulation_id"
     t.index ["settings"], name: "index_documents_on_settings", using: :gin
     t.index ["status"], name: "index_documents_on_status"
     t.index ["uploaded_by_id"], name: "index_documents_on_uploaded_by_id"
@@ -231,6 +274,29 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_14_162908) do
     t.index ["resource_type", "resource_id"], name: "index_permissions_on_resource_type_and_resource_id"
   end
 
+  create_table "policies", force: :cascade do |t|
+    t.string "title"
+    t.text "description"
+    t.integer "status"
+    t.date "effective_date"
+    t.bigint "organization_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_policies_on_organization_id"
+  end
+
+  create_table "policy_links", force: :cascade do |t|
+    t.bigint "policy_id", null: false
+    t.string "linkable_type", null: false
+    t.bigint "linkable_id", null: false
+    t.string "citation"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["linkable_type", "linkable_id"], name: "index_policy_links_on_linkable"
+    t.index ["policy_id"], name: "index_policy_links_on_policy_id"
+  end
+
   create_table "providers", force: :cascade do |t|
     t.string "name", null: false
     t.string "code", null: false
@@ -253,6 +319,20 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_14_162908) do
     t.index ["organization_id"], name: "index_providers_on_organization_id"
     t.index ["settings"], name: "index_providers_on_settings", using: :gin
     t.index ["status"], name: "index_providers_on_status"
+  end
+
+  create_table "regulation_extractions", force: :cascade do |t|
+    t.bigint "regulation_id", null: false
+    t.bigint "custom_column_id", null: false
+    t.text "extracted_value"
+    t.text "reasoning"
+    t.text "source_text"
+    t.float "confidence_score"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["custom_column_id"], name: "index_regulation_extractions_on_custom_column_id"
+    t.index ["regulation_id", "custom_column_id"], name: "index_reg_extractions_on_reg_and_column", unique: true
+    t.index ["regulation_id"], name: "index_regulation_extractions_on_regulation_id"
   end
 
   create_table "regulation_review_decisions", force: :cascade do |t|
@@ -294,14 +374,14 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_14_162908) do
     t.date "effective_date"
     t.date "publication_date"
     t.string "status"
-    t.integer "version", default: 1
+    t.integer "revision", default: 1
     t.bigint "previous_version_id"
     t.jsonb "full_text", default: {}
     t.jsonb "files", default: {}
     t.jsonb "metadata", default: {}
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["agency", "jurisdiction", "external_id", "version"], name: "idx_on_agency_jurisdiction_external_id_version_17f2981086", unique: true
+    t.index ["agency", "jurisdiction", "external_id", "revision"], name: "idx_on_agency_jurisdiction_external_id_revision_2bd25bff38", unique: true
     t.index ["external_id"], name: "index_regulations_on_external_id"
     t.index ["previous_version_id"], name: "index_regulations_on_previous_version_id"
   end
@@ -316,6 +396,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_14_162908) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "provider_id", null: false
+    t.jsonb "sectors", default: []
+    t.jsonb "jurisdictions", default: []
     t.index ["name"], name: "index_regulatory_data_sources_on_name", unique: true
     t.index ["provider_id"], name: "index_regulatory_data_sources_on_provider_id"
     t.index ["source_type"], name: "index_regulatory_data_sources_on_source_type"
@@ -358,6 +440,19 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_14_162908) do
     t.index ["name", "resource_type", "resource_id"], name: "index_roles_on_name_and_resource_type_and_resource_id"
     t.index ["organization_id"], name: "index_roles_on_organization_id"
     t.index ["resource_type", "resource_id"], name: "index_roles_on_resource"
+  end
+
+  create_table "table_templates", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.string "category"
+    t.jsonb "columns"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.bigint "organization_id"
+    t.index ["organization_id"], name: "index_table_templates_on_organization_id"
+    t.index ["user_id"], name: "index_table_templates_on_user_id"
   end
 
   create_table "teams", force: :cascade do |t|
@@ -468,6 +563,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_14_162908) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "comments", "users"
+  add_foreign_key "comments", "users", column: "assignee_id"
   add_foreign_key "compliance_controls", "compliance_requirements"
   add_foreign_key "compliance_controls", "organizations"
   add_foreign_key "compliance_controls", "users", column: "assignee_id"
@@ -475,11 +572,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_14_162908) do
   add_foreign_key "compliance_frameworks", "providers"
   add_foreign_key "compliance_requirements", "compliance_frameworks"
   add_foreign_key "compliance_requirements", "organizations"
+  add_foreign_key "custom_columns", "users"
   add_foreign_key "departments", "organizations"
   add_foreign_key "documents", "compliance_controls"
   add_foreign_key "documents", "compliance_frameworks"
   add_foreign_key "documents", "compliance_requirements"
   add_foreign_key "documents", "organizations"
+  add_foreign_key "documents", "regulations"
   add_foreign_key "documents", "users", column: "approved_by_id"
   add_foreign_key "documents", "users", column: "uploaded_by_id"
   add_foreign_key "feedbacks", "users"
@@ -490,7 +589,11 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_14_162908) do
   add_foreign_key "organization_regulations", "regulations"
   add_foreign_key "organization_regulations", "users", column: "assigned_by_id"
   add_foreign_key "permissions", "organizations"
+  add_foreign_key "policies", "organizations"
+  add_foreign_key "policy_links", "policies"
   add_foreign_key "providers", "organizations"
+  add_foreign_key "regulation_extractions", "custom_columns"
+  add_foreign_key "regulation_extractions", "regulations"
   add_foreign_key "regulation_review_decisions", "regulation_reviews"
   add_foreign_key "regulation_review_decisions", "users"
   add_foreign_key "regulation_review_decisions", "workflow_steps"
@@ -506,6 +609,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_14_162908) do
   add_foreign_key "risk_assessments", "users", column: "assigned_to_id"
   add_foreign_key "risk_assessments", "users", column: "created_by_id"
   add_foreign_key "roles", "organizations"
+  add_foreign_key "table_templates", "organizations"
+  add_foreign_key "table_templates", "users"
   add_foreign_key "teams", "departments"
   add_foreign_key "units", "teams"
   add_foreign_key "users", "departments"

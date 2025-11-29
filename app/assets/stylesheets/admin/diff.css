@@ -1,0 +1,74 @@
+/* Diffy CSS Styles */
+.diff {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.diff ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.diff li {
+  padding: 0.125rem 0.5rem;
+  white-space: pre-wrap;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.diff li:last-child {
+  border-bottom: none;
+}
+
+/* Unchanged lines */
+.diff li.unchanged {
+  color: #374151;
+}
+
+/* Deletions (Red + Strikethrough) */
+.diff del, .diff li.del {
+  text-decoration: none; /* Reset default browser style */
+}
+
+.diff li.del {
+  background-color: #fef2f2; /* Light red background */
+  color: #b91c1c; /* Dark red text */
+}
+
+.diff del {
+  text-decoration: line-through;
+  background-color: #fee2e2; /* Slightly darker red for the specific deleted text */
+  color: #991b1b;
+}
+
+/* Additions (Green + Bold) */
+.diff ins, .diff li.ins {
+  text-decoration: none; /* Reset default browser style */
+}
+
+.diff li.ins {
+  background-color: #f0fdf4; /* Light green background */
+  color: #15803d; /* Dark green text */
+}
+
+.diff ins {
+  font-weight: bold;
+  background-color: #dcfce7; /* Slightly darker green for the specific added text */
+  color: #166534;
+}
+
+/* Line numbers (if Diffy includes them, usually requires specific config) */
+.diff .line-num {
+  display: inline-block;
+  width: 2rem;
+  color: #9ca3af;
+  text-align: right;
+  margin-right: 1rem;
+  user-select: none;
+}

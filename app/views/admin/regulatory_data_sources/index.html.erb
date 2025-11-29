@@ -1,7 +1,10 @@
 <div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-3xl font-bold text-gray-900">Regulatory Data Sources</h1>
-    <%= link_to 'New Data Source', new_admin_regulatory_data_source_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+    <div>
+      <%= link_to 'Discover New Sources', discover_admin_regulatory_data_sources_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+      <%= link_to 'New Data Source', new_admin_regulatory_data_source_path, class: "ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+    </div>
   </div>
 
   <%= form_with url: bulk_delete_admin_regulatory_data_sources_path, method: :delete, data: { confirm: "Are you sure you want to delete the selected data sources?" } do |form| %>
@@ -20,6 +23,8 @@
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source Type</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sectors</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jurisdictions</th>
             <th scope="col" class="relative px-6 py-3">
               <span class="sr-only">Actions</span>
             </th>
@@ -39,6 +44,8 @@
                   <%= regulatory_data_source.status.humanize %>
                 </span>
               </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= regulatory_data_source.sectors.join(', ') %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= regulatory_data_source.jurisdictions.join(', ') %></td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <%= link_to 'Show', [:admin, regulatory_data_source], class: "text-indigo-600 hover:text-indigo-900" %>
                 <%= link_to 'Edit', edit_admin_regulatory_data_source_path(regulatory_data_source), class: "ml-4 text-indigo-600 hover:text-indigo-900" %>

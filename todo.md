@@ -5,6 +5,7 @@
 *   **Phase 1: Automated Ingestion and AI-powered processing of regulations. (COMPLETED)**
 *   **Phase 2: Stakeholder Review and Decision Workflow. (COMPLETED)**
 *   **Phase 3: Implementation, Task Management, and Reporting. (COMPLETED)**
+*   **Phase 3.5: Security Hardening & Permissions Refactoring. (COMPLETED)**
 *   **Phase 4: Advanced Analytics and Integrations. (PENDING)**
 *   **Phase 5: Advanced Regulatory Data Ingestion by Sector (Future Refinement)**
 

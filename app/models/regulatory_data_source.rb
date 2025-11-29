@@ -10,4 +10,32 @@ class RegulatoryDataSource < ApplicationRecord
   validates :source_type, presence: true
   validates :url, presence: true
   validates :provider, presence: true
+  validate :validate_api_settings, if: :api?
+
+  before_validation :normalize_jsonb_attributes
+
+  def validate_api_settings
+    return unless settings.present?
+
+    required_keys = %w[results_key title_key url_key]
+    missing_keys = required_keys - settings.keys
+    
+    if missing_keys.any?
+      errors.add(:settings, "must contain the following keys for API source: #{missing_keys.join(', ')}")
+    end
+  end
+
+  private
+
+  def normalize_jsonb_attributes
+    self.sectors = normalize_attribute(sectors)
+    self.jurisdictions = normalize_attribute(jurisdictions)
+  end
+
+  def normalize_attribute(attr)
+    return [] unless attr.present?
+    return attr if attr.is_a?(Array)
+
+    attr.split(',').map(&:strip).reject(&:blank?).uniq
+  end
 end
