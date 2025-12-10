@@ -8,14 +8,19 @@ class Document < ApplicationRecord
   belongs_to :compliance_framework, optional: true
   belongs_to :compliance_requirement, optional: true
   belongs_to :compliance_control, optional: true
+  belongs_to :workflow_template, optional: true
   belongs_to :uploaded_by, class_name: 'User'
   belongs_to :approved_by, class_name: 'User', optional: true
 
+  has_many :evidence_request_documents, dependent: :destroy
+  has_many :evidence_requests, through: :evidence_request_documents
+
   # Active Storage for file attachments
-  has_one_attached :file
+  has_many :versions, class_name: 'DocumentVersion', dependent: :destroy
+  has_many_attached :files
 
   # Validations
-  validates :title, presence: true, length: { minimum: 2, maximum: 200 }
+  validates :title, presence: true
   validates :category, presence: true
   validates :status, presence: true
   validates :uploaded_by, presence: true

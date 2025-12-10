@@ -16,6 +16,112 @@
       </div>
     </div>
 
+    <!-- Getting Started Widget -->
+    <% if @onboarding_percent < 100 %>
+      <div class="px-4 py-6 sm:px-0">
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-lg font-medium text-gray-900">Getting Started</h2>
+              <span class="text-sm font-medium text-indigo-600"><%= @onboarding_percent %>% Complete</span>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="w-full bg-gray-200 rounded-full h-2.5 mb-6">
+              <div class="bg-indigo-600 h-2.5 rounded-full" style="width: <%= @onboarding_percent %>%"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <!-- Step 1: Org Structure -->
+              <div class="relative flex items-start">
+                <div class="flex items-center h-5">
+                  <% if @onboarding_progress[:org_structure] %>
+                    <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                  <% else %>
+                    <div class="h-5 w-5 border-2 border-gray-300 rounded-full"></div>
+                  <% end %>
+                </div>
+                <div class="ml-3 text-sm">
+                  <label class="font-medium text-gray-700 <%= 'line-through text-gray-400' if @onboarding_progress[:org_structure] %>">Setup Organization</label>
+                  <% unless @onboarding_progress[:org_structure] %>
+                    <p class="text-gray-500 text-xs mt-1"><%= link_to "Start Wizard", organization_setup_index_path(@organization), class: "text-indigo-600 hover:text-indigo-900" %></p>
+                  <% end %>
+                </div>
+              </div>
+
+              <!-- Step 2: Add Users -->
+              <div class="relative flex items-start">
+                <div class="flex items-center h-5">
+                  <% if @onboarding_progress[:users_added] %>
+                    <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                  <% else %>
+                    <div class="h-5 w-5 border-2 border-gray-300 rounded-full"></div>
+                  <% end %>
+                </div>
+                <div class="ml-3 text-sm">
+                  <label class="font-medium text-gray-700 <%= 'line-through text-gray-400' if @onboarding_progress[:users_added] %>">Add Users</label>
+                  <% unless @onboarding_progress[:users_added] %>
+                    <p class="text-gray-500 text-xs mt-1"><%= link_to "Invite Team", new_users_registration_path, class: "text-indigo-600 hover:text-indigo-900" %></p>
+                  <% end %>
+                </div>
+              </div>
+
+              <!-- Step 3: Import Framework -->
+              <div class="relative flex items-start">
+                <div class="flex items-center h-5">
+                  <% if @onboarding_progress[:framework_imported] %>
+                    <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                  <% else %>
+                    <div class="h-5 w-5 border-2 border-gray-300 rounded-full"></div>
+                  <% end %>
+                </div>
+                <div class="ml-3 text-sm">
+                  <label class="font-medium text-gray-700 <%= 'line-through text-gray-400' if @onboarding_progress[:framework_imported] %>">Import Framework</label>
+                  <% unless @onboarding_progress[:framework_imported] %>
+                    <p class="text-gray-500 text-xs mt-1"><%= link_to "Import CSV", import_organization_compliance_frameworks_path(@organization), class: "text-indigo-600 hover:text-indigo-900" %></p>
+                  <% end %>
+                </div>
+              </div>
+
+              <!-- Step 4: Create Policy -->
+              <div class="relative flex items-start">
+                <div class="flex items-center h-5">
+                  <% if @onboarding_progress[:policy_created] %>
+                    <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                  <% else %>
+                    <div class="h-5 w-5 border-2 border-gray-300 rounded-full"></div>
+                  <% end %>
+                </div>
+                <div class="ml-3 text-sm">
+                  <label class="font-medium text-gray-700 <%= 'line-through text-gray-400' if @onboarding_progress[:policy_created] %>">Create Policy</label>
+                  <% unless @onboarding_progress[:policy_created] %>
+                    <p class="text-gray-500 text-xs mt-1"><%= link_to "New Policy", new_organization_document_path(@organization, category: 'policy'), class: "text-indigo-600 hover:text-indigo-900" %></p>
+                  <% end %>
+                </div>
+              </div>
+
+              <!-- Step 5: Risk Assessment -->
+              <div class="relative flex items-start">
+                <div class="flex items-center h-5">
+                  <% if @onboarding_progress[:risk_assessed] %>
+                    <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                  <% else %>
+                    <div class="h-5 w-5 border-2 border-gray-300 rounded-full"></div>
+                  <% end %>
+                </div>
+                <div class="ml-3 text-sm">
+                  <label class="font-medium text-gray-700 <%= 'line-through text-gray-400' if @onboarding_progress[:risk_assessed] %>">Assess Risk</label>
+                  <% unless @onboarding_progress[:risk_assessed] %>
+                    <p class="text-gray-500 text-xs mt-1"><%= link_to "New Risk", new_organization_risk_assessment_path(@organization), class: "text-indigo-600 hover:text-indigo-900" %></p>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
     <!-- Regulatory Task Implementation -->
     <div class="px-4 py-6 sm:px-0">
       <h2 class="text-xl font-bold text-gray-900 mb-4">Regulatory Task Implementation</h2>
@@ -73,9 +179,11 @@
       </div>
       <div class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div class="bg-white overflow-hidden shadow rounded-lg">
-          <div class="p-5" data-controller="dashboard-chart" data-tasks-by-status="<%= @stats[:tasks_by_status].to_json %>">
-            <h3 class="text-lg font-medium text-gray-900">Tasks by Status</h3>
-            <canvas data-dashboard-chart-target="pieChart"></canvas>
+          <div class="p-5 h-64 relative" data-controller="dashboard-chart" data-tasks-by-status="<%= @stats[:tasks_by_status].to_json %>">
+            <h3 class="text-lg font-medium text-gray-900 absolute top-5 left-5">Tasks by Status</h3>
+            <div class="h-full w-full flex items-center justify-center pt-8">
+              <canvas data-dashboard-chart-target="pieChart"></canvas>
+            </div>
           </div>
         </div>
         <div class="bg-white overflow-hidden shadow rounded-lg">

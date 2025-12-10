@@ -51,6 +51,66 @@
     </div>
   </div>
 
+  <% if @document.workflow_template %>
+    <div class="mb-8">
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Approval Workflow: <%= @document.workflow_template.name %></h3>
+        <nav aria-label="Progress">
+          <ol role="list" class="overflow-hidden">
+            <li class="relative pb-10">
+              <div class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></div>
+              <!-- Draft Step (Always first) -->
+              <div class="relative flex items-start group">
+                <span class="h-9 flex items-center">
+                  <span class="relative z-10 w-8 h-8 flex items-center justify-center bg-indigo-600 rounded-full group-hover:bg-indigo-800">
+                    <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </span>
+                <span class="ml-4 min-w-0 flex flex-col">
+                  <span class="text-xs font-semibold tracking-wide uppercase text-indigo-600">Step 1</span>
+                  <span class="text-sm font-medium text-gray-900">Draft</span>
+                </span>
+              </div>
+            </li>
+
+            <% @document.workflow_template.workflow_steps.order(:created_at).each_with_index do |step, index| %>
+              <li class="relative pb-10">
+                <% unless index == @document.workflow_template.workflow_steps.count - 1 %>
+                  <div class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></div>
+                <% end %>
+                <div class="relative flex items-start group">
+                  <span class="h-9 flex items-center">
+                    <% if @document.approved? || (@document.needs_review? && index == 0) # Simplified logic %>
+                      <span class="relative z-10 w-8 h-8 flex items-center justify-center bg-indigo-600 rounded-full group-hover:bg-indigo-800">
+                        <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                      </span>
+                    <% elsif @document.needs_review? %>
+                       <span class="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-gray-300 rounded-full">
+                        <span class="h-2.5 w-2.5 bg-transparent rounded-full"></span>
+                      </span>
+                    <% else %>
+                      <span class="relative z-10 w-8 h-8 flex items-center justify-center bg-white border-2 border-gray-300 rounded-full">
+                        <span class="h-2.5 w-2.5 bg-transparent rounded-full"></span>
+                      </span>
+                    <% end %>
+                  </span>
+                  <span class="ml-4 min-w-0 flex flex-col">
+                    <span class="text-xs font-semibold tracking-wide uppercase text-gray-500">Step <%= index + 2 %></span>
+                    <span class="text-sm font-medium text-gray-900"><%= step.name %> (<%= step.role.name.titleize %>)</span>
+                  </span>
+                </div>
+              </li>
+            <% end %>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  <% end %>
+
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <!-- Main Content -->
     <div class="lg:col-span-2">

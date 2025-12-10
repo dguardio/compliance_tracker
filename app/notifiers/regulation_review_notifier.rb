@@ -7,6 +7,10 @@ class RegulationReviewNotifier < Noticed::Base
   param :regulation_review
   param :new_state
 
+  def title
+    "Regulation Review"
+  end
+
   # Define the message for the notification
   def message
     @regulation_review = params[:regulation_review]

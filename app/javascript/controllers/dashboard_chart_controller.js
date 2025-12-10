@@ -9,7 +9,7 @@ export default class extends Controller {
     const labels = Object.keys(data)
     const values = Object.values(data)
 
-    new Chart(this.pieChartTarget, {
+    this.chart = new Chart(this.pieChartTarget, {
       type: 'pie',
       data: {
         labels: labels.map(l => l.charAt(0).toUpperCase() + l.slice(1).replace(/_/g, ' ')),
@@ -40,5 +40,11 @@ export default class extends Controller {
         maintainAspectRatio: false
       }
     });
+  }
+
+  disconnect() {
+    if (this.chart) {
+      this.chart.destroy()
+    }
   }
 }

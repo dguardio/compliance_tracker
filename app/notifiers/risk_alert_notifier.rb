@@ -6,6 +6,10 @@ class RiskAlertNotifier < ApplicationNotifier
   param :risk_level
   param :alerted_by
 
+  def title
+    "Risk Alert"
+  end
+
   def message
     "#{params[:alerted_by].full_name} flagged '#{params[:item].name}' as #{params[:risk_level]} risk"
   end

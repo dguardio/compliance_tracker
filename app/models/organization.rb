@@ -18,6 +18,7 @@ class Organization < ApplicationRecord
   has_many :organization_regulations, dependent: :destroy
   has_many :regulations, through: :organization_regulations
   has_many :workflow_templates, dependent: :destroy
+  has_many :evidence_requests, dependent: :destroy
 
   # Validations
   validates :name, presence: true, length: { minimum: 2, maximum: 100 }

@@ -1,0 +1,101 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mb-6 flex items-center justify-between">
+      <%= link_to "← Back to Evidence Requests", organization_evidence_requests_path(@organization), class: "text-indigo-600 hover:text-indigo-900 font-medium" %>
+      <div class="flex space-x-3">
+        <%= link_to "Download All", download_all_organization_evidence_request_path(@organization, @evidence_request), class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        <%= link_to "Edit", edit_organization_evidence_request_path(@organization, @evidence_request), class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        <%= button_to "Delete", organization_evidence_request_path(@organization, @evidence_request), method: :delete, data: { confirm: "Are you sure?" }, class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
+      </div>
+    </div>
+
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900"><%= @evidence_request.title %></h3>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">
+          Status: <span class="font-medium text-gray-900"><%= @evidence_request.status.titleize %></span>
+        </p>
+      </div>
+      <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
+        <dl class="sm:divide-y sm:divide-gray-200">
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Description</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @evidence_request.description %></dd>
+          </div>
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Assigned To</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @evidence_request.assigned_to&.full_name || 'Unassigned' %></dd>
+          </div>
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Due Date</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><%= @evidence_request.due_date&.strftime('%B %d, %Y') %></dd>
+          </div>
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Compliance Context</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <% if @evidence_request.compliance_requirement %>
+                <div class="mb-2">
+                  <span class="font-medium">Requirement:</span> <%= @evidence_request.compliance_requirement.name %>
+                </div>
+              <% end %>
+              <% if @evidence_request.compliance_control %>
+                <div>
+                  <span class="font-medium">Control:</span> <%= @evidence_request.compliance_control.name %>
+                </div>
+              <% end %>
+            </dd>
+          </div>
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Attachments</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <ul role="list" class="border border-gray-200 rounded-md divide-y divide-gray-200">
+                <% if @evidence_request.files.attached? %>
+                  <% @evidence_request.files.each do |file| %>
+                    <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                      <div class="w-0 flex-1 flex items-center">
+                        <svg class="flex-shrink-0 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                        </svg>
+                        <span class="ml-2 flex-1 w-0 truncate"><%= file.filename %></span>
+                      </div>
+                      <div class="ml-4 flex-shrink-0">
+                        <%= link_to "Download", rails_blob_path(file, disposition: 'attachment'), class: "font-medium text-indigo-600 hover:text-indigo-500" %>
+                      </div>
+                    </li>
+                  <% end %>
+                <% else %>
+                  <li class="pl-3 pr-4 py-3 text-sm text-gray-500">No files attached</li>
+                <% end %>
+              </ul>
+            </dd>
+          </div>
+
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Linked Documents</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <ul role="list" class="border border-gray-200 rounded-md divide-y divide-gray-200">
+                <% if @evidence_request.documents.any? %>
+                  <% @evidence_request.documents.each do |doc| %>
+                    <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                      <div class="w-0 flex-1 flex items-center">
+                        <svg class="flex-shrink-0 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span class="ml-2 flex-1 w-0 truncate"><%= doc.title %></span>
+                      </div>
+                      <div class="ml-4 flex-shrink-0">
+                        <%= link_to "View", organization_document_path(@organization, doc), class: "font-medium text-indigo-600 hover:text-indigo-500" %>
+                      </div>
+                    </li>
+                  <% end %>
+                <% else %>
+                  <li class="pl-3 pr-4 py-3 text-sm text-gray-500">No documents linked</li>
+                <% end %>
+              </ul>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>

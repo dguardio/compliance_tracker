@@ -5,6 +5,10 @@ class ComplianceDeadlineNotifier < ApplicationNotifier
   param :requirement
   param :days_until_deadline
 
+  def title
+    "Compliance Deadline"
+  end
+
   def message
     "The compliance requirement '#{params[:requirement].name}' is due in #{params[:days_until_deadline]} days"
   end

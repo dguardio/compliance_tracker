@@ -10,6 +10,10 @@ class RegulatoryDataSource < ApplicationRecord
   validates :source_type, presence: true
   validates :url, presence: true
   validates :provider, presence: true
+  
+  encrypts :api_key
+
+
   validate :validate_api_settings, if: :api?
 
   before_validation :normalize_jsonb_attributes
@@ -23,6 +27,10 @@ class RegulatoryDataSource < ApplicationRecord
     if missing_keys.any?
       errors.add(:settings, "must contain the following keys for API source: #{missing_keys.join(', ')}")
     end
+  end
+
+  def auto_configure!
+    Regulatory::SmartConfiguratorService.new(self).call
   end
 
   private

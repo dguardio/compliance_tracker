@@ -3,18 +3,18 @@
 # The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
 
 # Clear existing data
-puts 'Clearing existing data...'
-User.destroy_all
-Organization.destroy_all
-Role.destroy_all
-Permission.destroy_all
-Provider.destroy_all
-ComplianceFramework.destroy_all
-ComplianceRequirement.destroy_all
-ComplianceControl.destroy_all
-Document.destroy_all
-Regulation.destroy_all
-OrganizationRegulation.destroy_all
+# puts 'Clearing existing data...'
+# User.destroy_all
+# Organization.destroy_all
+# Role.destroy_all
+# Permission.destroy_all
+# Provider.destroy_all
+# ComplianceFramework.destroy_all
+# ComplianceRequirement.destroy_all
+# ComplianceControl.destroy_all
+# Document.destroy_all
+# Regulation.destroy_all
+# OrganizationRegulation.destroy_all
 
 # Create organizations
 puts 'Creating organizations...'
@@ -176,6 +176,51 @@ orgs << Organization.create!(
   }
 )
 
+# Create Organization Structure (Departments, Teams, Units)
+puts 'Creating organization structure...'
+orgs.each do |org|
+  # Create Departments
+  %w[Legal IT Compliance Operations HR].each do |dept_name|
+    dept = Department.create!(
+      name: dept_name,
+      slug: dept_name.downcase,
+      organization: org,
+      status: 'active',
+      settings: {
+        budget_code: "BU-#{org.name[0..2].upcase}-#{dept_name[0..2].upcase}",
+        manager_email: "#{dept_name.downcase}.manager@#{org.domain}"
+      }
+    )
+    puts "  ✓ Created Department: #{dept.name} for #{org.name}"
+
+    # Create Teams for each Department
+    ['Security', 'Policy', 'Audit', 'General'].each do |team_suffix|
+      team_name = "#{dept.name} #{team_suffix}"
+      team = Team.create!(
+        name: team_name,
+        slug: team_name.parameterize,
+        department: dept,
+        status: 'active',
+        settings: {}
+      )
+      puts "    ✓ Created Team: #{team.name}"
+
+      # Create Units for IT Security Team
+      if team_name == 'IT Security'
+        %w[Network AppSecurity].each do |unit_name|
+          Unit.create!(
+            name: unit_name,
+            slug: unit_name.downcase,
+            team: team,
+            status: 'active',
+            settings: {}
+          )
+        end
+      end
+    end
+  end
+end
+
 # Create admin users for each organization
 puts 'Creating users...'
 users = []
@@ -227,11 +272,18 @@ orgs.each_with_index do |org, index|
 
   # Create regular users
   3.times do |user_index|
+    dept = Department.where(organization: org).sample
+    team = dept&.teams&.sample
+    unit = team&.units&.sample
+
     user = User.create!(
       email: "user#{index + 1}_#{user_index + 1}@example.com",
       password: 'password123',
       password_confirmation: 'password123',
       organization: org,
+      department: dept,
+      team: team,
+      unit: unit,
       settings: {
         first_name: Faker::Name.first_name,
         last_name: Faker::Name.last_name,
@@ -518,6 +570,51 @@ orgs.each do |org|
   )
 end
 
+# Create Regulatory Data Sources
+puts 'Creating regulatory data sources...'
+# SEC RSS Feed
+sec_provider = Provider.find_by(code: 'SEC')
+if sec_provider
+  RegulatoryDataSource.create!(
+    name: 'SEC Proposed Rules RSS',
+    description: 'RSS feed for SEC proposed rules and regulations',
+    source_type: 'rss',
+    url: 'https://www.sec.gov/rules/proposed.xml',
+    status: 'enabled',
+    provider: sec_provider,
+    jurisdictions: ['US'],
+    sectors: ['financial_services'],
+    settings: {
+      check_frequency: 'daily',
+      auto_import: true
+    }
+  )
+  puts "  ✓ Created Regulatory Data Source: SEC Proposed Rules RSS"
+end
+
+# FDA API (Simulation)
+user_provider = Provider.where(provider_type: 'organization_specific').first
+if user_provider
+  RegulatoryDataSource.create!(
+    name: 'Internal Compliance Feed',
+    description: 'Internal API for compliance updates',
+    source_type: 'api',
+    url: 'https://api.internal.compliance/v1/updates',
+    status: 'enabled',
+    provider: user_provider,
+    jurisdictions: ['US'],
+    sectors: ['healthcare'],
+    settings: {
+      auth_type: 'bearer',
+      api_key: 'test_key_123',
+      results_key: 'data',
+      title_key: 'title',
+      url_key: 'link'
+    }
+  )
+  puts "  ✓ Created Regulatory Data Source: Internal Compliance Feed"
+end
+
 # Create compliance frameworks
 puts 'Creating compliance frameworks...'
 frameworks = []
@@ -658,7 +755,7 @@ requirements.each do |requirement|
       compliance_requirement: requirement,
       control_type: %w[preventive detective corrective].sample,
       effectiveness: %w[low medium high].sample,
-      status: %w[active inactive draft].sample,
+      status: %w[implemented inactive draft].sample,
       organization: requirement.organization,
       settings: {
         control_category: %w[technical operational administrative].sample,
@@ -667,6 +764,112 @@ requirements.each do |requirement|
         implementation_date: Faker::Date.backward(days: 30)
       }
     )
+  end
+end
+
+# Create Workflows
+puts 'Creating workflows...'
+orgs.each do |org|
+  # Document Review Workflow
+  template = WorkflowTemplate.create!(
+    name: 'Standard Document Review',
+    description: 'Standard 3-step review process for compliance documents',
+    organization: org,
+    is_default: true
+  )
+  puts "  ✓ Created Workflow Template: #{template.name} for #{org.name}"
+
+  # Steps
+  draft_step = WorkflowStep.create!(
+    name: 'Draft',
+    step_type: 'initiation',
+    workflow_template: template,
+    role: Role.find_by(name: 'User', organization: org),
+    description: 'Initial draft creation',
+    position_x: 100,
+    position_y: 100
+  )
+
+  review_step = WorkflowStep.create!(
+    name: 'Manager Review',
+    step_type: 'review',
+    workflow_template: template,
+    role: Role.find_by(name: 'Compliance Manager', organization: org),
+    description: 'Review by compliance manager',
+    position_x: 300,
+    position_y: 100,
+    decision_options: ['approve', 'reject', 'request_changes']
+  )
+
+  approval_step = WorkflowStep.create!(
+    name: 'Final Approval',
+    step_type: 'approval',
+    workflow_template: template,
+    role: Role.find_by(name: 'Admin', organization: org),
+    description: 'Final sign-off',
+    position_x: 500,
+    position_y: 100,
+    decision_options: ['approve', 'reject']
+  )
+
+  # Transitions
+  WorkflowTransition.create!(workflow_step: draft_step, next_step: review_step, condition: 'submit')
+  WorkflowTransition.create!(workflow_step: review_step, next_step: approval_step, condition: 'approved')
+  WorkflowTransition.create!(workflow_step: review_step, next_step: draft_step, condition: 'rejected')
+end
+
+# Create Policies
+puts 'Creating policies...'
+orgs.each do |org|
+  %w[Data_Retention Access_Control Incident_Response].each do |policy_type|
+    policy = Policy.create!(
+      title: "#{policy_type.humanize} Policy",
+      description: "Official #{policy_type.humanize.downcase} policy for #{org.name}",
+      status: 'active',
+      effective_date: Date.today,
+      organization: org
+    )
+    puts "  ✓ Created Policy: #{policy.title}"
+  end
+end
+
+# Create Evidence Requests & Risk Assessments
+puts 'Creating evidence requests and risk assessments...'
+controls.each_with_index do |control, i|
+  # Evidence Request for every 3rd control
+  if i % 3 == 0
+    EvidenceRequest.create!(
+      title: "Evidence for #{control.name}",
+      description: "Please provide evidence demonstrating compliance with #{control.name}",
+      status: 'open',
+      due_date: Date.today + 30.days,
+      organization: control.organization,
+      compliance_control: control,
+      compliance_requirement: control.compliance_requirement,
+      assigned_to: User.where(organization: control.organization).sample
+    )
+    puts "  ✓ Created Evidence Request for Control: #{control.name}"
+  end
+
+  # Risk Assessment for every 5th control
+  if i % 5 == 0
+    RiskAssessment.create!(
+      name: "Risk Assessment - #{control.name}",
+      description: "Assessment of risks associated with #{control.name}",
+      organization: control.organization,
+      compliance_framework: control.compliance_requirement.compliance_framework,
+      compliance_requirement: control.compliance_requirement,
+      compliance_control: control,
+      likelihood: RiskAssessment.likelihoods.keys.sample,
+      impact: RiskAssessment.impacts.keys.sample,
+      risk_score: 10, # placeholder
+      status: 'in_progress',
+      assessment_date: Date.today,
+      next_review_date: Date.today + 1.year,
+      created_by: User.where(organization: control.organization).first,
+      assigned_to: User.where(organization: control.organization).sample
+    )
+    puts "  ✓ Created Risk Assessment for Control: #{control.name}"
   end
 end
 

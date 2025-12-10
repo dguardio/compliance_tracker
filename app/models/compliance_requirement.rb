@@ -7,6 +7,7 @@ class ComplianceRequirement < ApplicationRecord
   belongs_to :compliance_framework
   has_many :compliance_controls, dependent: :destroy
   has_many :risk_assessments, dependent: :destroy
+  has_many :evidence_requests, dependent: :destroy
   has_many :comments, as: :commentable, dependent: :destroy
 
   # Validations

@@ -7,6 +7,10 @@ class ControlAssignedNotifier < Noticed::Base
   param :compliance_control
   param :assigned_by
 
+  def title
+    "Control Assigned"
+  end
+
   def message
     @control = params[:compliance_control]
     @assigner = params[:assigned_by]

@@ -25,3 +25,4 @@ class UpdateOrganizationAssignmentsJob < ApplicationJob
       Rails.logger.info "Enqueued notifications for #{newly_assigned_regulations.count} new regulations to #{recipients.count} users in #{organization.name}."
     end
   end
+end

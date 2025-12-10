@@ -6,6 +6,10 @@ class ComplianceRequirementAssignedNotifier < ApplicationNotifier
   param :assigned_by
   param :assigned_to
 
+  def title
+    "Requirement Assigned"
+  end
+
   def message
     "#{params[:assigned_by].full_name} assigned you the compliance requirement '#{params[:requirement].name}'"
   end

@@ -1,0 +1,65 @@
+<div class="overflow-x-auto shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+  <table class="min-w-full divide-y divide-gray-300">
+    <thead class="bg-gray-50">
+      <tr>
+        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Risk Name</th>
+        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Level</th>
+        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Score</th>
+        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Context</th>
+        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Assigned To</th>
+        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Next Review</th>
+        <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+          <span class="sr-only">Actions</span>
+        </th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200 bg-white">
+      <% risks.each do |risk| %>
+        <tr>
+          <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
+            <%= link_to risk.name, risk_assessment_path(risk), class: "text-indigo-600 hover:text-indigo-900" %>
+          </td>
+          <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+            <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-<%= risk.risk_level_color %>-100 text-<%= risk.risk_level_color %>-800">
+              <%= risk.risk_level %>
+            </span>
+          </td>
+          <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+            <%= risk.risk_score %>
+          </td>
+          <td class="px-3 py-4 text-sm text-gray-500">
+            <div class="text-xs">
+              <% if risk.compliance_control %>
+                Control: <%= risk.compliance_control.name %>
+              <% elsif risk.compliance_requirement %>
+                Req: <%= risk.compliance_requirement.name %>
+              <% elsif risk.compliance_framework %>
+                Framework: <%= risk.compliance_framework.name %>
+              <% else %>
+                Organization Level
+              <% end %>
+            </div>
+          </td>
+          <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+            <% if risk.assigned_to %>
+              <div class="flex items-center">
+                <div class="h-6 w-6 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs mr-2">
+                  <%= risk.assigned_to.initials %>
+                </div>
+                <%= risk.assigned_to.full_name %>
+              </div>
+            <% else %>
+              <span class="text-gray-400">Unassigned</span>
+            <% end %>
+          </td>
+          <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+            <%= risk.next_review_date&.strftime('%b %d, %Y') %>
+          </td>
+          <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+            <%= link_to "Edit", edit_risk_assessment_path(risk), class: "text-indigo-600 hover:text-indigo-900" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

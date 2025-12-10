@@ -1,0 +1,46 @@
+<div class="max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Step 4: Invite Users</h1>
+    <p class="mt-2 text-sm text-gray-600">Invite team members to your organization.</p>
+  </div>
+
+  <!-- List existing -->
+  <% if @users.any? %>
+    <div class="bg-white shadow overflow-hidden sm:rounded-md mb-8">
+      <ul class="divide-y divide-gray-200">
+        <% @users.each do |user| %>
+          <li class="px-4 py-4 sm:px-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-indigo-600 truncate"><%= user.full_name %></p>
+                <p class="text-xs text-gray-500"><%= user.email %></p>
+              </div>
+              <div>
+                <% user.roles.each do |role| %>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                    <%= role.name.titleize %>
+                  </span>
+                <% end %>
+              </div>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <!-- Invite new -->
+  <div class="bg-white shadow sm:rounded-lg mb-8">
+    <div class="px-4 py-5 sm:p-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">Invite a User</h3>
+      <p class="text-sm text-gray-500 mb-4">To invite a user, please use the registration page. We'll pre-fill the organization ID for you.</p>
+      
+      <%= link_to "Go to User Registration", new_users_registration_path(organization_id: @organization.id), target: "_blank", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+    </div>
+  </div>
+
+  <div class="flex justify-between">
+    <%= link_to "← Back", organization_setup_path(@organization, :units), class: "inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+    <%= link_to "Finish Setup", organization_path(@organization), class: "ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+  </div>
+</div>

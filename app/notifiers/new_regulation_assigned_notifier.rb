@@ -7,6 +7,10 @@ class NewRegulationAssignedNotifier < ApplicationNotifier
   param :regulation
   param :organization
 
+  def title
+    "New Regulation Assigned"
+  end
+
   # Helper methods for rendering
   def message
     "A new regulation, '#{regulation.title}', has been assigned to your organization."

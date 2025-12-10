@@ -15,7 +15,11 @@ class Admin::RegulatoryDataSourcesController < ApplicationController
   end
 
   def new
-    @regulatory_data_source = RegulatoryDataSource.new
+    @regulatory_data_source = RegulatoryDataSource.new(
+      name: params[:name],
+      url: params[:url],
+      source_type: params[:source_type]
+    )
     authorize @regulatory_data_source
   end
 
@@ -67,6 +71,28 @@ class Admin::RegulatoryDataSourcesController < ApplicationController
     # Renders discover.html.erb by default
   end
 
+  def preview_config
+    authorize RegulatoryDataSource, :create?
+    
+    # Create a temporary object to hold the docs (not saved)
+    temp_source = RegulatoryDataSource.new(
+      documentation_url: params[:documentation_url],
+      documentation_content: params[:documentation_content]
+    )
+    
+    begin
+      config = Regulatory::SmartConfiguratorService.new(temp_source).preview
+      
+      if config
+        render json: config
+      else
+        render json: { error: 'Could not configure source from documentation.' }, status: :unprocessable_entity
+      end
+    rescue StandardError => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def set_regulatory_data_source
@@ -78,6 +104,6 @@ class Admin::RegulatoryDataSourcesController < ApplicationController
   end
 
   def regulatory_data_source_params
-    params.require(:regulatory_data_source).permit(:name, :description, :source_type, :url, :status, :provider_id, sectors: [], jurisdictions: [], settings: {})
+    params.require(:regulatory_data_source).permit(:name, :description, :source_type, :url, :status, :provider_id, :api_key, :api_key_param, :documentation_url, :documentation_content, sectors: [], jurisdictions: [], settings: {})
   end
 end

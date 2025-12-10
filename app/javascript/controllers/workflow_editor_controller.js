@@ -16,18 +16,14 @@ export default class extends Controller {
       this._drawInitialConnections();
     });
 
-    this.jsPlumbInstance.bind("beforeDrop", (info) => {
-      const sourceAnchorType = info.connection.endpoints[0].anchor.type;
-      const targetAnchorType = info.dropEndpoint.anchor.type;
-      this._openConnectionModal(info.sourceId, info.targetId, sourceAnchorType, targetAnchorType);
-      return false; // Prevent jsPlumb from creating the connection immediately
-    });
+    // Store handlers for unbinding
+    this.beforeDropHandler = this._handleBeforeDrop.bind(this);
+    this.connectionDetachedHandler = this._handleConnectionDetached.bind(this);
 
-    this.jsPlumbInstance.bind("connectionDetached", (info, originalEvent) => {
-      if (originalEvent) {
-        this._deleteConnection(info.connection);
-      }
-    });
+    this.jsPlumbInstance.bind("beforeDrop", this.beforeDropHandler);
+    this.jsPlumbInstance.bind("connectionDetached", this.connectionDetachedHandler);
+
+
 
     // Bind the handler once and store it
     this.boundHandleSaveConnection = this.handleSaveConnection.bind(this);
@@ -37,6 +33,12 @@ export default class extends Controller {
   disconnect() {
     // Remove event listener using the stored bound function
     document.removeEventListener("condition-form:save-connection", this.boundHandleSaveConnection);
+    // Unbind jsPlumb events
+    if (this.jsPlumbInstance) {
+      this.jsPlumbInstance.unbind("beforeDrop", this.beforeDropHandler);
+      this.jsPlumbInstance.unbind("connectionDetached", this.connectionDetachedHandler);
+    }
+
 
     if (this.jsPlumbInstance) {
       this.jsPlumbInstance.deleteEveryEndpoint();
@@ -71,7 +73,11 @@ export default class extends Controller {
       paintStyle: { fill: '#9CA3AF' },
       hoverPaintStyle: { fill: '#3B82F6' },
       connectorStyle: { stroke: '#9CA3AF', strokeWidth: 2 },
-      connectorHoverStyle: { stroke: '#3B82F6', strokeWidth: 2 }
+      connectorHoverStyle: { stroke: '#3B82F6', strokeWidth: 2 },
+      connector: ["Flowchart", { stub: [40, 60], gap: 10, cornerRadius: 5, alwaysRespectStubs: true }],
+      connectorOverlays: [
+        ["Arrow", { location: 1, width: 10, length: 10 }]
+      ]
     };
 
     this.jsPlumbInstance.addEndpoint(step, Object.assign({}, endpointOptions, { anchor: "Top" }));
@@ -90,8 +96,11 @@ export default class extends Controller {
           source: sourceElement,
           target: targetElement,
           label: transition.label,
-          connector: "Bezier",
-          anchors: [transition.source_anchor_type, transition.target_anchor_type]
+          connector: ["Flowchart", { stub: [40, 60], gap: 10, cornerRadius: 5, alwaysRespectStubs: true }],
+          anchors: [transition.source_anchor_type, transition.target_anchor_type],
+          overlays: [
+            ["Arrow", { location: 1, width: 10, length: 10 }]
+          ]
         };
 
         const conn = this.jsPlumbInstance.connect(connectOptions);
@@ -104,11 +113,24 @@ export default class extends Controller {
     this.jsPlumbInstance.repaintEverything();
   }
 
+  _handleBeforeDrop(info) {
+    const sourceAnchorType = info.connection.endpoints[0].anchor.type;
+    const targetAnchorType = info.dropEndpoint.anchor.type;
+    this._openConnectionModal(info.sourceId, info.targetId, sourceAnchorType, targetAnchorType);
+    return false; // Prevent jsPlumb from creating the connection immediately
+  }
+
+  _handleConnectionDetached(info, originalEvent) {
+    if (originalEvent) {
+      this._deleteConnection(info.connection);
+    }
+  }
+
   _openConnectionModal = (sourceId, targetId, sourceAnchorType, targetAnchorType) => {
     const organizationId = this.element.dataset.organizationId;
     const sourceStepId = sourceId.split('-')[1];
     const url = `/organizations/${organizationId}/workflow_templates/${this.templateIdValue}/workflow_steps/${sourceStepId}/condition_form?target_id=${targetId}&source_anchor_type=${sourceAnchorType}&target_anchor_type=${targetAnchorType}`;
-    
+
     const modalFrame = document.getElementById('modal');
     if (modalFrame) {
       modalFrame.src = url;
@@ -119,83 +141,86 @@ export default class extends Controller {
 
   // ... (other methods) ...
 
-    _saveConnection = async (sourceId, targetId, condition, sourceAnchorType, targetAnchorType) => {
-      const fromId = sourceId.split("-")[1];
-      const toId = targetId.split("-")[1];
-      const organizationId = this.element.dataset.organizationId;
-      const url = `/organizations/${organizationId}/workflow_templates/${this.templateIdValue}/workflow_transitions`;
-  
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-Token': this._getCsrfToken()
-          },
-          body: JSON.stringify({
-            workflow_transition: {
-              from_id: fromId,
-              to_id: toId,
-              condition: condition,
-              source_anchor_type: sourceAnchorType,
-              target_anchor_type: targetAnchorType
-            }
-          })
-        });
-  
-        if (response.ok) {
-          const data = await response.json();
-  
-          const sourceElement = document.getElementById(sourceId);
-          const targetElement = document.getElementById(targetId);
-  
-          if (sourceElement && targetElement) {
-            const connectOptions = {
-              source: sourceElement,
-              target: targetElement,
-              label: condition,
-              connector: "Bezier"
-            };
-            // If anchor types are available, use them to specify exact anchors
-            if (sourceAnchorType) {
-              connectOptions.sourceAnchor = sourceAnchorType;
-            }
-            if (targetAnchorType) {
-              connectOptions.targetAnchor = targetAnchorType;
-            }
-  
-            const conn = this.jsPlumbInstance.connect(connectOptions);
-            conn.setParameter("transitionId", data.transition_id);
-  
-            // Close the modal after successful save and draw
-            const modalControllerElement = document.getElementById("modal").querySelector("[data-controller='modal']");
-            if (modalControllerElement) {
-              modalControllerElement.dispatchEvent(new Event("modal:close"));
-            } else {
-              console.error("Could not find modal controller element to close modal.");
-            }
-          } else {
-            console.error(`Failed to find source or target element for programmatic connect: ${sourceId} -> ${targetId}`);
+  _saveConnection = async (sourceId, targetId, condition, sourceAnchorType, targetAnchorType) => {
+    const fromId = sourceId.split("-")[1];
+    const toId = targetId.split("-")[1];
+    const organizationId = this.element.dataset.organizationId;
+    const url = `/organizations/${organizationId}/workflow_templates/${this.templateIdValue}/workflow_transitions`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': this._getCsrfToken()
+        },
+        body: JSON.stringify({
+          workflow_transition: {
+            from_id: fromId,
+            to_id: toId,
+            condition: condition,
+            source_anchor_type: sourceAnchorType,
+            target_anchor_type: targetAnchorType
           }
-  
-          // Revert: Do not update internal state here
-          // const newTransitions = this.transitionsValue;
-          // newTransitions.push({
-          //   id: data.transition_id,
-          //   source: sourceId,
-          //   target: targetId,
-          //   label: condition
-          // });
-          // this.transitionsValue = newTransitions;
-  
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        const sourceElement = document.getElementById(sourceId);
+        const targetElement = document.getElementById(targetId);
+
+        if (sourceElement && targetElement) {
+          const connectOptions = {
+            source: sourceElement,
+            target: targetElement,
+            label: condition,
+            connector: ["Flowchart", { stub: [40, 60], gap: 10, cornerRadius: 5, alwaysRespectStubs: true }],
+            overlays: [
+              ["Arrow", { location: 1, width: 10, length: 10 }]
+            ]
+          };
+          // If anchor types are available, use them to specify exact anchors
+          if (sourceAnchorType) {
+            connectOptions.sourceAnchor = sourceAnchorType;
+          }
+          if (targetAnchorType) {
+            connectOptions.targetAnchor = targetAnchorType;
+          }
+
+          const conn = this.jsPlumbInstance.connect(connectOptions);
+          conn.setParameter("transitionId", data.transition_id);
+
+          // Close the modal after successful save and draw
+          const modalControllerElement = document.getElementById("modal").querySelector("[data-controller='modal']");
+          if (modalControllerElement) {
+            modalControllerElement.dispatchEvent(new Event("modal:close"));
+          } else {
+            console.error("Could not find modal controller element to close modal.");
+          }
         } else {
-          const errorText = await response.text();
-          console.error("Failed to save connection. Server response:", errorText);
+          console.error(`Failed to find source or target element for programmatic connect: ${sourceId} -> ${targetId}`);
         }
-      } catch (error) {
-        console.error("Error during fetch operation:", error);
+
+        // Revert: Do not update internal state here
+        // const newTransitions = this.transitionsValue;
+        // newTransitions.push({
+        //   id: data.transition_id,
+        //   source: sourceId,
+        //   target: targetId,
+        //   label: condition
+        // });
+        // this.transitionsValue = newTransitions;
+
+      } else {
+        const errorText = await response.text();
+        console.error("Failed to save connection. Server response:", errorText);
       }
+    } catch (error) {
+      console.error("Error during fetch operation:", error);
     }
+  }
   _deleteConnection = async (connection) => {
     const transitionId = connection.getParameter("transitionId");
     if (!transitionId) return;

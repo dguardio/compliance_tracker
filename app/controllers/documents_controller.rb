@@ -179,6 +179,7 @@ class DocumentsController < ApplicationController
     params.require(:document).permit(
       :title, :description, :category, :status, :expires_at,
       :compliance_framework_id, :compliance_requirement_id, :compliance_control_id,
+      :workflow_template_id,
       :file, :tags, :document_type, :department, :team, :unit,
       :review_cycle, :approval_workflow, :custom_fields, :metadata
     )

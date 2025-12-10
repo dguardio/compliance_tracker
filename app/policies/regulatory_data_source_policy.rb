@@ -30,4 +30,8 @@ class RegulatoryDataSourcePolicy < ApplicationPolicy
   def bulk_delete?
     user.super_admin?
   end
+
+  def discover?
+    user.super_admin?
+  end
 end

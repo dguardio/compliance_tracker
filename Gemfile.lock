@@ -274,14 +274,14 @@ GEM
       railties (>= 6.1.0)
     faker (3.5.2)
       i18n (>= 1.8.11, < 2)
-    faraday (2.13.2)
+    faraday (2.14.0)
       faraday-net_http (>= 2.0, < 3.5)
       json
       logger
     faraday-multipart (1.1.1)
       multipart-post (~> 2.0)
-    faraday-net_http (3.4.1)
-      net-http (>= 0.5.0)
+    faraday-net_http (3.4.2)
+      net-http (~> 0.5)
     faraday-retry (2.3.2)
       faraday (~> 2.0)
     ffi (1.17.2-x86_64-linux-gnu)
@@ -320,7 +320,7 @@ GEM
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
     jmespath (1.6.2)
-    json (2.12.2)
+    json (2.17.1)
     json-schema (5.1.1)
       addressable (~> 2.8)
       bigdecimal (~> 3.1)
@@ -395,8 +395,8 @@ GEM
       bigdecimal (~> 3.1)
     multipart-post (2.4.1)
     mutex_m (0.3.0)
-    net-http (0.6.0)
-      uri
+    net-http (0.8.0)
+      uri (>= 0.11.1)
     net-imap (0.5.9)
       date
       net-protocol
@@ -620,7 +620,7 @@ GEM
     ruby-vips (2.2.4)
       ffi (~> 1.12)
       logger
-    ruby_llm (1.8.2)
+    ruby_llm (1.9.1)
       base64
       event_stream_parser (~> 1)
       faraday (>= 1.10.0)
@@ -628,7 +628,9 @@ GEM
       faraday-net_http (>= 1)
       faraday-retry (>= 1)
       marcel (~> 1.0)
+      ruby_llm-schema (~> 0.2.1)
       zeitwerk (~> 2)
+    ruby_llm-schema (0.2.5)
     rubyzip (2.4.1)
     rufus-scheduler (3.9.2)
       fugit (~> 1.1, >= 1.11.1)
@@ -716,7 +718,7 @@ GEM
       unicode-emoji (~> 4.0, >= 4.0.4)
     unicode-emoji (4.0.4)
     uniform_notifier (1.17.0)
-    uri (1.0.3)
+    uri (1.1.1)
     vcr (6.3.1)
       base64
     version_gem (1.1.8)

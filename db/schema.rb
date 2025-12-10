@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_11_28_172555) do
+ActiveRecord::Schema[7.1].define(version: 2025_12_09_164846) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -168,6 +168,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_28_172555) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "regulation_id"
+    t.bigint "workflow_template_id"
     t.index ["approved_by_id"], name: "index_documents_on_approved_by_id"
     t.index ["category"], name: "index_documents_on_category"
     t.index ["compliance_control_id"], name: "index_documents_on_compliance_control_id"
@@ -178,6 +179,33 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_28_172555) do
     t.index ["settings"], name: "index_documents_on_settings", using: :gin
     t.index ["status"], name: "index_documents_on_status"
     t.index ["uploaded_by_id"], name: "index_documents_on_uploaded_by_id"
+    t.index ["workflow_template_id"], name: "index_documents_on_workflow_template_id"
+  end
+
+  create_table "evidence_request_documents", force: :cascade do |t|
+    t.bigint "evidence_request_id", null: false
+    t.bigint "document_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_id"], name: "index_evidence_request_documents_on_document_id"
+    t.index ["evidence_request_id"], name: "index_evidence_request_documents_on_evidence_request_id"
+  end
+
+  create_table "evidence_requests", force: :cascade do |t|
+    t.string "title"
+    t.text "description"
+    t.integer "status"
+    t.date "due_date"
+    t.bigint "organization_id", null: false
+    t.bigint "assigned_to_id"
+    t.bigint "compliance_requirement_id"
+    t.bigint "compliance_control_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assigned_to_id"], name: "index_evidence_requests_on_assigned_to_id"
+    t.index ["compliance_control_id"], name: "index_evidence_requests_on_compliance_control_id"
+    t.index ["compliance_requirement_id"], name: "index_evidence_requests_on_compliance_requirement_id"
+    t.index ["organization_id"], name: "index_evidence_requests_on_organization_id"
   end
 
   create_table "feedbacks", force: :cascade do |t|
@@ -398,6 +426,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_28_172555) do
     t.bigint "provider_id", null: false
     t.jsonb "sectors", default: []
     t.jsonb "jurisdictions", default: []
+    t.string "documentation_url"
+    t.text "documentation_content"
+    t.text "api_key"
+    t.string "api_key_param"
     t.index ["name"], name: "index_regulatory_data_sources_on_name", unique: true
     t.index ["provider_id"], name: "index_regulatory_data_sources_on_provider_id"
     t.index ["source_type"], name: "index_regulatory_data_sources_on_source_type"
@@ -581,6 +613,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_28_172555) do
   add_foreign_key "documents", "regulations"
   add_foreign_key "documents", "users", column: "approved_by_id"
   add_foreign_key "documents", "users", column: "uploaded_by_id"
+  add_foreign_key "documents", "workflow_templates"
+  add_foreign_key "evidence_request_documents", "documents"
+  add_foreign_key "evidence_request_documents", "evidence_requests"
+  add_foreign_key "evidence_requests", "compliance_controls"
+  add_foreign_key "evidence_requests", "compliance_requirements"
+  add_foreign_key "evidence_requests", "organizations"
+  add_foreign_key "evidence_requests", "users", column: "assigned_to_id"
   add_foreign_key "feedbacks", "users"
   add_foreign_key "memberships", "organizations"
   add_foreign_key "memberships", "users"

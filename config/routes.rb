@@ -53,6 +53,7 @@ Rails.application.routes.draw do
         delete :bulk_delete
         get :discover
         post :discover
+        post :preview_config
       end
     end
 
@@ -76,7 +77,12 @@ Rails.application.routes.draw do
     resources :departments, only: %i[index show new create edit update destroy]
     resources :teams, only: %i[index show new create edit update destroy]
     resources :units, only: %i[index show new create edit update destroy]
-    resources :users, only: %i[index show new create edit update destroy]
+    resources :users, only: %i[index show new create edit update destroy] do
+      collection do
+        get :import, to: 'users/imports#new'
+        post :import, to: 'users/imports#create'
+      end
+    end
 
     # Nested hierarchical resources
     resources :departments, only: %i[index show new create edit update destroy] do
@@ -88,6 +94,10 @@ Rails.application.routes.draw do
 
     # Compliance management
     resources :compliance_frameworks do
+      collection do
+        get :import
+        post :process_import
+      end
       member do
         post :suggest_requirements
       end
@@ -141,6 +151,12 @@ Rails.application.routes.draw do
         get :get_controls
       end
     end
+    
+    resources :evidence_requests do
+      member do
+        get :download_all
+      end
+    end
 
     # Workflow management
     resources :workflow_templates do
@@ -152,6 +168,9 @@ Rails.application.routes.draw do
       end
       resources :workflow_transitions, only: %i[create destroy]
     end
+
+    # Setup Wizard
+    resources :setup, only: [:index, :show, :update], controller: 'organizations/setup'
   end
 
   post 'switch_organization', to: 'organizations#switch_organization', as: :switch_organization
@@ -188,7 +207,9 @@ Rails.application.routes.draw do
   get 'dashboard', to: 'dashboard#dashboard', as: :dashboard
 
   # Risk Dashboard
-  get 'risk_dashboard', to: 'risk_dashboard#index', as: :risk_dashboard
+    get 'risk_dashboard', to: 'risk_dashboard#index', as: :risk_dashboard
+    get 'risk_dashboard/my_risks', to: 'risk_dashboard#my_risks'
+    get 'risk_dashboard/organization_risks', to: 'risk_dashboard#organization_risks', as: :organization_risks
 
   # Regulation Reviews
   resources :regulation_reviews, only: %i[index show update] do

@@ -102,9 +102,13 @@
                              RiskAssessment.likelihoods.keys.map { |k| [k.titleize, k] }, 
                              { prompt: "Select Likelihood" }, 
                              { class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" } %>
-              <p class="mt-1 text-xs text-gray-500">
-                How likely is this risk to occur?
-              </p>
+              <div class="mt-1 text-xs text-gray-500 space-y-1">
+                <p><strong>Very Low:</strong> Unlikely to occur (once in 10 years)</p>
+                <p><strong>Low:</strong> Could occur (once in 5 years)</p>
+                <p><strong>Medium:</strong> Might occur (once a year)</p>
+                <p><strong>High:</strong> Likely to occur (once a month)</p>
+                <p><strong>Very High:</strong> Almost certain (weekly/daily)</p>
+              </div>
             </div>
 
             <div>
@@ -113,9 +117,13 @@
                   RiskAssessment.impacts.keys.map { |k| [k.titleize, k] },
                   { prompt: "Select Impact" },
                   class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-              <p class="mt-1 text-sm text-gray-500">
-                What would be the impact if this risk occurs?
-              </p>
+              <div class="mt-1 text-xs text-gray-500 space-y-1">
+                <p><strong>Negligible:</strong> Minimal damage, no financial loss</p>
+                <p><strong>Minor:</strong> Minor damage, < $1k loss</p>
+                <p><strong>Moderate:</strong> Moderate damage, < $10k loss</p>
+                <p><strong>Major:</strong> Significant damage, < $100k loss</p>
+                <p><strong>Catastrophic:</strong> Severe damage, > $100k loss</p>
+              </div>
             </div>
           </div>
 

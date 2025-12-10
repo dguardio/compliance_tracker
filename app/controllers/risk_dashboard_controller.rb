@@ -37,6 +37,23 @@ class RiskDashboardController < ApplicationController
     @risk_trends = []
   end
 
+  def my_risks
+    @organization = current_user.organization
+    @risk_assessments = @organization.risk_assessments
+                                     .where(assigned_to: current_user)
+                                     .includes(:compliance_framework, :compliance_requirement, :compliance_control)
+                                     .order(risk_score: :desc)
+                                     .page(params[:page]).per(20)
+  end
+
+  def organization_risks
+    @organization = current_user.organization
+    @risk_assessments = @organization.risk_assessments
+                                     .includes(:assigned_to, :compliance_framework, :compliance_requirement, :compliance_control)
+                                     .order(risk_score: :desc)
+                                     .page(params[:page]).per(20)
+  end
+
   private
 
   def ensure_user_has_organization

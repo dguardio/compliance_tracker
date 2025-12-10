@@ -11,6 +11,7 @@ class SourceDiscoveryAgent
     PROMPT
 
     response = RubyLLM.chat.ask(prompt)
+    Rails.logger.info "SourceDiscoveryAgent Raw LLM Response: #{response.content}"
     parse_response(response.content)
   end
 

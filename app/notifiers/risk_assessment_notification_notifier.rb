@@ -10,6 +10,10 @@ class RiskAssessmentNotificationNotifier < ApplicationNotifier
   param :action # :created, :updated, :assigned, :overdue, :high_risk
   param :actor, optional: true
 
+  def title
+    "Risk Assessment Update"
+  end
+
   def message
     ra = params[:risk_assessment]
     case params[:action].to_sym

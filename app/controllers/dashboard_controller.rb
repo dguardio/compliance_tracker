@@ -43,6 +43,16 @@ class DashboardController < ApplicationController
       due_soon_tasks: @compliance_controls.due_soon.count
     }
 
+    # Onboarding Progress
+    @onboarding_progress = {
+      org_structure: @organization.departments.exists? && @organization.teams.exists? && @organization.units.exists?,
+      users_added: @organization.users.count > 1, # More than just the creator
+      framework_imported: @organization.compliance_frameworks.exists?,
+      policy_created: @organization.documents.where(category: 'policy').exists?,
+      risk_assessed: @organization.risk_assessments.exists?
+    }
+    @onboarding_percent = @onboarding_progress.values.count(true) * 20
+
     @overdue_tasks = @compliance_controls.overdue.includes(:assignee, :compliance_requirement).order(due_date: :asc).limit(5)
 
     # Recent activity (placeholder for future implementation)

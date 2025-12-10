@@ -55,6 +55,27 @@ class ComplianceFrameworksController < ApplicationController
     end
   end
 
+  def import
+    authorize ComplianceFramework.new(organization: @organization), :create?
+  end
+
+  def process_import
+    authorize ComplianceFramework.new(organization: @organization), :create?
+    
+    if params[:file].present?
+      importer = ComplianceFrameworkImporter.new(@organization, params[:file].path)
+      if importer.import
+        redirect_to organization_compliance_frameworks_path(@organization), notice: 'Compliance framework imported successfully.'
+      else
+        flash.now[:alert] = "Import failed: #{importer.errors.join(', ')}"
+        render :import
+      end
+    else
+      flash.now[:alert] = 'Please select a file to import.'
+      render :import
+    end
+  end
+
   private
 
   def set_organization

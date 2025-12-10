@@ -14,7 +14,7 @@ export default class extends Controller {
 
     const settings = {
       whitelist: whitelist,
-      enforceWhitelist: true,
+      enforceWhitelist: false,
       originalInputValueFormat: valuesArr => valuesArr.map(item => item.value).join(','),
       dropdown: {
         enabled: 0,             // show suggestions on focus
@@ -30,6 +30,12 @@ export default class extends Controller {
   disconnect() {
     if (this.tagify) {
       this.tagify.destroy()
+    }
+  }
+
+  addTags(tags) {
+    if (this.tagify) {
+      this.tagify.addTags(tags)
     }
   }
 }

@@ -6,6 +6,8 @@ class Users::RegistrationsController < ApplicationController
 
   def new
     @user = User.new
+    @user.organization_id = params[:organization_id] if params[:organization_id].present?
+    @user.email = params[:email] if params[:email].present?
     @organizations = Organization.active.order(:name)
   end
 

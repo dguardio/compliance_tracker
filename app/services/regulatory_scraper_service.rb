@@ -157,11 +157,11 @@ class RegulatoryScraperService
         if full_text.present?
            # Handle relative URLs if present, otherwise use a placeholder or nil
            full_url = item_url.present? ? URI.join(data_source.url, item_url).to_s : nil
-           ingest_regulation(full_text, full_url, data_source, title, publication_date, 'text/plain', {})
+           ingest_regulation(full_text, full_url, data_source, title, publication_date, 'text/plain', {}, item)
         elsif item_url.present?
           # Handle relative URLs
           full_url = URI.join(data_source.url, item_url).to_s
-          process_regulation_link(full_url, data_source, title, publication_date)
+          process_regulation_link(full_url, data_source, title, publication_date, item)
         end
       end
       
@@ -172,7 +172,7 @@ class RegulatoryScraperService
     end
   end
 
-  def process_regulation_link(url, data_source, title = nil, publication_date = nil)
+  def process_regulation_link(url, data_source, title = nil, publication_date = nil, raw_data = {})
     Rails.logger.info "Attempting to process regulation link: #{url}"
     
     # Smart Caching: Check HEAD first
@@ -223,20 +223,15 @@ class RegulatoryScraperService
       return
     end
 
-    if extracted_text.blank?
-      Rails.logger.warn "Could not extract text from resource at #{url} with content type #{content_type}"
-      return
-    end
-
-    ingest_regulation(extracted_text, url, data_source, title, publication_date, content_type, regulation_response.headers)
+    ingest_regulation(extracted_text, url, data_source, title, publication_date, content_type, regulation_response.headers, raw_data)
   rescue HTTParty::Error, SocketError, URI::InvalidURIError => e
     Rails.logger.error "Error fetching or processing regulation from #{url}: #{e.message}"
   rescue StandardError => e
     Rails.logger.error "An unexpected error occurred while processing regulation link #{url}: #{e.message}"
   end
 
-  def ingest_regulation(text, url, data_source, title, publication_date, content_type, headers = {})
-    attributes = build_regulation_attributes(text, url, data_source.provider, title, publication_date, content_type, headers)
+  def ingest_regulation(text, url, data_source, title, publication_date, content_type, headers = {}, raw_data = {})
+    attributes = build_regulation_attributes(text, url, data_source.provider, title, publication_date, content_type, headers, raw_data)
     
     # If URL is nil (direct text), we need a way to identify existing regulations. 
     # For now, we'll require a URL/External ID even for direct text to handle updates/drift.
@@ -290,7 +285,7 @@ class RegulatoryScraperService
     end
   end
 
-  def build_regulation_attributes(text, url, provider, title, publication_date, content_type, headers = {})
+  def build_regulation_attributes(text, url, provider, title, publication_date, content_type, headers = {}, raw_data = {})
     {
       title: title.presence || "Untitled Regulation from #{provider.name}",
       agency: provider.name,
@@ -303,7 +298,8 @@ class RegulatoryScraperService
       metadata: { 
         content_hash: Digest::SHA256.hexdigest(text),
         last_modified: headers['Last-Modified'],
-        etag: headers['ETag']
+        etag: headers['ETag'],
+        raw_source_data: raw_data # Store entire raw API record
       },
       external_id: url
     }

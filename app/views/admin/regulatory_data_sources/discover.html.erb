@@ -7,7 +7,7 @@
     <h2 class="text-xl font-semibold text-gray-900 mb-4">Discover with AI</h2>
     <p class="text-sm text-gray-600 mb-6">Enter a sector and jurisdiction to let the AI discover potential new data sources.</p>
     
-    <%= form_with url: discover_admin_regulatory_data_sources_path, method: :post, class: "space-y-4" do |form| %>
+    <%= form_with url: discover_admin_regulatory_data_sources_path, method: :post, class: "space-y-4", data: { turbo: false } do |form| %>
       <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
         <div class="sm:col-span-3">
           <%= label_tag :sector, "Sector", class: "block text-sm font-medium text-gray-700" %>
