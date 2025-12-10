@@ -1,7 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 @import 'json_viewer.css';
+
+@layer base {
+  body {
+    @apply font-sans antialiased text-gray-900 bg-slate-50;
+  }
+  
+  /* Enforce tabular figures for all data grids */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Smooth scrolling and text rendering */
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
 
 /* Add custom styles here */
 

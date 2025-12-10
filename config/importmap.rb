@@ -27,3 +27,4 @@ pin "@kurkle/color", to: "https://ga.jspm.io/npm:@kurkle/color@0.3.2/dist/color.
 
 pin "trix"
 pin "@rails/actiontext", to: "actiontext.esm.js"
+pin "canvas-confetti" # references vendor/javascript/canvas-confetti.js

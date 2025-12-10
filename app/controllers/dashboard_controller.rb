@@ -15,6 +15,17 @@ class DashboardController < ApplicationController
   end
 
   def dashboard
+    setup_dashboard_data
+  end
+
+  def joyful
+    setup_dashboard_data
+    render layout: 'joyful'
+  end
+
+  private
+
+  def setup_dashboard_data
     @organization = current_user.organization
     @departments = @organization.departments.includes(:teams, :units)
     @users = @organization.users.includes(:roles, :department, :team, :unit)
@@ -58,8 +69,6 @@ class DashboardController < ApplicationController
     # Recent activity (placeholder for future implementation)
     @recent_activity = []
   end
-
-  private
 
   def ensure_user_has_organization
     return if current_user.organization

@@ -205,6 +205,7 @@ Rails.application.routes.draw do
 
   # Dashboard
   get 'dashboard', to: 'dashboard#dashboard', as: :dashboard
+  get 'joyful_dashboard', to: 'dashboard#joyful', as: :joyful_dashboard
 
   # Risk Dashboard
     get 'risk_dashboard', to: 'risk_dashboard#index', as: :risk_dashboard
