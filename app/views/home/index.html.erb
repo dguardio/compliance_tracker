@@ -1,130 +1,206 @@
-<div class="min-h-screen bg-gray-50">
-  <!-- Navigation -->
-  <nav class="bg-white shadow">
+<div class="min-h-screen bg-slate-50 font-sans selection:bg-primary-200 selection:text-primary-900">
+  
+  <!-- Glassmorphic Header -->
+  <nav class="fixed top-4 left-4 right-4 z-50 rounded-2xl bg-white/80 backdrop-blur-md shadow-sm border border-white/50 animate-fade-in-up">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between h-16">
-        <div class="flex">
-          <div class="flex-shrink-0 flex items-center">
-            <h1 class="text-xl font-bold text-indigo-600">Compliance Tracker</h1>
+      <div class="flex justify-between h-16 items-center">
+        <div class="flex-shrink-0 flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-primary-500/30">
+            C
           </div>
+          <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">ComplianceTracker</span>
         </div>
+        
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="#features" class="text-sm font-medium text-gray-600 hover:text-primary-600 transition-colors">Features</a>
+          <a href="#testimonials" class="text-sm font-medium text-gray-600 hover:text-primary-600 transition-colors">Testimonials</a>
+          <a href="#pricing" class="text-sm font-medium text-gray-600 hover:text-primary-600 transition-colors">Pricing</a>
+        </div>
+
         <div class="flex items-center space-x-4">
-          <%= link_to "Sign In", new_user_session_path, class: "text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium" %>
-          <%= link_to "Sign Up", new_user_registration_path, class: "bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium" %>
+          <%= link_to "Sign In", new_user_session_path, class: "text-sm font-medium text-gray-600 hover:text-primary-600 transition-colors" %>
+          <%= render Joyful::ButtonComponent.new(
+                text: "Get Started",
+                path: new_user_registration_path,
+                variant: :primary,
+                icon: "arrow-right",
+                class: "shadow-primary-glow"
+              ) %>
         </div>
       </div>
     </div>
   </nav>
 
   <!-- Hero Section -->
-  <div class="relative bg-white overflow-hidden">
-    <div class="max-w-7xl mx-auto">
-      <div class="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
-        <main class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
-          <div class="sm:text-center lg:text-left">
-            <h1 class="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-              <span class="block xl:inline">Enterprise Compliance</span>
-              <span class="block text-indigo-600 xl:inline">Management</span>
-            </h1>
-            <p class="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-              Streamline your compliance operations with AI-driven regulatory monitoring, multi-tenant architecture, and comprehensive role-based access control.
-            </p>
-            <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
-              <div class="rounded-md shadow">
-                <%= link_to "Get Started", new_user_registration_path, class: "w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10" %>
-              </div>
-              <div class="mt-3 sm:mt-0 sm:ml-3">
-                <%= link_to "Learn More", "#features", class: "w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 md:py-4 md:text-lg md:px-10" %>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
+  <div class="relative pt-32 pb-16 sm:pt-40 sm:pb-24 overflow-hidden">
+    <!-- Background Blobs -->
+    <div class="absolute top-0 left-1/2 w-full -translate-x-1/2 h-full z-0 pointer-events-none">
+      <div class="absolute top-20 left-10 w-72 h-72 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-float"></div>
+      <div class="absolute top-20 right-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-float delay-100"></div>
+      <div class="absolute -bottom-8 left-1/3 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-float delay-200"></div>
     </div>
-  </div>
 
-  <!-- Features Section -->
-  <div id="features" class="py-12 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="lg:text-center">
-        <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Features</h2>
-        <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-          Everything you need for compliance management
-        </p>
-        <p class="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
-          Multi-tenant architecture with hierarchical organization management, AI-powered regulatory monitoring, and comprehensive role-based access control.
-        </p>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-50 text-primary-700 ring-1 ring-inset ring-primary-700/10 mb-8 animate-fade-in-up">
+        <span class="mr-2">✨</span> Now with AI-Powered Regulatory Analysis
+      </span>
+      
+      <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 mb-8 animate-fade-in-up delay-100">
+        Compliance management <br class="hidden md:block" />
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-indigo-600">reimagined for speed.</span>
+      </h1>
+      
+      <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-600 mb-10 animate-fade-in-up delay-200">
+        Streamline your compliance operations with our multi-tenant platform. Automated monitoring, intelligent risk assessment, and Joyful workflows.
+      </p>
+
+      <div class="flex justify-center gap-4 animate-fade-in-up delay-300">
+        <%= render Joyful::ButtonComponent.new(
+              text: "Start Free Trial",
+              path: new_user_registration_path,
+              variant: :primary,
+              icon: "rocket",
+              class: "px-8 py-4 text-lg shadow-primary-glow hover:scale-105 transition-transform"
+            ) %>
+        
+        <%= render Joyful::ButtonComponent.new(
+              text: "View Documentation",
+              path: "#features",
+              variant: :secondary,
+              icon: "book",
+              class: "px-8 py-4 text-lg bg-white/80 backdrop-blur"
+            ) %>
       </div>
 
-      <div class="mt-10">
-        <div class="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
-          <!-- Multi-tenancy -->
-          <div class="relative">
-            <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
-              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-              </svg>
-            </div>
-            <p class="ml-16 text-lg leading-6 font-medium text-gray-900">Multi-tenant Architecture</p>
-            <p class="mt-2 ml-16 text-base text-gray-500">
-              Complete tenant isolation with hierarchical organization structure (Organization → Department → Team → Unit).
-            </p>
-          </div>
-
-          <!-- Role-based Access -->
-          <div class="relative">
-            <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
-              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-              </svg>
-            </div>
-            <p class="ml-16 text-lg leading-6 font-medium text-gray-900">Role-based Access Control</p>
-            <p class="mt-2 ml-16 text-base text-gray-500">
-              Hierarchical roles with fine-grained permissions: Super Admin, Organization Admin, Department Admin, Team Lead, Unit Manager, Compliance Officer, and User.
-            </p>
-          </div>
-
-          <!-- AI Monitoring -->
-          <div class="relative">
-            <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
-              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-              </svg>
-            </div>
-            <p class="ml-16 text-lg leading-6 font-medium text-gray-900">AI-driven Monitoring</p>
-            <p class="mt-2 ml-16 text-base text-gray-500">
-              Automated regulatory scraping, summarization, and compliance tracking with customizable keywords and exclusion terms.
-            </p>
-          </div>
-
-          <!-- Compliance Tracking -->
-          <div class="relative">
-            <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
-              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-            <p class="ml-16 text-lg leading-6 font-medium text-gray-900">Compliance Tracking</p>
-            <p class="mt-2 ml-16 text-base text-gray-500">
-              Comprehensive compliance management with regulatory monitoring, policy development, and audit trail capabilities.
-            </p>
+      <!-- Preview Image/Card -->
+      <div class="mt-16 relative rounded-2xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4 animate-fade-in-up delay-300">
+        <div class="rounded-xl bg-white shadow-2xl overflow-hidden border border-gray-200">
+          <div class="h-96 bg-gray-50 flex items-center justify-center">
+             <div class="text-center">
+               <div class="w-16 h-16 bg-primary-100 text-primary-600 rounded-xl mx-auto flex items-center justify-center mb-4">
+                 <i class="fas fa-chart-pie text-2xl"></i>
+               </div>
+               <p class="text-gray-400 font-medium">Dashboard Preview Placeholder</p>
+             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- CTA Section -->
-  <div class="bg-indigo-700">
-    <div class="max-w-2xl mx-auto text-center py-16 px-4 sm:py-20 sm:px-6 lg:px-8">
-      <h2 class="text-3xl font-extrabold text-white sm:text-4xl">
-        <span class="block">Ready to get started?</span>
-        <span class="block">Start your compliance journey today.</span>
-      </h2>
-      <p class="mt-4 text-lg leading-6 text-indigo-200">
-        Join organizations worldwide in streamlining their compliance operations with our enterprise-grade platform.
-      </p>
-      <%= link_to "Get Started Now", new_user_registration_path, class: "mt-8 w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 sm:w-auto" %>
+  <!-- Features Grid -->
+  <div id="features" class="py-24 bg-white relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-primary-600 font-semibold tracking-wide uppercase text-sm">Features</h2>
+        <p class="mt-2 text-3xl font-extrabold text-gray-900 sm:text-4xl">Everything you need to stay compliant</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Feature 1 -->
+        <div class="group p-8 bg-slate-50 rounded-2xl border border-slate-100 hover:border-primary-100 hover:bg-white hover:shadow-primary-glow transition-all duration-300">
+          <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 mb-6 group-hover:scale-110 transition-transform">
+            <i class="fas fa-network-wired text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Multi-tenant Architecture</h3>
+          <p class="text-gray-600">Complete isolation with hierarchical structure: Organization → Department → Team → Unit.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="group p-8 bg-slate-50 rounded-2xl border border-slate-100 hover:border-primary-100 hover:bg-white hover:shadow-primary-glow transition-all duration-300">
+          <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 mb-6 group-hover:scale-110 transition-transform">
+            <i class="fas fa-user-shield text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Role-Based Access</h3>
+          <p class="text-gray-600">Granular permissions from Super Admin to Compliance Officer and Standard User.</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="group p-8 bg-slate-50 rounded-2xl border border-slate-100 hover:border-primary-100 hover:bg-white hover:shadow-primary-glow transition-all duration-300">
+          <div class="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center text-pink-600 mb-6 group-hover:scale-110 transition-transform">
+            <i class="fas fa-robot text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">AI-Driven Monitoring</h3>
+          <p class="text-gray-600">Automated regulatory scraping, summarization, and extracting of key obligations.</p>
+        </div>
+        
+         <!-- Feature 4 -->
+        <div class="group p-8 bg-slate-50 rounded-2xl border border-slate-100 hover:border-primary-100 hover:bg-white hover:shadow-primary-glow transition-all duration-300">
+          <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 mb-6 group-hover:scale-110 transition-transform">
+            <i class="fas fa-tasks text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Task Management</h3>
+          <p class="text-gray-600">Built-in Kanban boards to track compliance tasks, evidence collection, and audits.</p>
+        </div>
+
+         <!-- Feature 5 -->
+        <div class="group p-8 bg-slate-50 rounded-2xl border border-slate-100 hover:border-primary-100 hover:bg-white hover:shadow-primary-glow transition-all duration-300">
+           <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center text-teal-600 mb-6 group-hover:scale-110 transition-transform">
+            <i class="fas fa-file-contract text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Policy Management</h3>
+          <p class="text-gray-600">Draft, review, and approve policies with version control and automated mapping.</p>
+        </div>
+
+         <!-- Feature 6 -->
+        <div class="group p-8 bg-slate-50 rounded-2xl border border-slate-100 hover:border-primary-100 hover:bg-white hover:shadow-primary-glow transition-all duration-300">
+           <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform">
+            <i class="fas fa-shield-alt text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Risk Assessment</h3>
+          <p class="text-gray-600">Identify, assess, and mitigate risks with our comprehensive risk management module.</p>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- CTA Section -->
+  <div class="relative py-24 overflow-hidden">
+    <div class="absolute inset-0 bg-primary-600">
+      <div class="absolute inset-0 bg-gradient-to-br from-primary-600 to-indigo-800"></div>
+      <!-- Decorative circles -->
+      <div class="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+    </div>
+    
+    <div class="relative max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-extrabold text-white sm:text-4xl mb-6">
+        Ready to transform your compliance?
+      </h2>
+      <p class="text-xl text-primary-100 mb-10">
+        Join forward-thinking organizations that trust ComplianceTracker to stay ahead of regulations.
+      </p>
+      
+      <div class="flex justify-center gap-4">
+        <%= render Joyful::ButtonComponent.new(
+              text: "Get Started Now",
+              path: new_user_registration_path,
+              variant: :secondary,
+              icon: "arrow-right",
+              class: "px-8 py-4 text-lg shadow-lg hover:shadow-xl"
+            ) %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-gray-100 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded bg-primary-600 flex items-center justify-center text-white text-xs font-bold">C</div>
+        <span class="text-gray-900 font-semibold">ComplianceTracker</span>
+      </div>
+      
+      <p class="text-gray-500 text-sm">
+        © <%= Time.current.year %> ComplianceTracker. All rights reserved.
+      </p>
+      
+      <div class="flex space-x-6">
+        <a href="#" class="text-gray-400 hover:text-primary-600 transition-colors"><i class="fab fa-twitter text-xl"></i></a>
+        <a href="#" class="text-gray-400 hover:text-primary-600 transition-colors"><i class="fab fa-github text-xl"></i></a>
+        <a href="#" class="text-gray-400 hover:text-primary-600 transition-colors"><i class="fab fa-linkedin text-xl"></i></a>
+      </div>
+    </div>
+  </footer>
+
 </div>

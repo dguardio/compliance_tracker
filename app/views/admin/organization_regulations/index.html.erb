@@ -1,89 +1,142 @@
-<div class="w-full">
+<div class="container mx-auto px-4 py-8">
   <% if notice.present? %>
-    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-lg inline-block"><%= notice %></p>
+    <%= render Joyful::ToastComponent.new(type: :success, message: notice) %>
   <% end %>
 
-  <div class="flex justify-between items-center mb-6">
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
     <div>
-      <h1 class="font-bold text-4xl">Organization Regulations</h1>
-      <p class="text-gray-600 mt-2">Manage regulations applicable to your organization</p>
+      <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Organization Regulations</h1>
+      <p class="mt-1 text-gray-500">Manage regulations applicable to your organization</p>
     </div>
-    <div>
-      <%= link_to "Active Tables", admin_compliance_tables_path, class: "rounded-lg py-3 px-5 bg-indigo-600 text-white inline-block font-medium mr-2" %>
-      <%= link_to "Add Regulations", available_admin_organization_regulations_path, class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium" %>
+    <div class="flex gap-3">
+      <%= render Joyful::ButtonComponent.new(
+            text: "Active Tables",
+            path: admin_compliance_tables_path,
+            variant: :secondary,
+            icon: "table" # Hypothetical icon
+          ) %>
+      <%= render Joyful::ButtonComponent.new(
+            text: "Add Regulations",
+            path: available_admin_organization_regulations_path,
+            variant: :primary,
+            icon: "plus"
+          ) %>
     </div>
   </div>
 
-  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-gray-50">
-        <tr>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Regulation</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agency</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jurisdiction</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Added By</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Added</th>
-          <th scope="col" class="relative px-6 py-3">
-            <span class="sr-only">Actions</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
-        <% @organization_regulations.each do |org_reg| %>
+  <%= render Joyful::CardComponent.new(padding: false) do %>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
           <tr>
-            <td class="px-6 py-4 text-sm font-medium text-gray-900">
-              <%= link_to org_reg.regulation.title, admin_regulation_path(org_reg.regulation), class: "text-blue-600 hover:text-blue-800" %>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= org_reg.regulation.agency %></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= org_reg.regulation.jurisdiction %></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= org_reg.status == 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' %>">
-                <%= org_reg.status.humanize %>
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              <% if org_reg.priority >= 7 %>
-                <span class="text-red-600 font-semibold"><%= org_reg.priority %></span>
-              <% elsif org_reg.priority >= 4 %>
-                <span class="text-yellow-600"><%= org_reg.priority %></span>
-              <% else %>
-                <%= org_reg.priority %>
-              <% end %>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              <% if org_reg.assigned_by_id.nil? %>
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                  🤖 System
-                </span>
-              <% else %>
-                <%= User.find_by(id: org_reg.assigned_by_id)&.full_name || 'Unknown' %>
-              <% end %>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= org_reg.assigned_at&.strftime('%Y-%m-%d') || '-' %></td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <% if org_reg.status == 'pending' %>
-                <%= button_to 'Activate', update_status_admin_organization_regulation_path(org_reg, status: 'active'), method: :patch, class: "text-green-600 hover:text-green-900 mr-4" %>
-              <% else %>
-                <%= button_to 'Archive', update_status_admin_organization_regulation_path(org_reg, status: 'archived'), method: :patch, class: "text-yellow-600 hover:text-yellow-900 mr-4" %>
-              <% end %>
-              <%= button_to 'Remove', admin_organization_regulation_path(org_reg), method: :delete, data: { confirm: 'Are you sure?' }, class: "text-red-600 hover:text-red-900" %>
-            </td>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Regulation</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Agency</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Jurisdiction</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Priority</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Added By</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Added</th>
+            <th scope="col" class="relative px-6 py-3">
+              <span class="sr-only">Actions</span>
+            </th>
           </tr>
-        <% end %>
-        <% if @organization_regulations.empty? %>
-          <tr>
-            <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">
-              No regulations added yet. <%= link_to "Add some regulations", available_admin_organization_regulations_path, class: "text-blue-600 hover:text-blue-800" %> to get started.
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% if @organization_regulations.any? %>
+            <% @organization_regulations.each do |org_reg| %>
+              <tr class="hover:bg-gray-50 transition-colors duration-150">
+                <td class="px-6 py-4 text-sm font-medium text-gray-900">
+                  <%= link_to org_reg.regulation.title, admin_regulation_path(org_reg.regulation), class: "text-primary-600 hover:text-primary-800 font-medium" %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= org_reg.regulation.agency %></td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= org_reg.regulation.jurisdiction %></td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                  <%= render Joyful::StatusPillComponent.new(status: org_reg.status) %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <% priority_colors = { 
+                       (7..10) => "text-red-600 bg-red-50", 
+                       (4..6) => "text-yellow-600 bg-yellow-50", 
+                       (0..3) => "text-green-600 bg-green-50" 
+                     } 
+                     color_class = priority_colors.find { |range, _| range.include?(org_reg.priority) }&.last || "text-gray-600"
+                  %>
+                  <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold <%= color_class %>">
+                    <%= org_reg.priority %>
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <% if org_reg.assigned_by_id.nil? %>
+                        <div class="flex items-center gap-1.5 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded w-max">
+                            <i class="fas fa-robot"></i>
+                            <span>System</span>
+                        </div>
+                    <% else %>
+                        <% user = User.find_by(id: org_reg.assigned_by_id) %>
+                        <div class="flex items-center">
+                            <div class="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 mr-2">
+                                <%= user&.avatar_initials || "?" %>
+                            </div>
+                            <span><%= user&.full_name || 'Unknown' %></span>
+                        </div>
+                    <% end %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= org_reg.assigned_at&.strftime('%b %d, %Y') || '-' %></td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div class="flex justify-end items-center gap-2">
+                    <% if org_reg.status == 'pending' %>
+                      <%= button_to update_status_admin_organization_regulation_path(org_reg, status: 'active'), 
+                          method: :patch, 
+                          class: "text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 p-1.5 rounded transition-colors",
+                          title: "Activate" do %>
+                          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                      <% end %>
+                    <% else %>
+                      <%= button_to update_status_admin_organization_regulation_path(org_reg, status: 'archived'), 
+                          method: :patch, 
+                          class: "text-yellow-600 hover:text-yellow-900 bg-yellow-50 hover:bg-yellow-100 p-1.5 rounded transition-colors",
+                          title: "Archive" do %>
+                          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                      <% end %>
+                    <% end %>
+                    
+                    <%= button_to admin_organization_regulation_path(org_reg), 
+                        method: :delete, 
+                        data: { confirm: 'Are you sure you want to remove this regulation?' }, 
+                        class: "text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-1.5 rounded transition-colors",
+                        title: "Remove" do %>
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="8" class="px-6 py-20 text-center">
+                <div class="flex flex-col items-center justify-center">
+                    <div class="mx-auto h-16 w-16 bg-primary-50 rounded-full flex items-center justify-center mb-4 animate-float">
+                        <svg class="h-8 w-8 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">No Regulations Found</h3>
+                    <p class="text-sm text-gray-500 mb-6 max-w-sm mx-auto">Get started by adding regulations to your organization specifically.</p>
+                    <%= render Joyful::ButtonComponent.new(
+                        text: "Explore Regulations",
+                        path: available_admin_organization_regulations_path,
+                        variant: :primary
+                    ) %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
 
-  <div class="mt-4">
-    <%= paginate @organization_regulations %>
+  <div class="mt-8 flex justify-center">
+    <%= paginate @organization_regulations, theme: 'tailwind' %>
   </div>
 </div>

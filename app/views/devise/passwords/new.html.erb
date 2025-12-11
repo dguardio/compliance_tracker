@@ -1,0 +1,48 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8">
+    <div class="text-center">
+      <div class="mx-auto h-12 w-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 text-2xl">
+        <i class="fas fa-key"></i>
+      </div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 tracking-tight">
+        Reset Password
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        Enter your email to receive instructions
+      </p>
+    </div>
+
+    <%= render Joyful::CardComponent.new(padding: true) do %>
+      <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post, class: "space-y-6" }) do |f| %>
+        <%= render "devise/shared/error_messages", resource: resource %>
+
+        <%= render Joyful::InputComponent.new(
+              form: f, 
+              method: :email, 
+              label: "Email Address", 
+              placeholder: "you@example.com",
+              required: true,
+              type: :email_field,
+              autofocus: true,
+              autocomplete: "email"
+            ) %>
+
+        <div>
+          <%= render Joyful::ButtonComponent.new(
+                text: "Send Reset Instructions",
+                type: :submit,
+                variant: :primary,
+                class: "w-full justify-center"
+              ) %>
+        </div>
+      <% end %>
+    <% end %>
+    
+    <div class="text-center">
+        <p class="text-sm text-gray-600">
+            Remembered your password? 
+            <%= link_to "Log in", new_session_path(resource_name), class: "font-medium text-primary-600 hover:text-primary-500 transition-colors" %>
+        </p>
+    </div>
+  </div>
+</div>

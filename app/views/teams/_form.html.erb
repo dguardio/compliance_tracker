@@ -1,0 +1,73 @@
+<%= form_with model: [@organization, @team], local: true, class: "space-y-6" do |form| %>
+  <% if @team.errors.any? %>
+    <%= render Joyful::CardComponent.new(padding: true) do %>
+      <div class="space-y-2">
+        <h2 class="text-lg font-bold text-red-700 flex items-center gap-2">
+          <i class="fas fa-exclamation-circle"></i>
+          <%= pluralize(@team.errors.count, "error") %> prohibited this team from being saved:
+        </h2>
+        <ul class="list-disc pl-5 text-red-600">
+          <% @team.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  <% end %>
+
+  <%= render Joyful::CardComponent.new(title: @team.new_record? ? "New Team" : "Edit Team", icon: "users", padding: true) do %>
+    <div class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <%= render Joyful::InputComponent.new(
+              form: form, 
+              method: :name, 
+              label: "Team Name", 
+              placeholder: "e.g., Security Operations"
+            ) %>
+
+        <%= render Joyful::InputComponent.new(
+              form: form, 
+              method: :department_id, 
+              label: "Department", 
+              type: :collection_select, 
+              collection: @organization.departments, 
+              value_method: :id, 
+              text_method: :name, 
+              options: { prompt: "Select a department" }, 
+              html_options: { class: "w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" }
+            ) %>
+      </div>
+
+      <%= render Joyful::InputComponent.new(
+            form: form, 
+            method: :status, 
+            label: "Status", 
+            type: :select, 
+            choices: Team.statuses.keys.map { |s| [s.titleize, s] },
+            options: {},
+            html_options: { class: "w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" }
+          ) %>
+
+      <%= render Joyful::InputComponent.new(
+            form: form, 
+            method: :description, 
+            label: "Description", 
+            type: :text_area,
+            placeholder: "Describe the team's responsibilities...",
+            rows: 3
+          ) %>
+    </div>
+  <% end %>
+
+  <div class="flex justify-end pt-4 gap-3">
+    <%= link_to "Cancel", organization_path(@organization), 
+                class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200" %>
+    
+    <%= render Joyful::ButtonComponent.new(
+          text: @team.new_record? ? "Create Team" : "Update Team",
+          type: :submit,
+          variant: :primary,
+          icon: @team.new_record? ? "plus" : "save"
+        ) %>
+  </div>
+<% end %>

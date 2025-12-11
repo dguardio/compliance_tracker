@@ -1,176 +1,156 @@
-<div class="min-h-screen bg-gray-50 py-8">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Header -->
-    <div class="mb-8">
-      <div class="flex justify-between items-center">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">Permissions Management</h1>
-          <p class="mt-2 text-gray-600">Manage user and role permissions across your organization</p>
-        </div>
-        <div class="flex space-x-3">
-          <%= link_to organization_roles_path(current_user.organization), 
-                      class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
-            <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-            </svg>
-            Manage Roles
-          <% end %>
-          <%= link_to new_organization_permission_path(current_user.organization), 
-                      class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
-            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-            </svg>
-            New Permission
-          <% end %>
-        </div>
-      </div>
+<div class="container mx-auto px-4 py-8">
+  <!-- Header Section -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Permission Registry</h1>
+      <p class="mt-1 text-gray-500">Fine-grained access control for specific resources and actions.</p>
     </div>
-
-    <!-- Search and Filters -->
-    <div class="bg-white shadow rounded-lg mb-6">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-900">Search & Filters</h3>
-      </div>
-      <div class="px-6 py-4">
-        <%= form_with url: organization_permissions_path(current_user.organization), method: :get, local: true, class: "space-y-4" do |f| %>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <!-- Search -->
-            <div>
-              <%= f.label :search, "Search", class: "block text-sm font-medium text-gray-700 mb-1" %>
-              <%= f.text_field :search, value: params[:search], placeholder: "Search permissions...", 
-                              class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-            </div>
-
-            <!-- Grantee Type Filter -->
-            <div>
-              <%= f.label :grantee_type, "Grantee Type", class: "block text-sm font-medium text-gray-700 mb-1" %>
-              <%= f.select :grantee_type, options_for_select([['All', ''], ['User', 'User'], ['Role', 'Role']], params[:grantee_type]), 
-                          {}, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-            </div>
-
-            <!-- Action Filter -->
-            <div>
-              <%= f.label :permission_action, "Action", class: "block text-sm font-medium text-gray-700 mb-1" %>
-              <%= f.select :permission_action, options_for_select([["All", ""]] + @actions.map { |a| [a.titleize, a] }, params[:permission_action]), 
-                          {}, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-            </div>
-
-            <!-- Resource Type Filter -->
-            <div>
-              <%= f.label :resource_type, "Resource Type", class: "block text-sm font-medium text-gray-700 mb-1" %>
-              <%= f.select :resource_type, options_for_select([['All', '']] + @resource_types.map { |rt| [rt.titleize, rt] }, params[:resource_type]), 
-                          {}, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-            </div>
-          </div>
-
-          <div class="flex justify-between items-center">
-            <div class="flex space-x-3">
-              <%= f.submit "Apply Filters", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-              <%= link_to "Clear", organization_permissions_path(current_user.organization), 
-                          class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-            </div>
-            <div class="text-sm text-gray-500">
-              <% if @permissions.respond_to?(:total_count) %>
-                <%= pluralize(@permissions.total_count, 'permission') %> found
-              <% else %>
-                <%= pluralize(@permissions.count, 'permission') %> found
-              <% end %>
-            </div>
-          </div>
-        <% end %>
-      </div>
+    <div class="flex gap-3">
+        <%= render Joyful::ButtonComponent.new(
+            text: "Manage Roles",
+            path: organization_roles_path(current_user.organization),
+            variant: :secondary,
+            icon: "shield-check"
+          ) %>
+        <%= render Joyful::ButtonComponent.new(
+            text: "Grant Permission",
+            path: new_organization_permission_path(current_user.organization),
+            variant: :primary,
+            icon: "key"
+          ) %>
     </div>
+  </div>
 
-    <!-- Permissions Table -->
-    <div class="bg-white shadow overflow-hidden sm:rounded-md">
-      <% if @permissions.any? %>
-        <ul class="divide-y divide-gray-200">
-          <% @permissions.each do |permission| %>
-            <li class="px-6 py-4 hover:bg-gray-50">
-              <div class="flex items-center justify-between">
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center space-x-3">
-                    <div class="flex-shrink-0">
-                      <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                        <svg class="h-5 w-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                      </div>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                      <div class="flex items-center space-x-2">
-                        <h3 class="text-sm font-medium text-gray-900 truncate">
-                          <%= permission.name %>
-                        </h3>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          <%= permission.action.titleize %>
-                        </span>
-                      </div>
-                      <div class="mt-1 flex items-center space-x-4 text-sm text-gray-500">
-                        <span>
-                          <span class="font-medium">Grantee:</span> 
-                          <%= permission.grantee_type %> - 
-                          <% if permission.grantee_type == 'User' %>
-                            <%= permission.grantee&.full_name || 'N/A' %>
-                          <% else %>
-                            <%= permission.grantee&.name || 'N/A' %>
-                          <% end %>
-                        </span>
-                        <span>
-                          <span class="font-medium">Resource:</span> 
-                          <%= permission.resource_type %> - <%= permission.resource&.name || 'All' %>
-                        </span>
-                        <span>
-                          <span class="font-medium">Created:</span> 
-                          <%= permission.created_at.strftime("%b %d, %Y") %>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+  <!-- Search & Filter Bar -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-8">
+    <%= form_with url: organization_permissions_path(current_user.organization), method: :get, local: true, class: "flex flex-col gap-4" do |f| %>
+      <div class="flex flex-col md:flex-row gap-4 items-end">
+        <div class="flex-grow w-full">
+            <%= f.label :search, "Search Permissions", class: "text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block" %>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                    </svg>
                 </div>
-                <div class="flex items-center space-x-2">
-                  <%= link_to organization_permission_path(current_user.organization, permission), 
-                              class: "text-indigo-600 hover:text-indigo-900 text-sm font-medium" do %>
-                    View
-                  <% end %>
-                  <%= link_to edit_organization_permission_path(current_user.organization, permission), 
-                              class: "text-gray-600 hover:text-gray-900 text-sm font-medium" do %>
-                    Edit
-                  <% end %>
-                  <%= link_to organization_permission_path(current_user.organization, permission), 
-                              method: :delete, 
-                              data: { confirm: 'Are you sure you want to delete this permission?' },
-                              class: "text-red-600 hover:text-red-900 text-sm font-medium" do %>
-                    Delete
-                  <% end %>
+                <%= f.text_field :search, value: params[:search], 
+                                class: "block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-all duration-200", 
+                                placeholder: "Search by grantee, resource, or action..." %>
+            </div>
+        </div>
+        
+        <div class="w-full md:w-48">
+             <%= f.label :permission_action, "Action", class: "text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block" %>
+             <%= f.select :permission_action, options_for_select([["All Actions", ""]] + @actions.map { |a| [a.titleize, a] }, params[:permission_action]), 
+                          {}, class: "block w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" %>
+        </div>
+
+        <div class="w-full md:w-48">
+            <%= f.label :grantee_type, "Grantee Type", class: "text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block" %>
+            <%= f.select :grantee_type, options_for_select([['All Types', ''], ['User', 'User'], ['Role', 'Role']], params[:grantee_type]), 
+                        {}, class: "block w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" %>
+        </div>
+        
+        <div class="flex gap-2">
+             <%= render Joyful::ButtonComponent.new(
+                text: "Filter",
+                variant: :secondary,
+                form: f
+            ) %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Permissions List -->
+  <% if @permissions.any? %>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <ul class="divide-y divide-gray-100">
+          <% @permissions.each do |permission| %>
+            <li class="group hover:bg-gray-50 transition-colors duration-150">
+              <div class="px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center flex-1 min-w-0">
+                    <!-- Icon/Avatar -->
+                    <div class="flex-shrink-0 mr-4">
+                         <% if permission.grantee_type == 'User' %>
+                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold border border-blue-200">
+                                <%= permission.grantee&.first_name&.first&.upcase || 'U' %>
+                            </div>
+                         <% else %>
+                             <div class="h-10 w-10 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600 font-bold border border-purple-200">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            </div>
+                         <% end %>
+                    </div>
+
+                    <div class="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                        <!-- Grantee -->
+                         <div>
+                            <p class="text-sm font-bold text-gray-900 group-hover:text-primary-600 transition-colors truncate">
+                                <%= permission.name %>
+                            </p>
+                            <p class="text-xs text-gray-500">
+                                <%= permission.grantee_type %> • 
+                                <% if permission.grantee_type == 'User' %>
+                                    <%= permission.grantee&.full_name || 'N/A' %>
+                                <% else %>
+                                    <%= permission.grantee&.name || 'N/A' %>
+                                <% end %>
+                            </p>
+                        </div>
+                        
+                        <!-- Action -->
+                        <div>
+                             <%= render Joyful::StatusPillComponent.new(status: permission.action) %>
+                        </div>
+
+                        <!-- Resource -->
+                        <div class="text-sm text-gray-500">
+                            <span class="font-medium text-gray-900"><%= permission.resource_type %></span>
+                             <% if permission.resource %>
+                                <span class="bg-gray-100 px-1.5 py-0.5 rounded text-xs ml-1"><%= permission.resource.name %></span>
+                             <% else %>
+                                <span class="text-gray-400 italic text-xs ml-1">(Global)</span>
+                             <% end %>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ml-4 flex items-center space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                   <%= link_to edit_organization_permission_path(current_user.organization, permission), class: "text-gray-400 hover:text-blue-600 transition-colors p-1" do %>
+                        <span class="sr-only">Edit</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    <% end %>
+                    <%= link_to organization_permission_path(current_user.organization, permission), method: :delete, data: { confirm: 'Revoke this permission?' }, class: "text-gray-400 hover:text-red-600 transition-colors p-1" do %>
+                        <span class="sr-only">Delete</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    <% end %>
                 </div>
               </div>
             </li>
           <% end %>
         </ul>
-
-        <!-- Pagination -->
-        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-          <%= paginate @permissions %>
-        </div>
-      <% else %>
-        <div class="text-center py-12">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No permissions found</h3>
-          <p class="mt-1 text-sm text-gray-500">Get started by creating a new permission.</p>
-          <div class="mt-6">
-            <%= link_to new_organization_permission_path(current_user.organization), 
-                        class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
-              <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-              </svg>
-              New Permission
-            <% end %>
-          </div>
-        </div>
-      <% end %>
     </div>
-  </div>
+
+    <!-- Pagination -->
+    <div class="mt-8 flex justify-center">
+      <%= paginate @permissions, theme: 'tailwind' %>
+    </div>
+  <% else %>
+    <div class="text-center py-20 bg-white rounded-xl shadow-sm border border-dashed border-gray-300">
+      <div class="mx-auto h-24 w-24 bg-indigo-50 rounded-full flex items-center justify-center mb-6 animate-float">
+        <svg class="h-12 w-12 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-gray-900 mb-2">No Permissions Granting</h3>
+      <p class="text-gray-500 mb-8 max-w-sm mx-auto">Permissions allow you to fine-tune what users and roles can do.</p>
+      <%= render Joyful::ButtonComponent.new(
+          text: "Grant Permission",
+          path: new_organization_permission_path(current_user.organization),
+          variant: :primary,
+          icon: "key"
+      ) %>
+    </div>
+  <% end %>
 </div>

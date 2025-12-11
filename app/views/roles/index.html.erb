@@ -1,152 +1,132 @@
 <% content_for :title, "Roles - #{current_user.organization.name}" %>
 
-<div class="min-h-screen bg-gray-50">
-  <!-- Header -->
-  <div class="bg-white shadow">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center py-6">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">Roles</h1>
-          <p class="mt-1 text-sm text-gray-500">
-            Manage roles and permissions for <%= current_user.organization.name %>
-          </p>
-        </div>
-        <div class="flex space-x-3">
-          <%= link_to new_organization_role_path(current_user.organization), 
-                      class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
-            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-            </svg>
-            New Role
-          <% end %>
-        </div>
-      </div>
+<div class="container mx-auto px-4 py-8">
+  <!-- Header Section -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Role Definitions</h1>
+      <p class="mt-1 text-gray-500">Define responsibilities and access levels for your organization.</p>
+    </div>
+    <div class="flex gap-3">
+        <%= render Joyful::ButtonComponent.new(
+            text: "Manage Permissions",
+            path: organization_permissions_path(current_user.organization),
+            variant: :secondary,
+            icon: "key"
+          ) %>
+        <%= render Joyful::ButtonComponent.new(
+            text: "New Role",
+            path: new_organization_role_path(current_user.organization),
+            variant: :primary,
+            icon: "plus"
+          ) %>
     </div>
   </div>
 
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Filters and Search -->
-    <div class="bg-white rounded-lg shadow mb-6">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-900">Filters</h3>
-      </div>
-      <div class="px-6 py-4">
-        <%= form_with url: organization_roles_path(current_user.organization), method: :get, local: true, class: "space-y-4" do |f| %>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <!-- Search -->
-            <div>
-              <%= f.label :search, "Search", class: "block text-sm font-medium text-gray-700 mb-1" %>
-              <%= f.text_field :search, value: params[:search], 
-                              placeholder: "Search roles...",
-                              class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-            </div>
-
-            <!-- Resource Type Filter -->
-            <div>
-              <%= f.label :resource_type, "Resource Type", class: "block text-sm font-medium text-gray-700 mb-1" %>
-              <%= f.select :resource_type, options_for_select([["All", ""]] + @resource_types.map { |rt| [rt, rt] }, params[:resource_type]), 
-                          {}, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-            </div>
-
-            <!-- Name Filter -->
-            <div>
-              <%= f.label :name, "Role Name", class: "block text-sm font-medium text-gray-700 mb-1" %>
-              <%= f.text_field :name, value: params[:name], 
-                              placeholder: "Filter by name...",
-                              class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-            </div>
-
-            <!-- Filter Button -->
-            <div class="flex items-end">
-              <%= f.submit "Filter", class: "w-full bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500" %>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    </div>
-
-    <!-- Results Count -->
-    <div class="mb-4">
-      <div class="text-sm text-gray-500">
-        <% if @roles.respond_to?(:total_count) %>
-          <%= pluralize(@roles.total_count, 'role') %> found
-        <% else %>
-          <%= pluralize(@roles.count, 'role') %> found
-        <% end %>
-      </div>
-    </div>
-
-    <!-- Roles List -->
-    <div class="bg-white shadow overflow-hidden sm:rounded-md">
-      <ul class="divide-y divide-gray-200">
-        <% @roles.each do |role| %>
-          <li>
-            <div class="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <h3 class="text-lg font-medium text-gray-900">
-                      <%= link_to role.display_name, organization_role_path(current_user.organization, role), 
-                                  class: "hover:text-indigo-600" %>
-                    </h3>
-                    <div class="mt-1 flex items-center space-x-4 text-sm text-gray-500">
-                      <span>
-                        <span class="font-medium">Resource:</span> 
-                        <%= role.resource_type %>
-                        <% if role.resource %>
-                          - <%= role.resource.name %>
-                        <% else %>
-                          (All)
-                        <% end %>
-                      </span>
-                      <span>
-                        <span class="font-medium">Users:</span> 
-                        <%= role.users.count %>
-                      </span>
-                    </div>
-                  </div>
-                  <div class="flex items-center space-x-2">
-                    <%= link_to "View", organization_role_path(current_user.organization, role), 
-                                class: "text-indigo-600 hover:text-indigo-900 text-sm font-medium" %>
-                    <%= link_to "Edit", edit_organization_role_path(current_user.organization, role), 
-                                class: "text-gray-600 hover:text-gray-900 text-sm font-medium" %>
-                    <%= link_to "Delete", organization_role_path(current_user.organization, role), 
-                                method: :delete,
-                                data: { confirm: "Are you sure you want to delete this role?" },
-                                class: "text-red-600 hover:text-red-900 text-sm font-medium" %>
-                  </div>
+  <!-- Search & Filter Bar -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-8">
+    <%= form_with url: organization_roles_path(current_user.organization), method: :get, local: true, class: "flex flex-col gap-4" do |f| %>
+      <div class="flex flex-col md:flex-row gap-4 items-end">
+        <div class="flex-grow w-full">
+            <%= f.label :search, "Search Roles", class: "text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block" %>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                    </svg>
                 </div>
-              </div>
+                <%= f.text_field :search, value: params[:search], 
+                                class: "block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-all duration-200", 
+                                placeholder: "e.g. Administrator, Auditor..." %>
             </div>
-          </li>
-        <% end %>
-      </ul>
-
-      <% if @roles.empty? %>
-        <div class="text-center py-12">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No roles found</h3>
-          <p class="mt-1 text-sm text-gray-500">
-            Get started by creating a new role.
-          </p>
-          <div class="mt-6">
-            <%= link_to new_organization_role_path(current_user.organization), 
-                        class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
-              <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-              </svg>
-              New Role
-            <% end %>
-          </div>
         </div>
+        
+        <div class="w-full md:w-64">
+            <%= f.label :resource_type, "Resource Type", class: "text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block" %>
+            <%= f.select :resource_type, options_for_select([["All Resources", ""]] + @resource_types.map { |rt| [rt, rt] }, params[:resource_type]), 
+                    {}, class: "block w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" %>
+        </div>
+        
+        <div class="flex gap-2">
+             <%= render Joyful::ButtonComponent.new(
+                text: "Filter",
+                variant: :secondary,
+                form: f
+            ) %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Roles Grid -->
+  <% if @roles.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% @roles.each do |role| %>
+        <%= render Joyful::CardComponent.new(class: "h-full flex flex-col group hover:-translate-y-1 transition-all duration-300") do |card| %>
+            <div class="flex-grow">
+                <div class="flex justify-between items-start mb-4">
+                     <h3 class="text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
+                        <%= link_to role.display_name, organization_role_path(current_user.organization, role) %>
+                     </h3>
+                     <div class="bg-gray-100 rounded-lg px-2 py-1 text-xs font-bold text-gray-600 uppercase tracking-wider">
+                        <%= role.resource_type || "GLOBAL" %>
+                     </div>
+                </div>
+
+                <div class="mb-6 space-y-2">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-gray-500">Resource Context</span>
+                        <span class="font-medium text-gray-900 truncate max-w-[150px]">
+                            <%= role.resource&.name || "All Resources" %>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="bg-primary-50 rounded-lg p-3 text-center border border-primary-100">
+                    <span class="block text-2xl font-bold text-primary-700 tabular-nums"><%= role.users.count %></span>
+                    <span class="text-xs text-primary-600 font-medium uppercase tracking-wide">Assigned Users</span>
+                </div>
+            </div>
+
+            <% card.footer do %>
+                <div class="flex justify-between items-center w-full mt-4">
+                     <%= link_to organization_role_path(current_user.organization, role), class: "text-gray-500 hover:text-primary-600 text-sm font-medium transition-colors" do %>
+                        View Details
+                     <% end %>
+                     
+                     <div class="flex space-x-2">
+                        <%= link_to edit_organization_role_path(current_user.organization, role), class: "text-gray-400 hover:text-blue-600 transition-colors" do %>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        <% end %>
+                        <%= link_to organization_role_path(current_user.organization, role), method: :delete, data: { confirm: "Delete this role?" }, class: "text-gray-400 hover:text-red-600 transition-colors" do %>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        <% end %>
+                     </div>
+                </div>
+            <% end %>
+        <% end %>
       <% end %>
     </div>
 
     <!-- Pagination -->
-    <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-      <%= paginate @roles %>
+    <div class="mt-8 flex justify-center">
+      <%= paginate @roles, theme: 'tailwind' %>
     </div>
-  </div>
+  <% else %>
+    <div class="text-center py-20 bg-white rounded-xl shadow-sm border border-dashed border-gray-300">
+      <div class="mx-auto h-24 w-24 bg-indigo-50 rounded-full flex items-center justify-center mb-6 animate-float">
+        <svg class="h-12 w-12 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-gray-900 mb-2">No Roles Found</h3>
+      <p class="text-gray-500 mb-8 max-w-sm mx-auto">Define roles to structure permissions for your organization.</p>
+      <%= render Joyful::ButtonComponent.new(
+          text: "Create Role",
+          path: new_organization_role_path(current_user.organization),
+          variant: :primary,
+          icon: "plus"
+      ) %>
+    </div>
+  <% end %>
 </div>

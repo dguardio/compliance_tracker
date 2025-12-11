@@ -1,0 +1,71 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8">
+    <div class="text-center">
+      <div class="mx-auto h-12 w-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 text-2xl">
+        <i class="fas fa-user-plus"></i>
+      </div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 tracking-tight">
+        Create Account
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        Start your compliance journey today
+      </p>
+    </div>
+
+    <%= render Joyful::CardComponent.new(padding: true) do %>
+      <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "space-y-6" }) do |f| %>
+        <%= render "devise/shared/error_messages", resource: resource %>
+
+        <%= render Joyful::InputComponent.new(
+              form: f, 
+              method: :email, 
+              label: "Email Address", 
+              placeholder: "you@example.com",
+              required: true,
+              type: :email_field,
+              autofocus: true,
+              autocomplete: "email"
+            ) %>
+
+        <%= render Joyful::InputComponent.new(
+              form: f, 
+              method: :password, 
+              label: "Password", 
+              placeholder: "••••••••",
+              hint: @minimum_password_length ? "(#{@minimum_password_length} characters minimum)" : nil,
+              required: true,
+              type: :password_field,
+              autocomplete: "new-password"
+            ) %>
+
+        <%= render Joyful::InputComponent.new(
+              form: f, 
+              method: :password_confirmation, 
+              label: "Confirm Password", 
+              placeholder: "••••••••",
+              required: true,
+              type: :password_field,
+              autocomplete: "new-password"
+            ) %>
+
+        <div>
+          <%= render Joyful::ButtonComponent.new(
+                text: "Sign up",
+                type: :submit,
+                variant: :primary,
+                class: "w-full justify-center"
+              ) %>
+        </div>
+      <% end %>
+    <% end %>
+    
+    <div class="text-center">
+        <p class="text-sm text-gray-600">
+            Already have an account? 
+            <%- if controller_name != 'sessions' %>
+              <%= link_to "Log in", new_session_path(resource_name), class: "font-medium text-primary-600 hover:text-primary-500 transition-colors" %>
+            <% end %>
+        </p>
+    </div>
+  </div>
+</div>

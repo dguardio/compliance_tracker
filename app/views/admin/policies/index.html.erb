@@ -1,60 +1,96 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="md:flex md:items-center md:justify-between mb-6">
-    <div class="min-w-0 flex-1">
-      <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-        Policy Management
-      </h2>
-      <p class="mt-1 text-sm text-gray-500">
-        Manage internal policies and link them to regulations.
-      </p>
+  <!-- Header -->
+  <div class="flex items-end justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Policy Library</h1>
+      <p class="mt-2 text-lg text-gray-500">Center of Truth for <span class="font-semibold text-indigo-600"><%= current_user.organization.name %></span>.</p>
     </div>
-    <div class="mt-4 flex md:ml-4 md:mt-0">
-      <%= link_to new_admin_policy_path, class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" do %>
-        <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 00-1.5 0v2.5h-2.5a.75.75 0 000 1.5h2.5v2.5a.75.75 0 001.5 0v-2.5h2.5a.75.75 0 000-1.5h-2.5v-2.5z" clip-rule="evenodd" />
-        </svg>
-        New Policy
-      <% end %>
-    </div>
+    <%= render Joyful::ButtonComponent.new(text: "Draft New Policy", variant: :primary, path: new_admin_policy_path, icon: "fa fa-pen-nib") %>
   </div>
 
-  <div class="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
-    <table class="min-w-full divide-y divide-gray-300">
-      <thead>
-        <tr>
-          <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Title</th>
-          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
-          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Effective Date</th>
-          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Linked Items</th>
-          <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-            <span class="sr-only">Actions</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-200">
-        <% @policies.each do |policy| %>
-          <tr>
-            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-              <%= link_to policy.title, admin_policy_path(policy), class: "hover:text-indigo-600" %>
-            </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-              <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset <%= policy.active? ? 'bg-green-50 text-green-700 ring-green-600/20' : 'bg-gray-50 text-gray-600 ring-gray-500/10' %>">
-                <%= policy.status.humanize %>
-              </span>
-            </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-              <%= policy.effective_date&.strftime("%b %d, %Y") || "Not set" %>
-            </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-              <%= policy.policy_links.count %>
-            </td>
-            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-              <%= link_to "View", admin_policy_path(policy), class: "text-indigo-600 hover:text-indigo-900 mr-4" %>
-              <%= link_to "Edit", edit_admin_policy_path(policy), class: "text-indigo-600 hover:text-indigo-900" %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+  <!-- Filter / Search (Visual Placeholder for now) -->
+  <div class="flex items-center gap-2 mb-8 overflow-x-auto pb-2">
+     <button class="px-4 py-2 rounded-full bg-gray-900 text-white text-sm font-medium whitespace-nowrap">All Policies</button>
+     <button class="px-4 py-2 rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium whitespace-nowrap">Drafts</button>
+     <button class="px-4 py-2 rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium whitespace-nowrap">Effective</button>
+     <button class="px-4 py-2 rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium whitespace-nowrap">Archived</button>
   </div>
+
+  <!-- Document Grid -->
+  <% if @policies.any? %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+      <% @policies.each do |policy| %>
+        <%= link_to admin_policy_path(policy), class: "group relative flex flex-col items-center" do %>
+            <!-- Document Cover -->
+            <div class="relative w-full aspect-[21/29.7] bg-white rounded-lg shadow-sm border border-slate-200 transition-all duration-300 ease-in-out group-hover:-translate-y-2 group-hover:shadow-xl group-hover:rotate-1 z-10 overflow-hidden flex flex-col transform origin-bottom">
+                
+                <!-- Binder Stripe (Color Code based on Status) -->
+                <div class="h-2 w-full <%= policy.active? ? 'bg-indigo-500' : (policy.draft? ? 'bg-amber-400' : 'bg-slate-300') %>"></div>
+                
+                <!-- Body -->
+                <div class="flex-1 p-6 flex flex-col">
+                    <!-- Status Badge -->
+                    <div class="mb-4 flex justify-end">
+                       <% if policy.active? %>
+                          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700">Effective</span>
+                       <% elsif policy.draft? %>
+                          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700">Draft</span>
+                       <% else %>
+                          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600">Archived</span>
+                       <% end %>
+                    </div>
+
+                    <!-- Title -->
+                    <h3 class="flex-1 font-serif text-xl text-gray-800 leading-snug line-clamp-4 group-hover:text-indigo-600 transition-colors">
+                        <%= policy.title %>
+                    </h3>
+
+                    <!-- Footer Info -->
+                    <div class="mt-4 pt-4 border-t border-slate-100 space-y-2">
+                        <div class="text-xs text-gray-400 font-mono">
+                            VER <%= policy.updated_at.year %>.<%= policy.updated_at.month %>
+                        </div>
+                        <div class="text-xs text-slate-500">
+                           <% if policy.effective_date %>
+                              Effective: <span class="font-semibold"><%= policy.effective_date.strftime("%b %d, %Y") %></span>
+                           <% else %>
+                              <span class="italic">Not effective yet</span>
+                           <% end %>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page curl effect (CSS) -->
+                <div class="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-tl from-slate-200 to-transparent opacity-20"></div>
+            </div>
+            
+            <!-- Stack Effect (Pages behind) -->
+            <div class="absolute top-2 w-[96%] aspect-[21/29.7] bg-white rounded-lg shadow-sm border border-slate-200 z-0 rotate-2 opacity-60"></div>
+            <div class="absolute top-4 w-[92%] aspect-[21/29.7] bg-white rounded-lg shadow-sm border border-slate-200 -z-10 -rotate-1 opacity-40"></div>
+        <% end %>
+      <% end %>
+
+      <!-- New Policy Card -->
+      <%= link_to new_admin_policy_path, class: "group relative flex flex-col items-center justify-center w-full aspect-[21/29.7] rounded-lg border-2 border-dashed border-slate-300 hover:border-indigo-400 hover:bg-indigo-50 transition-all duration-300" do %>
+         <div class="text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 text-indigo-600 mb-3 group-hover:scale-110 transition-transform">
+               <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            </div>
+            <span class="block text-sm font-medium text-gray-900">Create New Policy</span>
+            <span class="block text-xs text-gray-500 mt-1">Start from scratch or upload</span>
+         </div>
+      <% end %>
+    </div>
+  <% else %>
+    <!-- Empty State -->
+    <div class="text-center py-24 bg-slate-50 rounded-3xl border border-dashed border-slate-300">
+        <div class="mx-auto h-24 w-24 text-slate-300 mb-4">
+           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">The library is empty</h3>
+        <p class="text-gray-500 mb-8 max-w-sm mx-auto">Policies engage your team and set the standards. Add your first policy to get started.</p>
+        <%= render Joyful::ButtonComponent.new(text: "Create First Policy", variant: :primary, path: new_admin_policy_path) %>
+    </div>
+  <% end %>
+
 </div>

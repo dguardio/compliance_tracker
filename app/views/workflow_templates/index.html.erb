@@ -1,39 +1,94 @@
-<div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-3xl font-bold text-gray-900">Workflow Templates for <%= @organization.name %></h1>
-    <%= link_to 'New Template', new_organization_workflow_template_path(@organization), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700" %>
+<div class="container mx-auto px-4 py-8">
+  <!-- Header Section -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Workflow Blueprints</h1>
+      <p class="mt-1 text-gray-500">Design automated compliance processes and approval chains.</p>
+    </div>
+    <% if policy(WorkflowTemplate.new(organization: @organization)).create? %>
+      <%= render Joyful::ButtonComponent.new(
+          text: "Create Blueprint",
+          path: new_organization_workflow_template_path(@organization),
+          variant: :primary,
+          icon: "plus"
+        ) %>
+    <% end %>
   </div>
 
-  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-    <ul role="list" class="divide-y divide-gray-200">
+  <% if @workflow_templates.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <% @workflow_templates.each do |template| %>
-        <li>
-          <%= link_to organization_workflow_template_path(@organization, template), class: "block hover:bg-gray-50" do %>
-            <div class="px-4 py-4 sm:px-6">
-              <div class="flex items-center justify-between">
-                <p class="text-lg font-medium text-indigo-600 truncate"><%= template.name %></p>
-                <div class="ml-2 flex-shrink-0 flex">
-                  <% if template.is_default? %>
-                    <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                      Default
-                    </p>
-                  <% end %>
+        <%= render Joyful::CardComponent.new(class: "h-full flex flex-col group hover:-translate-y-1 transition-all duration-300") do |card| %>
+            <div class="flex-grow">
+                <div class="flex justify-between items-start mb-4">
+                     <!-- "Blueprint" Icon -->
+                     <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500 font-bold text-lg shadow-sm border border-blue-100">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                     </div>
+                     <% if template.is_default? %>
+                        <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-green-100 text-green-700 uppercase tracking-wide">
+                            Default
+                        </span>
+                     <% end %>
                 </div>
-              </div>
-              <div class="mt-2 sm:flex sm:justify-between">
-                <div class="sm:flex">
-                  <p class="flex items-center text-sm text-gray-500">
-                    <%= template.description %>
-                  </p>
+
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
+                    <%= link_to template.name, organization_workflow_template_path(@organization, template) %>
+                </h3>
+
+                <p class="text-sm text-gray-500 line-clamp-2 mb-6 h-10">
+                    <%= template.description.presence || "No description provided." %>
+                </p>
+
+                <!-- Step Visualizer Mini -->
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-100 mb-4">
+                    <div class="flex items-center justify-between text-xs text-gray-500 mb-2">
+                        <span class="font-medium uppercase tracking-wide">Flow Depth</span>
+                        <span class="font-bold text-gray-900"><%= template.workflow_steps.count %> Steps</span>
+                    </div>
+                    <div class="flex gap-1 h-1.5 w-full">
+                         <% template.workflow_steps.limit(5).each do |step| %>
+                            <div class="h-full rounded-full bg-blue-300 flex-1"></div>
+                         <% end %>
+                         <% if template.workflow_steps.count > 5 %>
+                            <div class="h-full rounded-full bg-gray-200 flex-1"></div>
+                         <% end %>
+                    </div>
                 </div>
-                <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                  <p><%= pluralize(template.workflow_steps.count, "step") %></p>
-                </div>
-              </div>
             </div>
-          <% end %>
-        </li>
+
+            <% card.footer do %>
+                <div class="flex justify-between items-center w-full mt-2">
+                    <%= link_to organization_workflow_template_path(@organization, template), class: "text-primary-600 hover:text-primary-800 text-sm font-bold flex items-center group-hover:underline" do %>
+                        Open Designer
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    <% end %>
+
+                    <% if policy(template).destroy? %>
+                        <%= link_to organization_workflow_template_path(@organization, template), method: :delete, data: { confirm: "Delete this blueprint?" }, class: "text-gray-400 hover:text-red-500 transition-colors" do %>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        <% end %>
+                    <% end %>
+                </div>
+            <% end %>
+        <% end %>
       <% end %>
-    </ul>
-  </div>
+    </div>
+  <% else %>
+    <div class="text-center py-20 bg-white rounded-xl shadow-sm border border-dashed border-gray-300">
+      <div class="mx-auto h-24 w-24 bg-blue-50 rounded-full flex items-center justify-center mb-6 animate-float">
+        <svg class="h-12 w-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-gray-900 mb-2">No Blueprints Yet</h3>
+      <p class="text-gray-500 mb-8 max-w-sm mx-auto">Create your first workflow blueprint to automate your compliance processes.</p>
+      <%= render Joyful::ButtonComponent.new(
+          text: "Create Blueprint",
+          path: new_organization_workflow_template_path(@organization),
+          variant: :primary,
+          icon: "plus"
+      ) %>
+    </div>
+  <% end %>
 </div>

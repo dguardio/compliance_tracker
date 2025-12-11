@@ -18,11 +18,6 @@ class DashboardController < ApplicationController
     setup_dashboard_data
   end
 
-  def joyful
-    setup_dashboard_data
-    render layout: 'joyful'
-  end
-
   private
 
   def setup_dashboard_data
@@ -67,7 +62,46 @@ class DashboardController < ApplicationController
     @overdue_tasks = @compliance_controls.overdue.includes(:assignee, :compliance_requirement).order(due_date: :asc).limit(5)
 
     # Recent activity (placeholder for future implementation)
-    @recent_activity = []
+    # METRICS FOR JOYFUL DASHBOARD
+    # 1. Compliance Score (Simple heuristic: 100 - penalties)
+    # Penalties: High Risk Assessment (-10), Overdue Task (-5), Overdue Risk (-5)
+    high_risk_penalty = (@stats[:high_risk_assessments] || 0) * 10
+    overdue_task_penalty = (@stats[:overdue_tasks] || 0) * 5
+    overdue_risk_penalty = (@stats[:overdue_risk_assessments] || 0) * 5
+    raw_score = 100 - (high_risk_penalty + overdue_task_penalty + overdue_risk_penalty)
+    @compliance_score = [raw_score, 0].max
+
+    # 2. Streak (Days since last High Risk created)
+    # If no high risk items ever, use organization creation date
+    last_high_risk = @organization.risk_assessments.where('risk_score >= ?', 13).order(created_at: :desc).first
+    streak_start_date = last_high_risk ? last_high_risk.created_at.to_date : @organization.created_at.to_date
+    @streak = (Date.current - streak_start_date).to_i
+
+    # 3. Recent Activity Feed
+    # Fetch last 5 items from RiskAssessment and Document
+    recent_risks = @risk_assessments.order(created_at: :desc).limit(5).map do |r|
+      {
+        user: r.created_by,
+        action: "created risk assessment",
+        item: r,
+        item_name: r.name,
+        time: r.created_at,
+        type: 'risk'
+      }
+    end
+
+    recent_docs = @organization.documents.includes(:uploaded_by).order(created_at: :desc).limit(5).map do |d|
+      {
+        user: d.uploaded_by,
+        action: "uploaded document",
+        item: d,
+        item_name: d.title,
+        time: d.created_at,
+        type: 'document'
+      }
+    end
+
+    @recent_activity = (recent_risks + recent_docs).sort_by { |a| a[:time] }.reverse.first(5)
   end
 
   def ensure_user_has_organization

@@ -1,113 +1,137 @@
 <div class="container mx-auto px-4 py-8">
-  <div class="mb-6">
-    <%= link_to "← Back to Dashboard", dashboard_path, 
-                class: "text-blue-600 hover:text-blue-800 font-medium" %>
-  </div>
-
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-3xl font-bold text-gray-900">Compliance Frameworks</h1>
+  <!-- Header Section -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Program Overview</h1>
+      <p class="mt-1 text-gray-500">Manage your compliance frameworks and track implementation progress through the Mission Control interface.</p>
+    </div>
     <% if policy(ComplianceFramework.new(organization: @organization)).create? %>
-      <%= link_to "New Framework", new_organization_compliance_framework_path(@organization), 
-                  class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+      <%= render Joyful::ButtonComponent.new(
+            text: "Launch Framework",
+            path: new_organization_compliance_framework_path(@organization),
+            variant: :primary,
+            icon: "plus"
+          ) %>
     <% end %>
   </div>
 
-  <!-- Search Form -->
-  <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-    <%= search_form_for @q, url: organization_compliance_frameworks_path(@organization), class: "space-y-4" do |f| %>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <%= f.label :name_cont, "Name contains", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.search_field :name_cont, class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
-        </div>
-        
-        <div>
-          <%= f.label :status_eq, "Status", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.select :status_eq, 
-                      options_for_select([['All', ''], ['Active', 'active'], ['Inactive', 'inactive'], ['Draft', 'draft']], params.dig(:q, :status_eq)), 
-                      {}, 
-                      class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
-        </div>
-        
-        <div>
-          <%= f.label :version_cont, "Version contains", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.search_field :version_cont, class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+  <!-- Search & Filter Bar -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-8">
+    <%= search_form_for @q, url: organization_compliance_frameworks_path(@organization), class: "flex flex-col md:flex-row gap-4 items-end" do |f| %>
+      <div class="flex-grow w-full">
+        <%= f.label :name_cont, "Search Frameworks", class: "text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block" %>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <%= f.search_field :name_cont, class: "block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-all duration-200", placeholder: "e.g. SOC 2, HIPAA..." %>
         </div>
       </div>
       
-      <div class="flex justify-between items-center">
-        <div class="flex space-x-2">
-          <%= f.submit "Search", class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
-          <%= link_to "Clear", organization_compliance_frameworks_path(@organization), 
-                      class: "bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded" %>
-        </div>
-        <div class="text-sm text-gray-500">
-          <%= pluralize(@compliance_frameworks.total_count, 'framework') %> found
-        </div>
+      <div class="w-full md:w-48">
+        <%= f.label :status_eq, "Status", class: "text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block" %>
+        <%= f.select :status_eq, 
+                    options_for_select([['All Statuses', ''], ['Active', 'active'], ['Inactive', 'inactive'], ['Draft', 'draft']], params.dig(:q, :status_eq)), 
+                    {}, 
+                    class: "block w-full pl-3 pr-10 py-2 text-base border-gray-200 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-lg bg-gray-50 transition-all duration-200" %>
+      </div>
+
+      <div class="flex gap-2">
+        <%= render Joyful::ButtonComponent.new(
+              text: "Filter",
+              variant: :secondary,
+              form: f
+            ) %>
+        <%= link_to organization_compliance_frameworks_path(@organization), 
+            class: "inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200" do %>
+          <span class="sr-only">Clear</span>
+          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        <% end %>
       </div>
     <% end %>
   </div>
 
+  <!-- Frameworks Grid -->
   <% if @compliance_frameworks.any? %>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <% @compliance_frameworks.each do |framework| %>
-        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-          <div class="flex justify-between items-start mb-4">
-            <h3 class="text-xl font-semibold text-gray-900"><%= framework.name %></h3>
-            <span class="px-2 py-1 text-xs font-medium rounded-full 
-                       <%= framework.status == 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
-              <%= framework.status.titleize %>
-            </span>
-          </div>
-          
-          <p class="text-gray-600 mb-4"><%= framework.description %></p>
-          
-          <div class="space-y-2 mb-4">
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-500">Version:</span>
-              <span class="font-medium"><%= framework.version %></span>
-            </div>
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-500">Requirements:</span>
-              <span class="font-medium"><%= framework.compliance_requirements.count %></span>
-            </div>
-            <% if framework.settings&.dig('jurisdiction') %>
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-500">Jurisdiction:</span>
-                <span class="font-medium"><%= framework.settings['jurisdiction'] %></span>
-              </div>
+        <%= render Joyful::CardComponent.new do |card| %>
+            <% card.with_card_header(title: framework.name, subtitle: "Version #{framework.version}", path: organization_compliance_framework_path(@organization, framework)) do %>
+                <%= render Joyful::StatusPillComponent.new(status: framework.status) %>
             <% end %>
-          </div>
-          
-          <div class="flex justify-between items-center">
-            <%= link_to "View Details", organization_compliance_framework_path(@organization, framework), 
-                        class: "text-blue-600 hover:text-blue-800 font-medium" %>
-            <% if policy(framework).update? %>
-              <%= link_to "Edit", edit_organization_compliance_framework_path(@organization, framework), 
-                          class: "text-gray-600 hover:text-gray-800 font-medium" %>
+
+            <p class="text-gray-600 mb-6 line-clamp-3 h-12"><%= framework.description %></p>
+
+            <!-- Progress Visualization (Mocked Data for Visuals until implemented) -->
+            <div class="mb-6">
+                <div class="flex justify-between items-end mb-1">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Implementation</span>
+                    <span class="text-sm font-bold text-gray-900 tabular-nums"><%= rand(20..95) %>%</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                    <div class="bg-primary-500 h-2 rounded-full transition-all duration-1000 ease-out" style="width: <%= rand(20..95) %>%"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-gray-50 rounded-lg p-3 text-center border border-gray-100">
+                    <span class="block text-xl font-bold text-gray-900 tabular-nums"><%= framework.compliance_requirements.count %></span>
+                    <span class="text-xs text-gray-500 font-medium">Requirements</span>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-3 text-center border border-gray-100">
+                    <span class="block text-xl font-bold text-gray-900 tabular-nums"><%= framework.settings&.dig('jurisdiction') || 'Global' %></span>
+                    <span class="text-xs text-gray-500 font-medium">Jurisdiction</span>
+                </div>
+            </div>
+            
+            <% card.footer do %>
+                <div class="flex gap-3 w-full">
+                    <%= render Joyful::ButtonComponent.new(
+                        text: "Mission Map",
+                        path: organization_compliance_framework_path(@organization, framework),
+                        variant: :primary,
+                        class: "flex-1"
+                    ) %>
+                    
+                    <% if policy(framework).update? %>
+                        <%= render Joyful::ButtonComponent.new(
+                            path: edit_organization_compliance_framework_path(@organization, framework),
+                            variant: :secondary,
+                            icon: "pencil",
+                            class: "px-3"
+                        ) %>
+                    <% end %>
+                </div>
             <% end %>
-          </div>
-        </div>
+        <% end %>
       <% end %>
     </div>
 
     <!-- Pagination -->
-    <div class="mt-8">
-      <%= paginate @compliance_frameworks %>
+    <div class="mt-8 flex justify-center">
+      <%= paginate @compliance_frameworks, theme: 'tailwind' %>
     </div>
   <% else %>
-    <div class="text-center py-12">
-      <div class="text-gray-400 mb-4">
-        <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div class="text-center py-20 bg-white rounded-xl shadow-sm border border-dashed border-gray-300">
+      <div class="mx-auto h-24 w-24 bg-blue-50 rounded-full flex items-center justify-center mb-6 animate-float">
+        <svg class="h-12 w-12 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       </div>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">No compliance frameworks</h3>
-      <p class="text-gray-500 mb-4">Get started by creating your first compliance framework.</p>
+      <h3 class="text-xl font-bold text-gray-900 mb-2">No Frameworks Found</h3>
+      <p class="text-gray-500 mb-8 max-w-sm mx-auto">Get started by launching your first compliance framework to begin tracking your security posture.</p>
       <% if policy(ComplianceFramework.new(organization: @organization)).create? %>
-        <%= link_to "Create Framework", new_organization_compliance_framework_path(@organization), 
-                    class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+        <%= render Joyful::ButtonComponent.new(
+            text: "Launch First Framework",
+            path: new_organization_compliance_framework_path(@organization),
+            variant: :primary,
+            icon: "plus"
+        ) %>
       <% end %>
     </div>
   <% end %>
-</div> 
+</div>

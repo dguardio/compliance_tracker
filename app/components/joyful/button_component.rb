@@ -12,32 +12,33 @@ class Joyful::ButtonComponent < ViewComponent::Base
   end
 
   def call
-    classes = base_classes + variant_classes
+    classes = "#{base_classes} #{variant_classes}"
     @system_arguments[:class] = class_names(classes, @system_arguments[:class])
 
     if @path
       link_to @path, @system_arguments.merge(method: @method) do
-        content
+        inner_content
       end
     elsif @form
       @form.button @system_arguments do
-        content
+        inner_content
       end
     else
       button_tag @system_arguments do
-        content
+        inner_content
       end
     end
   end
 
   private
 
-  def content
-    capture do
-      concat tag.i(class: @icon) if @icon.present?
-      concat tag.span(@text) if @text.present?
-      concat content_tag(:span, &block) if block_given?
-    end
+  def inner_content
+    elements = []
+    elements << tag.i(class: @icon) if @icon.present?
+    elements << tag.span(@text) if @text.present?
+    # Check if a block was passed to the component (which ViewComponent captures into `content`)
+    elements << content if content.present?
+    safe_join(elements)
   end
 
   def base_classes

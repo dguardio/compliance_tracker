@@ -1,84 +1,122 @@
 <%# This is now the single source of truth for the organization form %>
 <%= form_with(model: organization, class: "space-y-8") do |form| %>
   <% if organization.errors.any? %>
-    <div id="error_explanation" class="bg-red-50 text-red-700 border border-red-200 p-4 rounded-lg">
-      <h2 class="text-lg font-bold mb-2"><%= pluralize(organization.errors.count, "error") %> prohibited this organization from being saved:</h2>
-      <ul class="list-disc pl-5">
-        <% organization.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
+    <%= render Joyful::CardComponent.new(padding: true) do %>
+      <div class="space-y-2">
+        <h2 class="text-lg font-bold text-red-700 flex items-center gap-2">
+          <i class="fas fa-exclamation-circle"></i>
+          <%= pluralize(organization.errors.count, "error") %> prohibited this organization from being saved:
+        </h2>
+        <ul class="list-disc pl-5 text-red-600">
+          <% organization.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  <% end %>
+
+  <%= render Joyful::CardComponent.new(title: "Organization Details", icon: "building", padding: true) do %>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <%= render Joyful::InputComponent.new(
+            form: form, 
+            method: :name, 
+            label: "Organization Name", 
+            placeholder: "Acme Corp",
+            required: true
+          ) %>
+
+      <%= render Joyful::InputComponent.new(
+            form: form, 
+            method: :domain, 
+            label: "Primary Domain", 
+            placeholder: "acme.com",
+            required: true
+          ) %>
     </div>
   <% end %>
 
-  <div class="space-y-4">
-    <div>
-      <%= form.label :name, class: "block text-sm font-medium text-gray-700" %>
-      <%= form.text_field :name, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-    </div>
-
-    <div>
-      <%= form.label :domain, class: "block text-sm font-medium text-gray-700" %>
-      <%= form.text_field :domain, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-    </div>
-  </div>
-
   <%= form.fields_for :settings, organization.settings do |settings_fields| %>
-    <div class="space-y-4 pt-8 border-t border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-900">Compliance Profile</h3>
-      <p class="text-sm text-gray-500">
-        Configure the profile used to automatically assign regulations. Use comma-separated values for multiple entries.
-      </p>
+    <%= render Joyful::CardComponent.new(title: "Compliance Profile", subtitle: "Configure the profile used to automatically assign regulations.", icon: "sliders", padding: true) do %>
+      <div class="space-y-6">
+        <% 
+           def parse_array_field(value)
+             return [] if value.nil?
+             return JSON.parse(value) if value.is_a?(String) && value.start_with?('[')
+             return value if value.is_a?(Array)
+             [value] # Fallback
+           rescue JSON::ParserError
+             [value]
+           end
+        %>
 
-      <div>
-        <%= settings_fields.label :compliance_industries, "Industries", class: "block text-sm font-medium text-gray-700" %>
-        <%= settings_fields.text_area :compliance_industries, 
-              value: (organization.compliance_industries || []).join(', '), 
-              rows: 3, 
-              class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
-              placeholder: "e.g., Finance, Healthcare, Technology" %>
-      </div>
+        <% industries = parse_array_field(organization.compliance_industries) %>
+        <%= render Joyful::InputComponent.new(
+              form: settings_fields, 
+              method: :compliance_industries, 
+              label: "Industries", 
+              type: :text_area,
+              value: industries.join(', '),
+              placeholder: "e.g., Finance, Healthcare, Technology",
+              rows: 3,
+              hint: "Comma-separated list of industries."
+            ) %>
 
-      <div>
-        <%= settings_fields.label :compliance_jurisdictions, "Jurisdictions", class: "block text-sm font-medium text-gray-700" %>
-        <%= settings_fields.text_area :compliance_jurisdictions, 
-              value: (organization.compliance_jurisdictions || []).join(', '), 
-              rows: 3, 
-              class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
-              placeholder: "e.g., Federal, California, New York, EU" %>
-      </div>
+        <% jurisdictions = parse_array_field(organization.compliance_jurisdictions) %>
+        <%= render Joyful::InputComponent.new(
+              form: settings_fields, 
+              method: :compliance_jurisdictions, 
+              label: "Jurisdictions", 
+              type: :text_area,
+              value: jurisdictions.join(', '),
+              placeholder: "e.g., Federal, California, New York, EU",
+              rows: 3,
+              hint: "Comma-separated list of jurisdictions."
+            ) %>
 
-      <div>
-        <%= settings_fields.label :compliance_keywords, "Compliance Keywords", class: "block text-sm font-medium text-gray-700" %>
-        <%= settings_fields.text_area :compliance_keywords, 
-              value: (organization.compliance_keywords || []).join(', '), 
-              rows: 3, 
-              class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
-              placeholder: "data privacy, cybersecurity, GDPR, SOX" %>
-      </div>
+        <% keywords = parse_array_field(organization.compliance_keywords) %>
+        <%= render Joyful::InputComponent.new(
+              form: settings_fields, 
+              method: :compliance_keywords, 
+              label: "Compliance Keywords", 
+              type: :text_area,
+              value: keywords.join(', '),
+              placeholder: "data privacy, cybersecurity, GDPR, SOX",
+              rows: 3,
+              hint: "Keywords to match against regulation text."
+            ) %>
 
-      <div>
-        <%= settings_fields.label :exclusion_terms, "Exclusion Terms", class: "block text-sm font-medium text-gray-700" %>
-        <%= settings_fields.text_area :exclusion_terms, 
-              value: (organization.exclusion_terms || []).join(', '), 
-              rows: 3, 
-              class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
-              placeholder: "wildlife, agriculture, unrelated topics" %>
-      </div>
+        <% terms = parse_array_field(organization.exclusion_terms) %>
+        <%= render Joyful::InputComponent.new(
+              form: settings_fields, 
+              method: :exclusion_terms, 
+              label: "Exclusion Terms", 
+              type: :text_area,
+              value: terms.join(', '),
+              placeholder: "wildlife, agriculture, unrelated topics",
+              rows: 3,
+              hint: "Regulations matching these terms will be skipped."
+            ) %>
 
-      <div class="relative flex items-start">
-        <div class="flex h-5 items-center">
-          <%= settings_fields.check_box :auto_assignment_enabled, { class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" }, 'true', 'false' %>
+        <div class="relative flex items-start pt-4">
+          <div class="flex h-6 items-center">
+            <%= settings_fields.check_box :auto_assignment_enabled, { class: "h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 transition duration-150 ease-in-out cursor-pointer" }, 'true', 'false' %>
+          </div>
+          <div class="ml-3">
+            <%= settings_fields.label :auto_assignment_enabled, "Enable Auto-Assignment", class: "font-medium text-gray-900 cursor-pointer" %>
+            <p class="text-sm text-gray-500">Automatically assign new and updated regulations based on this profile.</p>
+          </div>
         </div>
-        <div class="ml-3 text-sm">
-          <%= settings_fields.label :auto_assignment_enabled, "Enable Auto-Assignment", class: "font-medium text-gray-700" %>
-          <p class="text-gray-500">Automatically assign new and updated regulations based on this profile.</p>
-        </div>
       </div>
-    </div>
+    <% end %>
   <% end %>
 
   <div class="flex justify-end pt-5">
-    <%= form.submit class: "cursor-pointer rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
+    <%= render Joyful::ButtonComponent.new(
+          text: "Save Organization",
+          type: :submit,
+          variant: :primary,
+          icon: "save"
+        ) %>
   </div>
 <% end %>

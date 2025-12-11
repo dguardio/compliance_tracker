@@ -11,10 +11,10 @@ class RegulationReview < ApplicationRecord
   validates :workflow_state, presence: true
   validates :status, presence: true
 
-  enum status: { in_progress: 'in_progress', completed: 'completed', rejected: 'rejected' }
+  enum status: { review_in_progress: 'in_progress', review_completed: 'completed', review_rejected: 'rejected' }, _prefix: :review
 
   after_initialize :load_workflow_spec
-  after_transition :notify_assignees_of_new_step
+
 
   private
 
@@ -31,6 +31,8 @@ class RegulationReview < ApplicationRecord
     return unless initial_step
 
     spec.workflow_spec do
+      on_transition { notify_assignees_of_new_step }
+
       # Define all steps as states first
       template_steps.each do |step|
         state step.name.parameterize.underscore.to_sym, name: step.name.humanize

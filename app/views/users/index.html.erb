@@ -1,97 +1,118 @@
 <div class="container mx-auto px-4 py-8">
-  <div class="mb-6">
-    <%= link_to "← Back to Organization", organization_path(@organization), 
-                class: "text-blue-600 hover:text-blue-800 font-medium" %>
-  </div>
-
-  <div class="flex justify-between items-center mb-6">
+  <!-- Header Section -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
     <div>
-      <h1 class="text-3xl font-bold text-gray-900">Users</h1>
-      <p class="mt-1 text-sm text-gray-500">
-        Manage users for <%= @organization.name %>
-      </p>
+      <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Access Control</h1>
+      <p class="mt-1 text-gray-500">Manage user access, roles, and organizational structure.</p>
     </div>
-    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-      <%= link_to "Import Users", import_organization_users_path(@organization), 
-                  class: "inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-      <%= link_to "New User", new_organization_user_path(@organization), 
-                  class: "inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+    <div class="flex gap-3">
+        <%= render Joyful::ButtonComponent.new(
+            text: "Import Users",
+            path: import_organization_users_path(@organization),
+            variant: :secondary,
+            icon: "cloud-upload" 
+          ) %>
+        <%= render Joyful::ButtonComponent.new(
+            text: "Add Member",
+            path: new_organization_user_path(@organization),
+            variant: :primary,
+            icon: "user-add"
+          ) %>
     </div>
   </div>
 
+  <!-- Users List (Card/List Hybrid) -->
   <% if @users.any? %>
-    <div class="overflow-x-auto shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-      <table class="min-w-full divide-y divide-gray-300">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Role</th>
-            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Department</th>
-            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Team</th>
-            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Unit</th>
-            <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <% @users.each do |user| %>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-100">
+          <thead class="bg-gray-50">
             <tr>
-              <td class="px-3 sm:px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center">
-                  <div class="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
-                    <div class="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-indigo-500 flex items-center justify-center">
-                      <span class="text-white font-semibold text-xs sm:text-sm">
-                        <%= user.first_name&.first&.upcase || user.email.first.upcase %>
-                      </span>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Member</th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Role & Access</th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Department</th>
+              <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Team</th>
+              <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-100">
+            <% @users.each do |user| %>
+              <tr class="group hover:bg-gray-50 transition-colors duration-150">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10">
+                        <div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-sm text-white font-bold text-sm ring-2 ring-white">
+                            <%= user.first_name&.first&.upcase || user.email.first.upcase %><%= user.last_name&.first&.upcase %>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-bold text-gray-900 group-hover:text-primary-600 transition-colors"><%= user.full_name %></div>
+                      <div class="text-xs text-gray-500"><%= user.email %></div>
                     </div>
                   </div>
-                  <div class="ml-2 sm:ml-4">
-                    <div class="text-sm font-medium text-gray-900"><%= user.full_name %></div>
-                    <div class="text-xs sm:text-sm text-gray-500"><%= user.email %></div>
-                  </div>
-                </div>
-              </td>
-              <td class="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
-                <div class="text-sm text-gray-900">
-                  <% user.roles.each do |role| %>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                      <%= role.name.titleize %>
-                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex flex-wrap gap-1">
+                        <% if user.roles.any? %>
+                            <% user.roles.each do |role| %>
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary-50 text-primary-700 border border-primary-100">
+                                    <%= role.name.titleize %>
+                                </span>
+                            <% end %>
+                        <% else %>
+                            <span class="text-gray-400 text-sm italic">No roles assigned</span>
+                        <% end %>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
+                  <%= user.department&.name || content_tag(:span, '-', class: "text-gray-300") %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden lg:table-cell">
+                    <% if user.team %>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                            <%= user.team.name %>
+                        </div>
+                    <% else %>
+                        <span class="text-gray-300">-</span>
+                    <% end %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <%= link_to organization_user_path(@organization, user), class: "text-gray-400 hover:text-primary-600 transition-colors inline-block p-1" do %>
+                    <span class="sr-only">View</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                   <% end %>
-                </div>
-              </td>
-              <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
-                <%= user.department&.name || '-' %>
-              </td>
-              <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden lg:table-cell">
-                <%= user.team&.name || '-' %>
-              </td>
-              <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden lg:table-cell">
-                <%= user.unit&.name || '-' %>
-              </td>
-              <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <%= link_to "View", organization_user_path(@organization, user), class: "text-indigo-600 hover:text-indigo-900" %>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
+                   <%= link_to edit_organization_user_path(@organization, user), class: "text-gray-400 hover:text-blue-600 transition-colors inline-block p-1 ml-2" do %>
+                    <span class="sr-only">Edit</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Pagination -->
-    <div class="mt-8">
-      <%= paginate @users %>
+    <div class="mt-6 flex justify-center">
+      <%= paginate @users, theme: 'tailwind' %>
     </div>
   <% else %>
-    <div class="text-center py-12">
-      <div class="text-gray-400 mb-4">
-        <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+    <div class="text-center py-20 bg-white rounded-xl shadow-sm border border-dashed border-gray-300">
+      <div class="mx-auto h-24 w-24 bg-indigo-50 rounded-full flex items-center justify-center mb-6 animate-float">
+        <svg class="h-12 w-12 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
         </svg>
       </div>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">No users yet</h3>
-      <p class="text-gray-500 mb-4">Get started by adding users to your organization.</p>
-      <%= link_to "Add User", new_organization_user_path(@organization), 
-                  class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+      <h3 class="text-xl font-bold text-gray-900 mb-2">No Members Found</h3>
+      <p class="text-gray-500 mb-8 max-w-sm mx-auto">Build your team by adding users or importing them from your provider.</p>
+      <%= render Joyful::ButtonComponent.new(
+          text: "Add First Member",
+          path: new_organization_user_path(@organization),
+          variant: :primary,
+          icon: "user-add"
+      ) %>
     </div>
   <% end %>
-</div> 
+</div>

@@ -1,6 +1,6 @@
 <div class="container mx-auto px-4 py-8">
   <div class="mb-6">
-    <%= link_to "← Back to Risk Assessments", risk_assessments_path, 
+    <%= link_to "← Back to Risk Assessments", organization_compliance_framework_risk_assessments_path(@organization, @compliance_framework), 
                 class: "text-blue-600 hover:text-blue-800 font-medium" %>
   </div>
 
@@ -186,7 +186,7 @@
             <h3 class="text-lg font-medium text-gray-900">Actions</h3>
           </div>
           <div class="px-6 py-4 space-y-3">
-            <%= link_to "Edit Risk Assessment", edit_risk_assessment_path(@risk_assessment), 
+            <%= link_to "Edit Risk Assessment", edit_organization_compliance_framework_risk_assessment_path(@organization, @compliance_framework, @risk_assessment), 
                         class: "w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
             
             <% if policy(@risk_assessment).can_review? %>
@@ -199,7 +199,7 @@
                           class: "w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
             <% end %>
             
-            <%= link_to "Delete Risk Assessment", risk_assessment_path(@risk_assessment), 
+            <%= link_to "Delete Risk Assessment", organization_compliance_framework_risk_assessment_path(@organization, @compliance_framework, @risk_assessment), 
                         method: :delete,
                         data: { confirm: "Are you sure you want to delete this risk assessment?" },
                         class: "w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>

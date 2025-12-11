@@ -1,175 +1,208 @@
-<%= form_with(model: [:admin, regulatory_data_source], class: "space-y-8 divide-y divide-gray-200", data: { controller: "regulatory-auto-config" }) do |form| %>
+<%= form_with(model: [:admin, regulatory_data_source], class: "space-y-6", data: { controller: "regulatory-auto-config" }) do |form| %>
   <% if regulatory_data_source.errors.any? %>
-    <div id="error_explanation" class="bg-red-50 text-red-700 border border-red-200 p-4 rounded-md">
-      <h2 class="text-lg font-medium"><%= pluralize(regulatory_data_source.errors.count, "error") %> prohibited this regulatory data source from being saved:</h2>
-      <ul class="mt-3 list-disc list-inside text-sm">
-        <% regulatory_data_source.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
+    <%= render Joyful::CardComponent.new(padding: true) do %>
+      <div class="space-y-2">
+        <h2 class="text-lg font-bold text-red-700 flex items-center gap-2">
+          <i class="fas fa-exclamation-circle"></i>
+          <%= pluralize(regulatory_data_source.errors.count, "error") %> prohibited this data source from being saved:
+        </h2>
+        <ul class="list-disc pl-5 text-red-600">
+          <% regulatory_data_source.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  <% end %>
+
+  <%= render Joyful::CardComponent.new(title: "Source Information", icon: "database", padding: true) do %>
+    <div class="space-y-6">
+      <p class="text-sm text-gray-500">This information will be used to ingest new regulations.</p>
+
+      <%= render Joyful::InputComponent.new(
+            form: form, 
+            method: :source_type, 
+            label: "Source Type", 
+            type: :select, 
+            choices: RegulatoryDataSource.source_types.keys.map { |w| [w.humanize, w] },
+            options: { include_blank: 'Select a source type' },
+            html_options: { class: "w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" }
+          ) %>
+
+      <!-- Smart Configuration Section -->
+      <div id="smart-config-section" class="bg-blue-50 border border-blue-200 rounded-xl p-4 <%= 'hidden' unless regulatory_data_source.api? %>">
+        <h4 class="text-base font-bold text-blue-900 mb-2 flex items-center gap-2">
+          <i class="fas fa-magic"></i> Smart Auto-Configuration
+        </h4>
+        <p class="text-sm text-blue-700 mb-4">Provide the documentation URL or paste its content to automatically configure the API settings.</p>
+
+        <div class="space-y-4">
+          <%= render Joyful::InputComponent.new(
+                form: form, 
+                method: :documentation_url, 
+                label: "Documentation URL", 
+                placeholder: "https://api.example.com/docs",
+                data: { regulatory_auto_config_target: "url" }
+              ) %>
+
+          <%= render Joyful::InputComponent.new(
+                form: form, 
+                method: :documentation_content, 
+                label: "Or Paste Documentation Content (for manual override)", 
+                type: :text_area,
+                rows: 4,
+                placeholder: "Paste API documentation here if the URL scraper fails...",
+                data: { regulatory_auto_config_target: "content" }
+              ) %>
+
+          <div class="flex items-center gap-3">
+            <%= render Joyful::ButtonComponent.new(
+                  text: "Auto Configure Source",
+                  type: :button,
+                  variant: :primary,
+                  icon: "bolt",
+                  data: { action: "regulatory-auto-config#fetchConfig", regulatory_auto_config_target: "button" }
+                ) %>
+            <span class="text-xs text-gray-500" data-regulatory-auto-config-target="status"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <%= render Joyful::InputComponent.new(
+              form: form, 
+              method: :name, 
+              label: "Name", 
+              placeholder: "e.g., EU GDPR Source"
+            ) %>
+
+        <%= render Joyful::InputComponent.new(
+              form: form, 
+              method: :provider_id, 
+              label: "Provider", 
+              type: :collection_select, 
+              collection: @providers, 
+              value_method: :id, 
+              text_method: :name, 
+              options: { include_blank: 'Select a provider' }, 
+              html_options: { class: "w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" }
+            ) %>
+      </div>
+
+      <%= render Joyful::InputComponent.new(
+            form: form, 
+            method: :description, 
+            label: "Description", 
+            type: :text_area,
+            rows: 3
+          ) %>
+
+      <%= render Joyful::InputComponent.new(
+            form: form, 
+            method: :url, 
+            label: "Endpoint URL", 
+            data: { regulatory_auto_config_target: "endpointUrl" }
+          ) %>
+
+      <!-- Authentication Section -->
+      <div id="auth-settings" class="space-y-6 <%= 'hidden' unless regulatory_data_source.api? %>">
+        <div class="border-t border-gray-200 pt-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Authentication</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <%= render Joyful::InputComponent.new(
+                  form: form, 
+                  method: :api_key_param, 
+                  label: "Header Name / Param", 
+                  placeholder: "e.g., Authorization or X-API-KEY"
+                ) %>
+
+            <div>
+              <%= render Joyful::InputComponent.new(
+                    form: form, 
+                    method: :api_key, 
+                    label: "API Key", 
+                    type: :password_field,
+                    placeholder: "****************"
+                  ) %>
+              <p class="mt-1 text-xs text-gray-500">Stored securely using encryption.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <%= render Joyful::InputComponent.new(
+              form: form, 
+              method: :status, 
+              label: "Status", 
+              type: :select, 
+              choices: RegulatoryDataSource.statuses.keys.map { |s| [s.humanize, s] },
+              options: {},
+              html_options: { class: "w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" }
+            ) %>
+
+        <%= render Joyful::InputComponent.new(
+              form: form, 
+              method: :sectors, 
+              label: "Sectors", 
+              placeholder: "e.g., Healthcare, Finance",
+              value: regulatory_data_source.sectors.join(','),
+              data: { controller: "tagify", regulatory_auto_config_target: "sectors" }
+            ) %>
+
+        <%= render Joyful::InputComponent.new(
+              form: form, 
+              method: :jurisdictions, 
+              label: "Jurisdictions", 
+              placeholder: "e.g., USA, EU",
+              value: regulatory_data_source.jurisdictions.join(','),
+              data: { controller: "tagify", regulatory_auto_config_target: "jurisdictions" }
+            ) %>
+      </div>
     </div>
   <% end %>
 
-  <div class="space-y-6">
-    <div>
-      <h3 class="text-lg leading-6 font-medium text-gray-900">Regulatory Data Source Information</h3>
-      <p class="mt-1 text-sm text-gray-500">This information will be used to ingest new regulations.</p>
-    </div>
-
-    <!-- Source Type Selection -->
-    <div class="sm:border-b sm:border-gray-200 mb-6">
-      <div class="sm:col-span-3 mb-6">
-        <%= form.label :source_type, class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1">
-          <%= form.select :source_type, RegulatoryDataSource.source_types.keys.map { |w| [w.humanize, w] }, { include_blank: 'Select a source type' }, class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
-        </div>
-      </div>
-    </div>
-
-    <!-- Smart Configuration Section -->
-    <div id="smart-config-section" class="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6 <%= 'hidden' unless regulatory_data_source.api? %>">
-      <h4 class="text-base font-medium text-blue-900 mb-2">✨ Smart Auto-Configuration</h4>
-      <p class="text-sm text-blue-700 mb-4">Provide the documentation URL or paste its content to automatically configure the API settings.</p>
-
-      <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-        <div class="sm:col-span-4">
-          <%= form.label :documentation_url, "Documentation URL", class: "block text-sm font-medium text-gray-700" %>
-          <div class="mt-1">
-            <%= form.text_field :documentation_url, class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md", placeholder: "https://api.example.com/docs", data: { regulatory_auto_config_target: "url" } %>
-          </div>
-        </div>
-
-        <div class="sm:col-span-6">
-          <%= form.label :documentation_content, "Or Paste Documentation Content (for manual override)", class: "block text-sm font-medium text-gray-700" %>
-          <div class="mt-1">
-            <%= form.text_area :documentation_content, rows: 4, class: "shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md", placeholder: "Paste API documentation here if the URL scraper fails...", data: { regulatory_auto_config_target: "content" } %>
-          </div>
-        </div>
+  <!-- API Settings Section (Manual) -->
+  <div id="api-settings" class="<%= 'hidden' unless regulatory_data_source.api? %>">
+    <%= render Joyful::CardComponent.new(title: "Mapping Configuration (Manual)", icon: "code-branch", padding: true) do %>
+      <div class="space-y-6">
+        <p class="text-sm text-gray-500">Manually map API response keys if auto-configuration is not used.</p>
         
-        <div class="sm:col-span-6">
-             <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" data-action="regulatory-auto-config#fetchConfig" data-regulatory-auto-config-target="button">
-               Auto Configure Source
-             </button>
-             <span class="text-xs text-gray-500 ml-2" data-regulatory-auto-config-target="status"></span>
-        </div>
-      </div>
-    </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-1">
+            <%= form.label :results_key, "Results Key", class: "block text-sm font-medium leading-6 text-gray-900" %>
+            <%= text_field_tag "regulatory_data_source[settings][results_key]", regulatory_data_source.settings&.dig('results_key'), class: "block w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm", placeholder: "e.g., results", data: { regulatory_auto_config_target: "resultsKey" } %>
+          </div>
 
-    <!-- Manual Configuration / Basic Info -->
-    <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-      <div class="sm:col-span-4">
-        <%= form.label :name, class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1">
-          <%= form.text_field :name, class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
-        </div>
-      </div>
+          <div class="space-y-1">
+            <%= form.label :pagination_type, "Pagination Type", class: "block text-sm font-medium leading-6 text-gray-900" %>
+            <%= select_tag "regulatory_data_source[settings][pagination_type]", options_for_select([['Page Number', 'page_number'], ['Offset', 'offset']], regulatory_data_source.settings&.dig('pagination_type')), include_blank: 'None', class: "block w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" %>
+          </div>
 
-      <div class="sm:col-span-4">
-        <%= form.label :provider_id, class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1">
-          <%= form.collection_select :provider_id, @providers, :id, :name, { include_blank: 'Select a provider' }, class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
-        </div>
-      </div>
+          <div class="space-y-1">
+            <%= form.label :title_key, "Title Key", class: "block text-sm font-medium leading-6 text-gray-900" %>
+            <%= text_field_tag "regulatory_data_source[settings][title_key]", regulatory_data_source.settings&.dig('title_key'), class: "block w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm", placeholder: "e.g., title", data: { regulatory_auto_config_target: "titleKey" } %>
+          </div>
 
-      <div class="sm:col-span-6">
-        <%= form.label :description, class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1">
-          <%= form.text_area :description, rows: 3, class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+          <div class="space-y-1">
+            <%= form.label :url_key, "URL Key", class: "block text-sm font-medium leading-6 text-gray-900" %>
+            <%= text_field_tag "regulatory_data_source[settings][url_key]", regulatory_data_source.settings&.dig('url_key'), class: "block w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm", placeholder: "e.g., url", data: { regulatory_auto_config_target: "urlKey" } %>
+          </div>
         </div>
       </div>
-
-      <div class="sm:col-span-6">
-        <%= form.label :url, "Endpoint URL", class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1">
-          <%= form.text_field :url, class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md", data: { regulatory_auto_config_target: "endpointUrl" } %>
-        </div>
-      </div>
-
-      <div class="sm:col-span-3">
-        <%= form.label :status, class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1">
-          <%= form.select :status, RegulatoryDataSource.statuses.keys.map { |s| [s.humanize, s] }, {}, class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
-        </div>
-      </div>
-      
-       <div class="sm:col-span-6">
-        <%= form.label :sectors, class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1">
-          <%= form.text_field :sectors, value: regulatory_data_source.sectors.join(','), "data-controller": "tagify", "data-regulatory-auto-config-target": "sectors", class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm", placeholder: "e.g., Healthcare, Finance" %>
-        </div>
-      </div>
-
-      <div class="sm:col-span-6">
-        <%= form.label :jurisdictions, class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1">
-          <%= form.text_field :jurisdictions, value: regulatory_data_source.jurisdictions.join(','), "data-controller": "tagify", "data-regulatory-auto-config-target": "jurisdictions", class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm", placeholder: "e.g., USA, EU" %>
-        </div>
-      </div>
-    </div>
+    <% end %>
   </div>
 
-    <!-- Authentication Section -->
-    <div id="auth-settings" class="space-y-6 border-t border-gray-200 pt-6 mt-6 <%= 'hidden' unless regulatory_data_source.api? %>">
-      <div>
-        <h3 class="text-lg leading-6 font-medium text-gray-900">Authentication</h3>
-        <p class="mt-1 text-sm text-gray-500">Securely store API credentials.</p>
-      </div>
-
-      <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-         <div class="sm:col-span-3">
-          <%= form.label :api_key_param, "Header Name / Param", class: "block text-sm font-medium text-gray-700" %>
-          <div class="mt-1">
-            <%= form.text_field :api_key_param, class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md", placeholder: "e.g., Authorization or X-API-KEY" %>
-          </div>
-        </div>
-
-        <div class="sm:col-span-3">
-          <%= form.label :api_key, "API Key", class: "block text-sm font-medium text-gray-700" %>
-          <div class="mt-1">
-            <%= form.password_field :api_key, value: regulatory_data_source.api_key, class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md", placeholder: "****************" %>
-          </div>
-          <p class="mt-1 text-xs text-gray-500">Stored securely using encryption.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- API Settings Section (Manual) -->
-    <div id="api-settings" class="space-y-6 border-t border-gray-200 pt-6 mt-6 <%= 'hidden' unless regulatory_data_source.api? %>">
-      <div>
-        <h3 class="text-lg leading-6 font-medium text-gray-900">Mapping Configuration (Manual)</h3>
-        <p class="mt-1 text-sm text-gray-500">Manually map API response keys if auto-configuration is not used.</p>
-      </div>
-
-      <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-        <div class="sm:col-span-3">
-          <%= form.label :results_key, "Results Key", class: "block text-sm font-medium text-gray-700" %>
-          <div class="mt-1">
-            <%= text_field_tag "regulatory_data_source[settings][results_key]", regulatory_data_source.settings&.dig('results_key'), class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md", placeholder: "e.g., results", data: { regulatory_auto_config_target: "resultsKey" } %>
-          </div>
-        </div>
-
-        <div class="sm:col-span-3">
-          <%= form.label :pagination_type, "Pagination Type", class: "block text-sm font-medium text-gray-700" %>
-          <div class="mt-1">
-            <%= select_tag "regulatory_data_source[settings][pagination_type]", options_for_select([['Page Number', 'page_number'], ['Offset', 'offset']], regulatory_data_source.settings&.dig('pagination_type')), include_blank: 'None', class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
-          </div>
-        </div>
-
-        <div class="sm:col-span-3">
-          <%= form.label :title_key, "Title Key", class: "block text-sm font-medium text-gray-700" %>
-          <div class="mt-1">
-            <%= text_field_tag "regulatory_data_source[settings][title_key]", regulatory_data_source.settings&.dig('title_key'), class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md", placeholder: "e.g., title", data: { regulatory_auto_config_target: "titleKey" } %>
-          </div>
-        </div>
-
-        <div class="sm:col-span-3">
-          <%= form.label :url_key, "URL Key", class: "block text-sm font-medium text-gray-700" %>
-          <div class="mt-1">
-            <%= text_field_tag "regulatory_data_source[settings][url_key]", regulatory_data_source.settings&.dig('url_key'), class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md", placeholder: "e.g., url", data: { regulatory_auto_config_target: "urlKey" } %>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="flex justify-end pt-4 gap-3">
+    <%= link_to 'Cancel', admin_regulatory_data_sources_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200" %>
+    
+    <%= render Joyful::ButtonComponent.new(
+          text: "Save Data Source",
+          type: :submit,
+          variant: :primary,
+          icon: "save"
+        ) %>
+  </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -179,6 +212,8 @@
       const smartConfig = document.getElementById('smart-config-section');
 
       function toggleApiSettings() {
+        if (!sourceTypeSelect) return;
+        
         if (sourceTypeSelect.value === 'api') {
           apiSettings.classList.remove('hidden');
           authSettings.classList.remove('hidden');
@@ -190,14 +225,11 @@
         }
       }
 
-      sourceTypeSelect.addEventListener('change', toggleApiSettings);
+      if (sourceTypeSelect) {
+        sourceTypeSelect.addEventListener('change', toggleApiSettings);
+        // Initial check
+        toggleApiSettings();
+      }
     });
   </script>
-
-  <div class="pt-5">
-    <div class="flex justify-end">
-      <%= link_to 'Cancel', admin_regulatory_data_sources_path, class: "bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-      <%= form.submit class: "ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-    </div>
-  </div>
 <% end %>
