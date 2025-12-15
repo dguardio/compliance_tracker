@@ -44,6 +44,13 @@
         <%= f.search_field :jurisdiction_cont, class: "block w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm", placeholder: "e.g. US, EU" %>
       </div>
 
+      <div class="flex items-center pb-2">
+        <label class="inline-flex items-center cursor-pointer">
+          <%= check_box_tag :semantic_search, "1", params[:semantic_search] == "1", class: "form-checkbox h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500" %>
+          <span class="ml-2 text-sm text-gray-600 font-medium">Semantic Search</span>
+        </label>
+      </div>
+
       <div class="flex gap-2">
         <%= render Joyful::ButtonComponent.new(
               text: "Search",

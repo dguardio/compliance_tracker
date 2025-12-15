@@ -71,6 +71,26 @@ class Admin::RegulatoryDataSourcesController < ApplicationController
     # Renders discover.html.erb by default
   end
 
+  def run_discovery
+    authorize RegulatoryDataSource, :discover?
+    
+    # Trigger the agent asynchronously
+    # In a real app, this would be a Job: Ai::RegulatoryDiscoveryAgentJob.perform_later(params[:topics])
+    # For now, we call the service directly (or wrap it in a Thread/Job as per project patterns)
+    
+    Thread.new do
+      # 1. Run the targeted scouts on known sources
+      Rails.logger.info "Running Targeted Discovery Supervisor..."
+      Ai::DiscoverySupervisor.new.run_all
+      
+      # 2. Run the wild watchdog search
+      Rails.logger.info "Running Wild Watchdog..."
+      Ai::RegulatoryDiscoveryAgent.run_global_scan
+    end
+    
+    redirect_to admin_regulatory_data_sources_path, notice: 'Global Regulatory Watchdog initiated 🐕. Check logs for progress.'
+  end
+
   def preview_config
     authorize RegulatoryDataSource, :create?
     

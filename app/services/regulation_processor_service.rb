@@ -26,7 +26,11 @@ class RegulationProcessorService
     
     if regulation.update(update_attributes)
       Rails.logger.info "Successfully updated regulation ##{regulation.id} with AI-extracted metadata."
+      GenerateEmbeddingJob.perform_later(regulation)
       
+      # 3.5. Create Standard Requirements from extracted data
+      create_standard_requirements(regulation, extracted_metadata[:requirements])
+
       # 4. Ensure a document is attached (downloaded or generated)
       RegulationDocumentService.new.attach_document(regulation)
     else
@@ -93,6 +97,34 @@ class RegulationProcessorService
       Rails.logger.error "LLM API Error or JSON parsing error during metadata extraction: #{e.message}. Response: #{response&.content}"
       {} # Return empty hash on error
     end
+  end
+
+  # Creates or updates StandardRequirement records based on extracted data.
+  #
+  # @param regulation [Regulation] The parent regulation.
+  # @param requirements_data [Array<Hash>] The array of requirement objects from LLM.
+  def create_standard_requirements(regulation, requirements_data)
+    return unless requirements_data.is_a?(Array)
+
+    Rails.logger.info "Creating/Updating #{requirements_data.size} standard requirements for #{regulation.title}"
+
+    requirements_data.each_with_index do |req_data, index|
+      # Generate a predictable external ID or use one if provided (though LLM usually won't provide stable IDs)
+      # We'll use a combination of regulation ID and index as a fallback for now.
+      # In a real system, we might want to try to fuzzy match existing ones to avoid duplicates on re-runs.
+      external_id = "#{regulation.id}-REQ-#{index + 1}"
+
+      regulation.standard_requirements.find_or_initialize_by(external_id: external_id).tap do |sr|
+        sr.name = req_data[:title].presence || "Requirement #{index + 1}"
+        sr.description = req_data[:description]
+        sr.category = req_data[:topic] || req_data[:action_type] || 'General'
+        
+        sr.save!
+        GenerateEmbeddingJob.perform_later(sr)
+      end
+    end
+  end
+
   end
 
 end

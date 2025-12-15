@@ -1,7 +1,7 @@
 <div class="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
   <h1 class="text-3xl font-bold text-gray-900 mb-6">New Workflow Template</h1>
 
-  <div class="bg-white p-8 rounded-lg shadow">
+  <%= render Joyful::CardComponent.new do %>
     <%= render 'form', organization: @organization, workflow_template: @workflow_template %>
-  </div>
+  <% end %>
 </div>

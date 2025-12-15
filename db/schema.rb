@@ -10,9 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_12_09_164846) do
+ActiveRecord::Schema[7.1].define(version: 2025_12_15_043435) do
   # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_trgm"
   enable_extension "plpgsql"
+  enable_extension "vector"
 
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
@@ -50,6 +52,21 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_09_164846) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "ai_agent_traces", force: :cascade do |t|
+    t.string "run_id"
+    t.string "agent_name"
+    t.string "action"
+    t.jsonb "input"
+    t.text "output"
+    t.jsonb "metadata"
+    t.string "status"
+    t.bigint "parent_trace_id"
+    t.float "duration"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["run_id"], name: "index_ai_agent_traces_on_run_id"
   end
 
   create_table "comments", force: :cascade do |t|
@@ -123,8 +140,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_09_164846) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "risk_level"
+    t.bigint "standard_requirement_id", null: false
     t.index ["compliance_framework_id"], name: "index_compliance_requirements_on_compliance_framework_id"
     t.index ["organization_id"], name: "index_compliance_requirements_on_organization_id"
+    t.index ["standard_requirement_id"], name: "index_compliance_requirements_on_standard_requirement_id"
   end
 
   create_table "custom_columns", force: :cascade do |t|
@@ -218,6 +237,22 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_09_164846) do
     t.datetime "updated_at", null: false
     t.index ["feedbackable_type", "feedbackable_id"], name: "index_feedbacks_on_feedbackable"
     t.index ["user_id"], name: "index_feedbacks_on_user_id"
+  end
+
+  create_table "flipper_features", force: :cascade do |t|
+    t.string "key", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_flipper_features_on_key", unique: true
+  end
+
+  create_table "flipper_gates", force: :cascade do |t|
+    t.string "feature_key", null: false
+    t.string "key", null: false
+    t.text "value"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["feature_key", "key", "value"], name: "index_flipper_gates_on_feature_key_and_key_and_value", unique: true
   end
 
   create_table "memberships", force: :cascade do |t|
@@ -409,7 +444,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_09_164846) do
     t.jsonb "metadata", default: {}
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.vector "embedding", limit: 768
     t.index ["agency", "jurisdiction", "external_id", "revision"], name: "idx_on_agency_jurisdiction_external_id_revision_2bd25bff38", unique: true
+    t.index ["embedding"], name: "index_regulations_on_embedding", opclass: :vector_l2_ops, using: :hnsw
     t.index ["external_id"], name: "index_regulations_on_external_id"
     t.index ["previous_version_id"], name: "index_regulations_on_previous_version_id"
   end
@@ -472,6 +509,19 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_09_164846) do
     t.index ["name", "resource_type", "resource_id"], name: "index_roles_on_name_and_resource_type_and_resource_id"
     t.index ["organization_id"], name: "index_roles_on_organization_id"
     t.index ["resource_type", "resource_id"], name: "index_roles_on_resource"
+  end
+
+  create_table "standard_requirements", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.bigint "regulation_id", null: false
+    t.string "category"
+    t.string "external_id"
+    t.vector "embedding", limit: 768
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["embedding"], name: "index_standard_requirements_on_embedding", opclass: :vector_l2_ops, using: :hnsw
+    t.index ["regulation_id"], name: "index_standard_requirements_on_regulation_id"
   end
 
   create_table "table_templates", force: :cascade do |t|
@@ -604,6 +654,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_09_164846) do
   add_foreign_key "compliance_frameworks", "providers"
   add_foreign_key "compliance_requirements", "compliance_frameworks"
   add_foreign_key "compliance_requirements", "organizations"
+  add_foreign_key "compliance_requirements", "standard_requirements"
   add_foreign_key "custom_columns", "users"
   add_foreign_key "departments", "organizations"
   add_foreign_key "documents", "compliance_controls"
@@ -648,6 +699,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_09_164846) do
   add_foreign_key "risk_assessments", "users", column: "assigned_to_id"
   add_foreign_key "risk_assessments", "users", column: "created_by_id"
   add_foreign_key "roles", "organizations"
+  add_foreign_key "standard_requirements", "regulations"
   add_foreign_key "table_templates", "organizations"
   add_foreign_key "table_templates", "users"
   add_foreign_key "teams", "departments"

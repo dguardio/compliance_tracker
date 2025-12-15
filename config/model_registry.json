@@ -32366,11 +32366,11 @@
   {
     "id": "gemini-1.5-pro",
     "name": "gemini-1.5-pro",
-    "provider": "vertexai",
+    "provider": "gemini",
     "family": "gemini-1.5",
     "created_at": null,
-    "context_window": null,
-    "max_output_tokens": null,
+    "context_window": 1000000,
+    "max_output_tokens": 8192,
     "knowledge_cutoff": null,
     "modalities": {
       "input": [],
@@ -32410,7 +32410,7 @@
   {
     "id": "gemini-2.0-flash",
     "name": "Gemini 2.0 Flash",
-    "provider": "vertexai",
+    "provider": "gemini",
     "family": "gemini-2.0-flash",
     "created_at": null,
     "context_window": 1048576,

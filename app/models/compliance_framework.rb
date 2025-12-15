@@ -6,6 +6,7 @@ class ComplianceFramework < ApplicationRecord
   has_many :compliance_requirements, dependent: :destroy
   has_many :compliance_controls, through: :compliance_requirements
   has_many :risk_assessments, dependent: :destroy
+  has_many :organization_regulations
   belongs_to :provider, optional: true
 
   # Validations

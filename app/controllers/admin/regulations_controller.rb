@@ -6,15 +6,29 @@ class Admin::RegulationsController < ApplicationController
   def index
     authorize Regulation
     scope = policy_scope(Regulation)
+    
+    # Ransack Search (Keyword)
     @q = scope.ransack(params[:q])
     
-    regulations = if params[:search_by_all].present?
+    regulations = if params[:semantic_search] == "1" && params[:q].present? && params[:q][:title_cont].present?
+                    # Semantic Search: Use generic text query from title field
+                    query = params[:q][:title_cont]
+                    embedding = Ai::EmbeddingService.generate(query)
+                    
+                    if embedding
+                      flash.now[:notice] = "Showing semantic search results for: '#{query}'"
+                      scope.related_to(embedding)
+                    else
+                      flash.now[:alert] = "Could not generate vector for query."
+                      scope
+                    end
+                  elsif params[:search_by_all].present?
                     scope.search_by_all(params[:search_by_all])
                   else
                     scope
                   end
 
-    @regulations = @q.result(distinct: true).merge(regulations).order(created_at: :desc).page(params[:page])
+    @regulations = @q.result.merge(regulations).order(created_at: :desc).page(params[:page])
   end
 
   # GET /admin/regulations/1

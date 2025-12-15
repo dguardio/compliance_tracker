@@ -53,8 +53,12 @@
      </div>
   </div>
 
-  <div class="grid grid-cols-1 gap-8">
-     
+     <!-- Compliance Profile (AI) -->
+     <%= turbo_stream_from @organization %>
+     <div id="compliance_profile_card">
+        <%= render 'compliance_profile', organization: @organization %>
+     </div>
+
      <!-- Departments Section -->
      <%= render Joyful::CardComponent.new(padding: true) do %>
         <div class="flex items-center justify-between mb-6">

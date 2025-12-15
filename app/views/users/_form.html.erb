@@ -1,0 +1,105 @@
+<%= form_with model: [@organization, @user], local: true, class: "space-y-6" do |form| %>
+  <% if @user.errors.any? %>
+    <%= render Joyful::CardComponent.new(padding: true) do %>
+      <div class="space-y-2">
+        <h2 class="text-lg font-bold text-red-700 flex items-center gap-2">
+          <i class="fas fa-exclamation-circle"></i>
+          <%= pluralize(@user.errors.count, "error") %> prohibited this user from being saved:
+        </h2>
+        <ul class="list-disc pl-5 text-red-600">
+          <% @user.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  <% end %>
+
+  <%= render Joyful::CardComponent.new(title: "Basic Information", icon: "user", padding: true) do %>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <%= render Joyful::InputComponent.new(form: form, method: :first_name, label: "First Name", placeholder: "Jane") %>
+      <%= render Joyful::InputComponent.new(form: form, method: :last_name, label: "Last Name", placeholder: "Doe") %>
+      
+      <%= render Joyful::InputComponent.new(form: form, method: :email, label: "Email Address", type: :email_field, placeholder: "jane.doe@company.com", required: true, class: "col-span-1 md:col-span-2") %>
+      
+      <%= render Joyful::InputComponent.new(form: form, method: :password, label: "Password", type: :password_field, required: @user.new_record?) %>
+      <%= render Joyful::InputComponent.new(form: form, method: :password_confirmation, label: "Confirm Password", type: :password_field, required: @user.new_record?) %>
+      
+      <%= render Joyful::InputComponent.new(form: form, method: :job_title, label: "Job Title", placeholder: "Compliance Officer") %>
+      <%= render Joyful::InputComponent.new(form: form, method: :phone, label: "Phone Number", type: :telephone_field, placeholder: "+1 (555) 123-4567") %>
+    </div>
+  <% end %>
+
+  <%= render Joyful::CardComponent.new(title: "Organizational Structure", icon: "sitemap", padding: true) do %>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <%= render Joyful::InputComponent.new(
+            form: form, 
+            method: :department_id, 
+            label: "Department", 
+            type: :collection_select, 
+            collection: @organization.departments.order(:name), 
+            value_method: :id, 
+            text_method: :name, 
+            options: { prompt: "Select Department" }, 
+            html_options: { class: "w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" }
+          ) %>
+      
+       <%= render Joyful::InputComponent.new(
+            form: form, 
+            method: :team_id, 
+            label: "Team", 
+            type: :collection_select, 
+            collection: @organization.teams.order(:name), 
+            value_method: :id, 
+            text_method: :name, 
+            options: { prompt: "Select Team" }, 
+            html_options: { class: "w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" }
+          ) %>
+
+       <%= render Joyful::InputComponent.new(
+            form: form, 
+            method: :unit_id, 
+            label: "Unit", 
+            type: :collection_select, 
+            collection: @organization.units.order(:name), 
+            value_method: :id, 
+            text_method: :name, 
+            options: { prompt: "Select Unit" }, 
+            html_options: { class: "w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" }
+          ) %>
+    </div>
+  <% end %>
+  
+  <%= render Joyful::CardComponent.new(title: "Roles", icon: "shield-alt", padding: true) do %>
+    <div class="space-y-3">
+      <% @organization.roles.order(:name).each do |role| %>
+        <div class="flex items-center p-3 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-colors">
+          <%= check_box_tag "user[role_ids][]", 
+                            role.id, 
+                            @user.role_ids.include?(role.id), 
+                            id: "user_role_ids_#{role.id}",
+                            class: "h-5 w-5 text-primary-600 focus:ring-primary-500 border-gray-300 rounded cursor-pointer transition duration-150 ease-in-out" %>
+          <div class="ml-3">
+            <%= label_tag "user_role_ids_#{role.id}", role.display_name, class: "text-sm font-medium text-gray-900 cursor-pointer" %>
+            <p class="text-xs text-gray-500"><%= role.description %></p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="flex justify-end pt-4 gap-3">
+    <%= render Joyful::ButtonComponent.new(
+          text: "Cancel",
+          variant: :secondary,
+          path: organization_users_path(@organization)
+        ) %>
+    
+    <%= render Joyful::ButtonComponent.new(
+          text: @user.new_record? ? "Create User" : "Update User",
+          type: :submit,
+          variant: :primary,
+          icon: @user.new_record? ? "user-plus" : "save"
+        ) %>
+  </div>
+<% end %>

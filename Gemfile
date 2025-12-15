@@ -130,7 +130,9 @@ gem 'workflow', '~> 2.0'
 # Regulation Intake Feature Gems
 gem 'dotenv-rails', groups: %i[development test]
 gem 'pgvector'
+gem 'neighbor'
 gem 'ruby_llm'
+gem 'async'
 
 # Testing
 gem 'factory_bot_rails', '~> 6.4'
@@ -139,6 +141,11 @@ gem 'rspec-rails', '~> 6.0'
 gem 'shoulda-matchers', '~> 5.1'
 gem 'vcr', '~> 6.1'
 gem 'webmock', '~> 3.18'
+
+# Feature Flags
+gem 'flipper'
+gem 'flipper-active_record'
+gem 'flipper-ui'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -179,3 +186,5 @@ end
 
 gem "caxlsx", "~> 4.4"
 gem "caxlsx_rails", "~> 0.6.4"
+
+gem "google_search_results", "~> 2.2"

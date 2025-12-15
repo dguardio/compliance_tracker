@@ -5,6 +5,7 @@ class ComplianceRequirement < ApplicationRecord
 
   # Associations
   belongs_to :compliance_framework
+  belongs_to :standard_requirement, optional: true # optional for legacy/migration support, though seeds make it required
   has_many :compliance_controls, dependent: :destroy
   has_many :risk_assessments, dependent: :destroy
   has_many :evidence_requests, dependent: :destroy

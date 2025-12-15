@@ -25,7 +25,7 @@ class Joyful::ToastComponent < ViewComponent::Base
     end
 
     content_tag :div, 
-      class: "pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 transform transition-all duration-300 ease-out-back custom-toast",
+      class: "pointer-events-auto w-auto max-w-4xl overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 transform transition-all duration-300 ease-out-back custom-toast",
       data: { 
         controller: "toast", 
         transition_enter: "transform ease-out duration-300 transition",
@@ -35,7 +35,7 @@ class Joyful::ToastComponent < ViewComponent::Base
         transition_leave_start: "opacity-100",
         transition_leave_end: "opacity-0"
       } do
-      content_tag :div, class: "p-4" do
+      content_tag :div, class: "p-6" do
         content_tag :div, class: "flex items-start" do
           concat(content_tag(:div, class: "flex-shrink-0") do
             content_tag(:div, class: "inline-flex items-center justify-center h-10 w-10 rounded-full #{icon_wrapper_class}") do
@@ -43,7 +43,7 @@ class Joyful::ToastComponent < ViewComponent::Base
             end
           end)
           
-          concat(content_tag(:div, class: "ml-3 w-0 flex-1 pt-0.5") do
+          concat(content_tag(:div, class: "ml-3 flex-1 pt-0.5") do
              concat content_tag(:p, @title || type_title, class: "text-sm font-medium #{title_color}")
              concat content_tag(:p, @message, class: "mt-1 text-sm text-gray-500")
           end)

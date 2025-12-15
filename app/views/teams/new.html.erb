@@ -1,10 +1,8 @@
-<div class="container mx-auto px-4 py-8">
-  <div class="mb-6">
-    <%= link_to "← Back to Organization", organization_path(@organization), 
-                class: "text-primary-600 hover:text-primary-800 font-medium transition-colors" %>
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">New Team</h1>
+    <p class="mt-2 text-sm text-gray-500">Create a new team within <%= @organization.name %>.</p>
   </div>
 
-  <div class="max-w-2xl mx-auto">
-    <%= render 'form', organization: @organization, team: @team %>
-  </div>
+  <%= render 'form', organization: @organization, team: @team %>
 </div> 

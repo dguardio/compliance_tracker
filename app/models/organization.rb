@@ -1,4 +1,5 @@
 class Organization < ApplicationRecord
+  include Flipper::Identifier
   resourcify
   # Associations
   has_many :departments, dependent: :destroy
@@ -116,7 +117,56 @@ class Organization < ApplicationRecord
   scope :active, -> { where(status: :active) }
   scope :by_name, -> { order(:name) }
 
+  # Robust Accessors for JSONB Arrays
+  # These handle cases where data might be stored as stringified JSON instead of real arrays
+  def compliance_keywords
+    safe_parse_json_array(super)
+  end
+
+  def exclusion_terms
+    safe_parse_json_array(super)
+  end
+
+  def compliance_industries
+    safe_parse_json_array(super)
+  end
+
+  def compliance_jurisdictions
+    safe_parse_json_array(super)
+  end
+
+  private
+
+  def safe_parse_json_array(value)
+    return value if value.is_a?(Array)
+    return JSON.parse(value) rescue [] if value.is_a?(String)
+    []
+  end
+
+  public
+
   # Instance methods
+  # Default values for branding
+  def primary_color
+    super.presence || '#3B82F6'
+  end
+
+  def secondary_color
+    super.presence || '#6B7280'
+  end
+
+  def accent_color
+    super.presence || '#10B981'
+  end
+
+  def text_color
+    super.presence || '#1F2937'
+  end
+
+  def background_color
+    super.presence || '#FFFFFF'
+  end
+
   def display_name
     name
   end
@@ -233,10 +283,6 @@ class Organization < ApplicationRecord
   end
 
   # Settings helper methods
-  def brand_colors
-    settings['brand_colors'] || default_brand_colors
-  end
-
   def default_brand_colors
     {
       primary: '#3B82F6',
@@ -249,18 +295,6 @@ class Organization < ApplicationRecord
       error: '#EF4444',
       info: '#3B82F6'
     }
-  end
-
-  def primary_color
-    brand_colors['primary'] || '#3B82F6'
-  end
-
-  def secondary_color
-    brand_colors['secondary'] || '#6B7280'
-  end
-
-  def accent_color
-    brand_colors['accent'] || '#10B981'
   end
 
   def timezone
@@ -405,8 +439,8 @@ class Organization < ApplicationRecord
       '--primary-color': primary_color,
       '--secondary-color': secondary_color,
       '--accent-color': accent_color,
-      '--text-color': brand_colors['text'] || '#1F2937',
-      '--background-color': brand_colors['background'] || '#FFFFFF'
+      '--text-color': text_color || '#1F2937',
+      '--background-color': background_color || '#FFFFFF'
     }
   end
 

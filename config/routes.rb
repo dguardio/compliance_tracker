@@ -1,5 +1,16 @@
 Rails.application.routes.draw do
   namespace :admin do
+    resources :agent_traces, only: [:index, :show]
+    authenticate :user, ->(u) { u.super_admin? } do
+      mount Flipper::UI.app(Flipper) => '/flipper'
+    end
+    resources :organizations do
+      member do
+        post :enrich
+      end
+      resources :departments, only: [:new, :create, :show, :index]
+      resources :teams, only: [:show]
+    end
     resources :policies do
       resources :policy_links, only: [:new, :create, :destroy]
       resources :comments, only: [:create, :destroy]
@@ -18,10 +29,13 @@ Rails.application.routes.draw do
     end
 
     resources :compliance_tables, only: [:index]
+
+
     
     resources :custom_columns do
       collection do
         post :extract_all
+        post :apply_template
       end
       member do
         post :extract
@@ -54,6 +68,7 @@ Rails.application.routes.draw do
         get :discover
         post :discover
         post :preview_config
+        post :run_discovery
       end
     end
 
@@ -71,7 +86,14 @@ Rails.application.routes.draw do
   end
 
   # Multi-tenancy routes
-  resources :organizations do
+    namespace :ai do
+      resources :profile_generations, only: [:create]
+    end
+
+    resources :organizations do
+    member do
+      post :enrich
+    end
     # Direct organization-level resources
     resources :providers, only: %i[index show new create edit update destroy]
     resources :departments, only: %i[index show new create edit update destroy]
@@ -92,7 +114,8 @@ Rails.application.routes.draw do
       end
     end
 
-    # Compliance management
+
+
     resources :compliance_frameworks do
       collection do
         get :import
@@ -205,6 +228,15 @@ Rails.application.routes.draw do
 
   # Dashboard
   get 'dashboard', to: 'dashboard#dashboard', as: :dashboard
+
+  resources :standard_requirements, only: [:index] do
+    collection do
+      get :search
+    end
+    member do
+      post :adopt
+    end
+  end
 
   # Risk Dashboard
     get 'risk_dashboard', to: 'risk_dashboard#index', as: :risk_dashboard

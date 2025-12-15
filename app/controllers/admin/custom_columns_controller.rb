@@ -68,25 +68,38 @@ class Admin::CustomColumnsController < ApplicationController
     end
   end
 
-  def use_template
-    template = CustomColumn.find(params[:id])
+  # Apply a full template (creates multiple columns)
+  def apply_template
+    template = TableTemplate.find(params[:id])
     
-    # Create a copy for the current user
-    new_column = current_user.custom_columns.create(
-      name: template.name,
-      prompt: template.prompt,
-      column_type: template.column_type,
-      is_template: false
-    )
+    # Batch create columns
+    created_columns = []
     
-    if new_column.persisted?
-      if params[:redirect_to].present?
-        redirect_to params[:redirect_to], notice: "Column '#{new_column.name}' added from template."
-      else
-        redirect_to admin_custom_columns_path, notice: "Column '#{new_column.name}' added from template."
+    if template.columns.is_a?(Array)
+      template.columns.each do |col_data|
+        # Skip if column with this name already exists for user to avoid dupes
+        next if current_user.custom_columns.exists?(name: col_data['name'])
+        
+        column = current_user.custom_columns.build(
+          name: col_data['name'],
+          prompt: col_data['prompt'],
+          column_type: col_data['column_type'] || 'text',
+          is_template: false
+        )
+        created_columns << column if column.save
       end
+    end
+    
+    if created_columns.any?
+      # Add new columns to the current view selection
+      current_selection = (params[:custom_column_ids] || []).map(&:to_i)
+      new_selection = (current_selection + created_columns.map(&:id)).uniq
+      
+      redirect_to admin_compliance_tables_path(custom_column_ids: new_selection), 
+        notice: "#{created_columns.count} columns added from '#{template.name}' template."
     else
-      redirect_back fallback_location: admin_custom_columns_path, alert: "Failed to add column: #{new_column.errors.full_messages.join(', ')}"
+      redirect_back fallback_location: admin_compliance_tables_path, 
+        alert: "No new columns were added. You might already have all columns from this template."
     end
   end
 

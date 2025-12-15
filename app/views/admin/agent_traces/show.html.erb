@@ -1,0 +1,71 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <%= link_to '← Back to Logs', admin_agent_traces_path, class: "text-blue-600 hover:underline" %>
+  </div>
+
+  <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
+    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+      <div>
+        <h1 class="text-xl font-semibold text-gray-800"><%= @trace.agent_name %>: <%= @trace.action %></h1>
+        <p class="text-sm text-gray-500">Run ID: <%= @trace.run_id %></p>
+      </div>
+      <span class="px-3 py-1 rounded-full text-sm font-semibold 
+        <%= @trace.success? ? 'bg-green-100 text-green-800' : (@trace.error? ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') %>">
+        <%= @trace.status.upcase %>
+      </span>
+    </div>
+
+    <div class="p-6 grid grid-cols-1 gap-6">
+      
+      <!-- Input Section -->
+      <div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Input Parameters</h3>
+        <div class="bg-gray-800 rounded-md p-4 overflow-x-auto">
+          <pre class="text-gray-100 text-sm"><code><%= JSON.pretty_generate(@trace.input) rescue @trace.input %></code></pre>
+        </div>
+      </div>
+
+      <!-- Output Section -->
+      <div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Agent Output</h3>
+        <div class="bg-gray-50 border border-gray-200 rounded-md p-4 overflow-x-auto">
+          <div class="prose max-w-none">
+            <%= simple_format(@trace.output) %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metadata Section -->
+      <% if @trace.metadata.present? %>
+        <div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Metadata</h3>
+          <div class="bg-gray-100 rounded-md p-4 text-sm font-mono text-gray-700">
+             <pre><%= JSON.pretty_generate(@trace.metadata) rescue @trace.metadata %></pre>
+          </div>
+        </div>
+      <% end %>
+
+    </div>
+  </div>
+
+  <!-- Child Traces (Timeline) -->
+  <% if @trace.children.any? %>
+    <div class="mt-8">
+      <h2 class="text-xl font-bold mb-4">Sub-Tasks Execution</h2>
+      <div class="space-y-4">
+        <% @trace.children.order(:created_at).each do |child| %>
+          <div class="border-l-4 <%= child.success? ? 'border-green-500' : 'border-gray-300' %> bg-white shadow rounded-r p-4 ml-2">
+            <div class="flex justify-between">
+              <span class="font-semibold"><%= child.agent_name %></span>
+              <span class="text-xs text-gray-500"><%= child.duration ? "#{child.duration.round(2)}s" : 'running' %></span>
+            </div>
+            <p class="text-sm text-gray-600"><%= child.action %></p>
+            <div class="mt-2 text-xs text-gray-400">
+              <%= link_to "View Details", admin_agent_trace_path(child), class: "hover:text-blue-600" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

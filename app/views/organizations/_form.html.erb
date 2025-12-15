@@ -1,122 +1,306 @@
-<%# This is now the single source of truth for the organization form %>
-<%= form_with(model: organization, class: "space-y-8") do |form| %>
-  <% if organization.errors.any? %>
-    <%= render Joyful::CardComponent.new(padding: true) do %>
-      <div class="space-y-2">
-        <h2 class="text-lg font-bold text-red-700 flex items-center gap-2">
-          <i class="fas fa-exclamation-circle"></i>
-          <%= pluralize(organization.errors.count, "error") %> prohibited this organization from being saved:
-        </h2>
-        <ul class="list-disc pl-5 text-red-600">
-          <% organization.errors.full_messages.each do |message| %>
-            <li><%= message %></li>
-          <% end %>
-        </ul>
+<%# Mission Control Style Organization Form %>
+<%= form_with(model: organization, class: "h-full", data: { 
+    controller: "tabs branding-preview", 
+    tabs_active_class: "bg-primary-50 text-primary-700 border-primary-200", 
+    tabs_inactive_class: "text-gray-600 hover:bg-gray-50 border-transparent hover:text-gray-900",
+    branding_preview_default_primary_value: organization.primary_color,
+    branding_preview_default_secondary_value: organization.secondary_color
+}) do |form| %>
+
+  <div class="lg:grid lg:grid-cols-12 lg:gap-x-8">
+    <!-- Vertical Navigation (Left Rail) -->
+    <aside class="py-6 lg:col-span-3">
+      <nav class="space-y-1">
+        <button type="button" 
+                data-tabs-target="button" 
+                data-action="click->tabs#switch"
+                class="group flex items-center px-3 py-2 text-sm font-medium border-l-4 w-full transition-colors duration-150 ease-in-out">
+          <span class="truncate">Identity & Contact</span>
+        </button>
+
+        <button type="button" 
+                data-tabs-target="button" 
+                data-action="click->tabs#switch"
+                class="group flex items-center px-3 py-2 text-sm font-medium border-l-4 w-full transition-colors duration-150 ease-in-out">
+          <span class="truncate">Branding & Appearance</span>
+        </button>
+
+        <button type="button" 
+                data-tabs-target="button" 
+                data-action="click->tabs#switch"
+                class="group flex items-center px-3 py-2 text-sm font-medium border-l-4 w-full transition-colors duration-150 ease-in-out">
+          <span class="truncate">Compliance Strategy</span>
+        </button>
+      </nav>
+
+      <div class="mt-8 pt-8 border-t border-gray-200 px-3">
+         <div class="rounded-lg bg-gray-50 p-4">
+            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Completion Status</h4>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-primary-600 h-2.5 rounded-full" style="width: <%= organization.valid? ? '100%' : '60%' %>"></div>
+            </div>
+            <p class="mt-2 text-xs text-gray-500">Complete required fields to activate full automation perks.</p>
+         </div>
+         
+         <div class="mt-6">
+            <%= render Joyful::ButtonComponent.new(
+                text: "Save Organization",
+                type: :submit,
+                variant: :primary,
+                icon: "save",
+                class: "w-full justify-center"
+            ) %>
+         </div>
       </div>
-    <% end %>
-  <% end %>
+    </aside>
 
-  <%= render Joyful::CardComponent.new(title: "Organization Details", icon: "building", padding: true) do %>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <%= render Joyful::InputComponent.new(
-            form: form, 
-            method: :name, 
-            label: "Organization Name", 
-            placeholder: "Acme Corp",
-            required: true
-          ) %>
+    <!-- Main Content Panels (Right Area) -->
+    <div class="space-y-6 sm:px-6 lg:col-span-9 lg:px-0">
+      
+      <!-- Panel 1: Identity -->
+      <div data-tabs-target="panel" class="space-y-6 animate-fade-in">
+        <%= render Joyful::CardComponent.new(title: "Identity & Contact", subtitle: "Basic information about your organization.", padding: true) do %>
+            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                <div class="sm:col-span-4">
+                    <%= render Joyful::InputComponent.new(form: form, method: :name, label: "Organization Name", placeholder: "Acme Corp", required: true) %>
+                </div>
 
-      <%= render Joyful::InputComponent.new(
-            form: form, 
-            method: :domain, 
-            label: "Primary Domain", 
-            placeholder: "acme.com",
-            required: true
-          ) %>
-    </div>
-  <% end %>
+                <div class="sm:col-span-4">
+                    <%= render Joyful::InputComponent.new(form: form, method: :domain, label: "Primary Domain", placeholder: "acme.com", required: true, hint: "Used for auto-joining team members.") %>
+                </div>
 
-  <%= form.fields_for :settings, organization.settings do |settings_fields| %>
-    <%= render Joyful::CardComponent.new(title: "Compliance Profile", subtitle: "Configure the profile used to automatically assign regulations.", icon: "sliders", padding: true) do %>
-      <div class="space-y-6">
-        <% 
-           def parse_array_field(value)
-             return [] if value.nil?
-             return JSON.parse(value) if value.is_a?(String) && value.start_with?('[')
-             return value if value.is_a?(Array)
-             [value] # Fallback
-           rescue JSON::ParserError
-             [value]
-           end
-        %>
+                 <div class="sm:col-span-3">
+                    <%= render Joyful::InputComponent.new(form: form, method: :contact_email, label: "Contact Email", placeholder: "admin@acme.com", type: :email_field) %>
+                </div>
+                 <div class="sm:col-span-3">
+                    <%= render Joyful::InputComponent.new(form: form, method: :contact_phone, label: "Contact Phone", placeholder: "+1 (555) 000-0000", type: :phone_field) %>
+                </div>
+            </div>
+        <% end %>
 
-        <% industries = parse_array_field(organization.compliance_industries) %>
-        <%= render Joyful::InputComponent.new(
-              form: settings_fields, 
-              method: :compliance_industries, 
-              label: "Industries", 
-              type: :text_area,
-              value: industries.join(', '),
-              placeholder: "e.g., Finance, Healthcare, Technology",
-              rows: 3,
-              hint: "Comma-separated list of industries."
-            ) %>
+        <%= render Joyful::CardComponent.new(title: "Location", subtitle: "Affects default jurisdiction selection.", padding: true) do %>
+             <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                <div class="sm:col-span-3">
+                    <%= render Joyful::InputComponent.new(form: form, method: :country, label: "Country", placeholder: "United States") %>
+                </div>
+                <div class="sm:col-span-3">
+                     <%= render Joyful::InputComponent.new(form: form, method: :state, label: "State/Province", placeholder: "California") %>
+                </div>
+             </div>
+        <% end %>
+      </div>
 
-        <% jurisdictions = parse_array_field(organization.compliance_jurisdictions) %>
-        <%= render Joyful::InputComponent.new(
-              form: settings_fields, 
-              method: :compliance_jurisdictions, 
-              label: "Jurisdictions", 
-              type: :text_area,
-              value: jurisdictions.join(', '),
-              placeholder: "e.g., Federal, California, New York, EU",
-              rows: 3,
-              hint: "Comma-separated list of jurisdictions."
-            ) %>
+      <!-- Panel 2: Branding -->
+      <div data-tabs-target="panel" class="hidden space-y-6 animate-fade-in">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Settings Column -->
+            <div class="space-y-6">
+                 <%= render Joyful::CardComponent.new(title: "Visual Identity", padding: true) do %>
+                    <div class="space-y-6">
+                        <%= render Joyful::InputComponent.new(
+                            form: form, 
+                            method: :logo_url, 
+                            label: "Logo URL", 
+                            placeholder: "https://example.com/logo.png",
+                            data: { action: "input->branding-preview#updatePreview", branding_preview_target: "logoInput" }
+                        ) %>
 
-        <% keywords = parse_array_field(organization.compliance_keywords) %>
-        <%= render Joyful::InputComponent.new(
-              form: settings_fields, 
-              method: :compliance_keywords, 
-              label: "Compliance Keywords", 
-              type: :text_area,
-              value: keywords.join(', '),
-              placeholder: "data privacy, cybersecurity, GDPR, SOX",
-              rows: 3,
-              hint: "Keywords to match against regulation text."
-            ) %>
+                        <div class="grid grid-cols-2 gap-4">
+                             <%= render Joyful::InputComponent.new(
+                                form: form, 
+                                method: :primary_color, 
+                                label: "Primary Color", 
+                                type: :color_field,
+                                value: organization.primary_color,
+                                data: { action: "input->branding-preview#updateColor", branding_preview_target: "primaryColorInput", color_type: "primary" }
+                            ) %>
 
-        <% terms = parse_array_field(organization.exclusion_terms) %>
-        <%= render Joyful::InputComponent.new(
-              form: settings_fields, 
-              method: :exclusion_terms, 
-              label: "Exclusion Terms", 
-              type: :text_area,
-              value: terms.join(', '),
-              placeholder: "wildlife, agriculture, unrelated topics",
-              rows: 3,
-              hint: "Regulations matching these terms will be skipped."
-            ) %>
+                             <%= render Joyful::InputComponent.new(
+                                form: form, 
+                                method: :secondary_color, 
+                                label: "Secondary Color", 
+                                type: :color_field,
+                                value: organization.secondary_color,
+                                data: { action: "input->branding-preview#updateColor", branding_preview_target: "secondaryColorInput", color_type: "secondary" }
+                            ) %>
 
-        <div class="relative flex items-start pt-4">
-          <div class="flex h-6 items-center">
-            <%= settings_fields.check_box :auto_assignment_enabled, { class: "h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 transition duration-150 ease-in-out cursor-pointer" }, 'true', 'false' %>
-          </div>
-          <div class="ml-3">
-            <%= settings_fields.label :auto_assignment_enabled, "Enable Auto-Assignment", class: "font-medium text-gray-900 cursor-pointer" %>
-            <p class="text-sm text-gray-500">Automatically assign new and updated regulations based on this profile.</p>
-          </div>
+                             <%= render Joyful::InputComponent.new(
+                                form: form, 
+                                method: :accent_color, 
+                                label: "Accent Color", 
+                                type: :color_field,
+                                value: organization.accent_color
+                            ) %>
+                            
+                             <%= render Joyful::InputComponent.new(
+                                form: form, 
+                                method: :text_color, 
+                                label: "Text Color", 
+                                type: :color_field,
+                                value: organization.text_color || '#1F2937'
+                            ) %>
+                        </div>
+                    </div>
+                 <% end %>
+            </div>
+
+            <!-- Preview Column -->
+            <div>
+                 <div class="sticky top-6">
+                    <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Live Preview</h3>
+                    <!-- Mock Dashboard Card -->
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden shadow-lg" data-branding-preview-target="preview" style="--preview-primary: <%= organization.primary_color %>; --preview-secondary: <%= organization.secondary_color %>;">
+                        <!-- Mock Header -->
+                        <div class="bg-white px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="h-8 w-8 rounded bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-400">Logo</div>
+                                <span class="font-bold text-gray-900"><%= organization.name.presence || 'Acme Corp' %></span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="h-2 w-16 bg-gray-100 rounded-full"></div>
+                                <div class="h-8 w-8 rounded-full bg-gray-100"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mock Body -->
+                        <div class="p-4 space-y-4">
+                            <div class="p-4 bg-white rounded-lg shadow-sm border border-gray-100 border-l-4" style="border-left-color: var(--preview-primary)">
+                                <h4 class="font-bold text-gray-900 mb-1">Compliance Score</h4>
+                                <div class="flex items-end gap-2">
+                                    <span class="text-2xl font-bold" style="color: var(--preview-primary)">85%</span>
+                                    <span class="text-sm text-gray-400 mb-1">Good Standing</span>
+                                </div>
+                                <div class="mt-2 w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                                    <div class="h-full rounded-full" style="background-color: var(--preview-primary); width: 85%"></div>
+                                </div>
+                            </div>
+
+                            <button class="w-full py-2 px-4 rounded-lg text-white font-medium shadow-sm transition-transform active:scale-95" style="background-color: var(--preview-primary)">
+                                Primary Action
+                            </button>
+                             <button class="w-full py-2 px-4 rounded-lg bg-white border border-gray-200 font-medium shadow-sm" style="color: var(--preview-secondary)">
+                                Secondary Action
+                            </button>
+                        </div>
+                    </div>
+                 </div>
+            </div>
         </div>
       </div>
-    <% end %>
-  <% end %>
 
-  <div class="flex justify-end pt-5">
-    <%= render Joyful::ButtonComponent.new(
-          text: "Save Organization",
-          type: :submit,
-          variant: :primary,
-          icon: "save"
-        ) %>
+      <!-- Panel 3: Compliance -->
+      <div data-tabs-target="panel" class="hidden space-y-6 animate-fade-in" 
+           data-controller="ai-profile-generator" 
+           data-ai-profile-generator-id-value="<%= organization.id %>"
+           data-ai-profile-generator-url-value="/ai/profile_generations">
+          <%= render Joyful::CardComponent.new(padding: true) do %>
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Strategy Profile</h3>
+                        <p class="text-sm text-gray-500">Configure how AI interprets your compliance needs.</p>
+                    </div>
+                    <%= render Joyful::ButtonComponent.new(
+                        variant: :secondary,
+                        data: { 
+                            ai_profile_generator_target: "button", 
+                            action: "click->ai-profile-generator#generate" 
+                        }
+                    ) do %>
+                        <!-- Custom content for loading state if needed, but button component might not support block content easily for icon replacement without refactor. using data attributes for now. -->
+                        <span data-ai-profile-generator-target="icon" class="mr-2"><i class="fas fa-magic"></i></span>
+                        <span data-ai-profile-generator-target="spinner" class="hidden mr-2 animate-spin"><i class="fas fa-circle-notch"></i></span>
+                        Auto-Detect with AI
+                    <% end %>
+                </div>
+
+                <div class="space-y-6">
+                     <% 
+                       def parse_array_field(value)
+                         return [] if value.nil?
+                         return JSON.parse(value) if value.is_a?(String) && value.start_with?('[')
+                         return value if value.is_a?(Array)
+                         [value]
+                       rescue JSON::ParserError
+                         [value]
+                       end
+                    %>
+                    
+                    <% jurisdictions = parse_array_field(organization.compliance_jurisdictions) %>
+                    <%= render Joyful::InputComponent.new(
+                        form: form, 
+                        method: :compliance_jurisdictions, 
+                        label: "Operating Jurisdictions", 
+                        type: :text_area,
+                        value: jurisdictions.join(', '),
+                        placeholder: "e.g., US, EU, CA, GB",
+                        rows: 1,
+                        hint: "Comma-separated list of jurisdictions (ISO codes preferred).",
+                        data: { 
+                            controller: "tagify",
+                            ai_profile_generator_target: "jurisdictions"
+                        }
+                    ) %>
+
+                    <% industries = parse_array_field(organization.compliance_industries) %>
+                    <%= render Joyful::InputComponent.new(
+                        form: form, 
+                        method: :compliance_industries, 
+                        label: "Industries", 
+                        type: :text_area, # Tagify works best on input or textarea
+                        value: industries.join(', '),
+                        placeholder: "e.g., Finance, Healthcare, Technology",
+                        rows: 1, # Tagify handles height
+                        hint: "Comma-separated list of industries.",
+                        data: { 
+                            controller: "tagify",
+                            ai_profile_generator_target: "industries"
+                        }
+                    ) %>
+
+                    <% keywords = parse_array_field(organization.compliance_keywords) %>
+                    <%= render Joyful::InputComponent.new(
+                        form: form, 
+                        method: :compliance_keywords, 
+                        label: "Compliance Keywords", 
+                        type: :text_area,
+                        value: keywords.join(', '),
+                        placeholder: "data privacy, cybersecurity, GDPR, SOX",
+                        rows: 1,
+                        hint: "Keywords to match against regulation text.",
+                        data: { 
+                            controller: "tagify",
+                            ai_profile_generator_target: "keywords"
+                        }
+                    ) %>
+
+                     <% terms = parse_array_field(organization.exclusion_terms) %>
+                    <%= render Joyful::InputComponent.new(
+                        form: form, 
+                        method: :exclusion_terms, 
+                        label: "Exclusion Terms", 
+                        type: :text_area,
+                        value: terms.join(', '),
+                        placeholder: "wildlife, agriculture, unrelated topics",
+                        rows: 1,
+                        hint: "Regulations matching these terms will be skipped.",
+                         data: { 
+                            controller: "tagify",
+                            ai_profile_generator_target: "exclusions"
+                        }
+                    ) %>
+
+                    <div class="flex items-center gap-3 p-4 bg-primary-50 rounded-lg border border-primary-100">
+                         <div class="flex h-6 items-center">
+                             <%= form.check_box :auto_assignment_enabled, { class: "h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 transition duration-150 ease-in-out cursor-pointer" }, 'true', 'false' %>
+                        </div>
+                        <div>
+                             <%= form.label :auto_assignment_enabled, "Enable Auto-Assignment", class: "font-bold text-primary-900 cursor-pointer" %>
+                             <p class="text-sm text-primary-700">Automatically assign new regulations based on this profile.</p>
+                        </div>
+                    </div>
+                </div>
+            <% end %>
+      </div>
+    </div>
   </div>
 <% end %>

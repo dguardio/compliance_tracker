@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ComplianceTracker - Enterprise Compliance Management</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-slate-50 min-h-screen font-sans antialiased text-gray-900">
+    <!-- Toasts -->
+    <div class="fixed top-4 right-4 z-50 flex flex-col gap-2">
+      <% if notice %>
+        <%= render Joyful::ToastComponent.new(type: :success, message: notice) %>
+      <% end %>
+      <% if alert %>
+        <%= render Joyful::ToastComponent.new(type: :error, message: alert) %>
+      <% end %>
+    </div>
+    
+    <%= yield %>
+  </body>
+</html>

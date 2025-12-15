@@ -13,18 +13,29 @@ module.exports = {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
       },
       colors: {
-        // "Trust & Wisdom" (Violet/Indigo)
+        // Dynamic Branding Colors (mapped to CSS variables injected by ApplicationHelper)
         primary: {
-          50: '#EEF2FF',
-          100: '#E0E7FF',
-          200: '#C7D2FE',
-          300: '#A5B4FC',
-          400: '#818CF8',
-          500: '#6366F1',
-          600: '#4F46E5', // Main Action
-          700: '#4338CA',
-          800: '#3730A3',
-          900: '#312E81',
+          50: 'var(--primary-50)',
+          100: 'var(--primary-100)',
+          200: 'var(--primary-200)',
+          300: 'var(--primary-300)',
+          400: 'var(--primary-400)',
+          500: 'var(--primary-500)',
+          600: 'var(--primary-600)', // Main Brand Color
+          700: 'var(--primary-700)',
+          800: 'var(--primary-800)',
+          900: 'var(--primary-900)',
+          DEFAULT: 'var(--primary-600)',
+        },
+        secondary: {
+          DEFAULT: 'var(--secondary-color)',
+          50: 'var(--secondary-50)',
+          600: 'var(--secondary-color)',
+        },
+        accent: {
+          DEFAULT: 'var(--accent-color)',
+          50: 'var(--accent-50)',
+          600: 'var(--accent-color)',
         },
         // "All Clear" (Mint/Teal)
         success: {

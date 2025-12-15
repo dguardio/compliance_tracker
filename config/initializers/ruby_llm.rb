@@ -22,6 +22,7 @@ else
     config.gemini_api_key = gemini_api_key
     config.model_registry_file = Rails.root.join('config', 'model_registry.json')
     config.default_model = 'gemini-2.0-flash'
+    config.default_embedding_model = 'text-embedding-004'
   end
   
   Rails.logger.info 'LLM service configured with Google Gemini as the provider.'

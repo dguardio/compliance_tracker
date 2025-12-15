@@ -1,0 +1,81 @@
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-8 flex justify-between items-start">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900"><%= @department.name %></h1>
+      <p class="mt-2 text-sm text-gray-500"><%= @department.description %></p>
+    </div>
+    <div class="flex gap-3">
+        <%= render Joyful::ButtonComponent.new(
+              text: "Edit",
+              path: edit_organization_department_path(@organization, @department),
+              variant: :secondary,
+              icon: "edit"
+            ) %>
+        <%= render Joyful::ButtonComponent.new(
+              text: "Back",
+              path: organization_departments_path(@organization),
+              variant: :secondary,
+              icon: "arrow-left"
+            ) %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <%= render Joyful::CardComponent.new(title: "Overview", icon: "info-circle", padding: true) do %>
+       <dl class="space-y-4">
+         <div>
+           <dt class="text-sm font-medium text-gray-500">Manager</dt>
+           <dd class="mt-1 text-sm text-gray-900 flex items-center gap-2">
+             <% if @department.respond_to?(:manager) && @department.manager %>
+                <div class="w-6 h-6 rounded-full bg-primary-100 flex items-center justify-center text-xs text-primary-700 font-bold">
+                    <%= @department.manager.initials %>
+                </div>
+                <%= @department.manager.full_name %>
+             <% else %>
+                <span class="text-gray-400">Unassigned</span>
+             <% end %>
+           </dd>
+         </div>
+         <div>
+           <dt class="text-sm font-medium text-gray-500">Deparmtent ID</dt>
+           <dd class="mt-1 text-sm font-mono text-gray-900"><%= @department.id %></dd>
+         </div>
+       </dl>
+    <% end %>
+
+    <%= render Joyful::CardComponent.new(title: "Teams", icon: "users", padding: true, class: "md:col-span-2") do %>
+      <% if @teams.any? %>
+        <div class="flow-root">
+          <ul role="list" class="-my-5 divide-y divide-gray-200">
+            <% @teams.each do |team| %>
+              <li class="py-4">
+                <div class="flex items-center space-x-4">
+                  <div class="flex-shrink-0">
+                    <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-gray-100">
+                      <i class="fas fa-users text-gray-500"></i>
+                    </span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 truncate">
+                      <%= link_to team.name, organization_team_path(@organization, team), class: "hover:text-primary-600" %>
+                    </p>
+                    <p class="text-sm text-gray-500 truncate">
+                      <%= pluralize(team.units.count, 'unit') %>
+                    </p>
+                  </div>
+                  <div>
+                    <%= link_to "View", organization_team_path(@organization, team), class: "inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50" %>
+                  </div>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% else %>
+        <div class="text-center py-6 text-gray-500 text-sm">
+          No teams assigned to this department yet.
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>

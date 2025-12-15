@@ -11,4 +11,14 @@ class TableTemplate < ApplicationRecord
       .or(where(organization: user.organization))
       .or(where(user_id: nil, organization_id: nil))
   end
+
+  def prompt
+    return nil unless columns.is_a?(Array) && columns.first
+    columns.first['prompt']
+  end
+
+  def column_type
+    return 'text' unless columns.is_a?(Array) && columns.first
+    columns.first['column_type'] || 'text'
+  end
 end

@@ -22,7 +22,8 @@ class Organizations::SetupController < ApplicationController
       if next_step
         redirect_to step_path(next_step)
       else
-        redirect_to organization_path(@organization), notice: 'Organization setup completed!'
+        Ai::OrganizationResearchAgent.perform_later(@organization)
+        redirect_to organization_path(@organization), notice: 'Organization setup completed! Researching your compliance profile...'
       end
     else
       render_step
@@ -51,10 +52,10 @@ class Organizations::SetupController < ApplicationController
       @department = @organization.departments.new
       @departments = @organization.departments
     when :teams
-      @team = @organization.teams.new
+      @team = Team.new
       @teams = @organization.teams.includes(:department)
     when :units
-      @unit = @organization.units.new
+      @unit = Unit.new
       @units = @organization.units.includes(:team)
     when :users
       @user = User.new
@@ -75,13 +76,13 @@ class Organizations::SetupController < ApplicationController
       true # Always proceed, user can skip adding
     when :teams
       if params[:team].present?
-        @team = @organization.teams.build(team_params)
+        @team = Team.new(team_params)
         @team.save
       end
       true
     when :units
       if params[:unit].present?
-        @unit = @organization.units.build(unit_params)
+        @unit = Unit.new(unit_params)
         @unit.save
       end
       true

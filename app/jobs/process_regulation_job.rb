@@ -14,10 +14,10 @@ class ProcessRegulationJob < ApplicationJob
     end
 
     Rails.logger.info "Starting processing for Regulation ID: #{regulation.id}"
-    RegulationProcessorService.new.process(regulation)
+    Ai::RegulationSupervisor.new.process(regulation)
     Rails.logger.info "Finished processing for Regulation ID: #{regulation.id}"
 
-    # After processing, enqueue the assignment job
-    AssignNewRegulationJob.perform_later(regulation.id)
+    # After processing, analyze impact for all organizations
+    Ai::ImpactAnalysisAgent.analyze_impact_for_all_orgs(regulation)
   end
 end

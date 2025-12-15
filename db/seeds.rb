@@ -720,16 +720,40 @@ if eba_provider
 end
 
 # Create compliance requirements
+# Create Base Regulation for sourcing StandardRequirements
+base_regulation = Regulation.create!(
+  title: 'Global Compliance Standard (Seeded)',
+  agency: 'Internal',
+  jurisdiction: 'Global',
+  reg_type: 'Standard',
+  version: 1,
+  effective_date: Date.today,
+  status: 'active',
+  external_id: 'SEED-STD-001',
+  full_text: { main: 'Base standard for seeded requirements' }
+)
+
 puts 'Creating compliance requirements...'
 requirements = []
 
 frameworks.each do |framework|
   3.times do |i|
+    # Create the source StandardRequirement first
+    std_req = StandardRequirement.create!(
+      name: "Standard: #{framework.name} - Sec #{i + 1}",
+      description: Faker::Lorem.paragraph(sentence_count: 3),
+      regulation: base_regulation,
+      category: 'General',
+      external_id: "STD-#{framework.id}-#{i + 1}"
+      # embedding: will be generated if we hook it up or left null for now
+    )
+
     requirements << ComplianceRequirement.create!(
       name: "#{framework.name} - Requirement #{i + 1}",
       code: "REQ-#{framework.id}-#{i + 1}",
-      description: Faker::Lorem.paragraph(sentence_count: 3),
+      description: std_req.description,
       compliance_framework: framework,
+      standard_requirement: std_req, # Link to the standard
       requirement_type: %w[legal_basis data_subject_rights risk_assessment].sample,
       priority: %w[high medium low].sample,
       status: %w[active inactive draft].sample,
@@ -1116,3 +1140,7 @@ puts 'Password: password123'
 
 puts "✓ Created #{regulations.count} sample regulations"
 puts '✓ Updated organization compliance profiles'
+
+# Load Table Templates
+load Rails.root.join('db', 'seeds', 'table_templates.rb')
+

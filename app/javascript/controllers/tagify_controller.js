@@ -25,6 +25,7 @@ export default class extends Controller {
     }
 
     this.tagify = new window.Tagify(this.element, settings)
+    this.element._tagify = this.tagify
   }
 
   disconnect() {

@@ -23,6 +23,25 @@
       <style>
         :root {
           <%= organization_css_variables %>
+          
+          /* Auto-generated Palette from Primary Color */
+          --primary-600: var(--primary-color); /* Main */
+          --primary-500: color-mix(in srgb, var(--primary-color), white 20%); /* Lighter/Focus */
+          --primary-700: color-mix(in srgb, var(--primary-color), black 10%); /* Hover */
+          --primary-800: color-mix(in srgb, var(--primary-color), black 20%);
+          --primary-900: color-mix(in srgb, var(--primary-color), black 30%);
+          
+          --primary-400: color-mix(in srgb, var(--primary-color), white 40%);
+          --primary-300: color-mix(in srgb, var(--primary-color), white 60%);
+          --primary-200: color-mix(in srgb, var(--primary-color), white 80%);
+          --primary-100: color-mix(in srgb, var(--primary-color), white 90%);
+          --primary-50:  color-mix(in srgb, var(--primary-color), white 95%);
+          
+          /* Secondary Palette */
+          --secondary-50: color-mix(in srgb, var(--secondary-color), white 95%);
+          
+          /* Accent Palette */
+          --accent-50: color-mix(in srgb, var(--accent-color), white 95%);
         }
         
         .btn-primary {
@@ -77,7 +96,7 @@
 
   <body class="bg-slate-50 min-h-screen font-sans antialiased text-gray-900">
     <!-- Toasts (Replacing legacy alerts) -->
-    <div class="fixed top-4 right-4 z-50 flex flex-col gap-2">
+    <div class="fixed top-6 right-6 z-50 flex flex-col items-end gap-2">
       <% if notice %>
         <%= render Joyful::ToastComponent.new(type: :success, message: notice) %>
       <% end %>
@@ -177,6 +196,8 @@
                   <div class="absolute left-0 top-full w-56 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                     <%= link_to "Manage Regulations", admin_regulations_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
                     <%= link_to "Regulatory Data Sources", admin_regulatory_data_sources_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
+                    <%= link_to "Agent Traces", admin_agent_traces_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
+                    <%= link_to "Feature Flags", "/admin/flipper", class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
                   </div>
                 </div>
                 <% end %>

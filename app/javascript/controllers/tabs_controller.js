@@ -1,7 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = [ "button", "panel" ]
+  static targets = ["button", "panel"]
+  static classes = ["active", "inactive"]
 
   connect() {
     this.showTab(0)
@@ -15,11 +16,13 @@ export default class extends Controller {
 
   showTab(index) {
     this.buttonTargets.forEach((button, i) => {
-      button.classList.toggle("bg-indigo-100", i === index)
-      button.classList.toggle("text-indigo-700", i === index)
-      button.classList.toggle("text-gray-500", i !== index)
-      button.classList.toggle("hover:text-gray-700", i !== index)
-      button.classList.toggle("hover:bg-gray-50", i !== index)
+      if (i === index) {
+        button.classList.add(...this.activeClasses)
+        button.classList.remove(...this.inactiveClasses)
+      } else {
+        button.classList.remove(...this.activeClasses)
+        button.classList.add(...this.inactiveClasses)
+      }
     })
 
     this.panelTargets.forEach((panel, i) => {

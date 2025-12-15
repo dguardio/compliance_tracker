@@ -10,23 +10,24 @@
     </div>
   <% end %>
 
-  <div>
-    <%= form.label :name, class: "block text-sm font-medium text-gray-700" %>
-    <div class="mt-1">
-      <%= form.text_field :name, class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
-    </div>
-  </div>
+  <%= render Joyful::InputComponent.new(
+        form: form,
+        method: :name,
+        label: "Template Name",
+        placeholder: "e.g., Standard Document Review"
+      ) %>
 
-  <div>
-    <%= form.label :description, class: "block text-sm font-medium text-gray-700" %>
-    <div class="mt-1">
-      <%= form.text_area :description, rows: 3, class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
-    </div>
-  </div>
+  <%= render Joyful::InputComponent.new(
+        form: form,
+        method: :description,
+        label: "Description",
+        type: :textarea,
+        placeholder: "Describe the purpose of this workflow..."
+      ) %>
 
   <div class="relative flex items-start">
     <div class="flex h-5 items-center">
-      <%= form.check_box :is_default, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" %>
+      <%= form.check_box :is_default, class: "h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500" %>
     </div>
     <div class="ml-3 text-sm">
       <%= form.label :is_default, "Set as default template for this organization", class: "font-medium text-gray-700" %>
@@ -34,6 +35,11 @@
   </div>
 
   <div class="flex justify-end">
-    <%= form.submit "Save Template", class: "cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+    <%= render Joyful::ButtonComponent.new(
+          text: "Save Template",
+          form: form,
+          variant: :primary,
+          class: "shadow-primary-glow"
+        ) %>
   </div>
 <% end %>

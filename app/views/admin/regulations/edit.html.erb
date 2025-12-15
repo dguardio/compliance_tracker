@@ -1,8 +1,8 @@
-<div class="mx-auto md:w-2/3 w-full">
-  <h1 class="font-bold text-4xl">Editing regulation</h1>
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Edit Regulation</h1>
+    <p class="mt-2 text-sm text-gray-500">Update details for <%= @regulation.title %></p>
+  </div>
 
   <%= render "form", regulation: @regulation %>
-
-  <%= link_to "Show this regulation", admin_regulation_path(@regulation), class: "ml-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
-  <%= link_to "Back to regulations", admin_regulations_path, class: "ml-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
 </div>

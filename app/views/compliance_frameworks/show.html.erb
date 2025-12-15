@@ -68,10 +68,11 @@
                  Requirements
                  <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-xs font-bold align-middle"><%= @compliance_requirements.count %></span>
               </h2>
-              <% if policy(ComplianceRequirement.new(compliance_framework: @compliance_framework, organization: @organization)).create? %>
+            <% if policy(ComplianceRequirement.new(compliance_framework: @compliance_framework, organization: @organization)).create? %>
+                 <%= render Joyful::ButtonComponent.new(text: "Import from Standard", variant: :secondary, path: search_standard_requirements_path(organization_id: @organization.id, compliance_framework_id: @compliance_framework.id), icon: "fa fa-file-import") %>
                  <%= render Joyful::ButtonComponent.new(text: "New Requirement", variant: :primary, path: new_organization_compliance_framework_compliance_requirement_path(@organization, @compliance_framework), icon: "fa fa-plus") %>
-              <% end %>
-           </div>
+            <% end %>
+         </div>
            
            <% if @compliance_requirements.any? %>
               <div class="grid grid-cols-1 gap-4">

@@ -3,7 +3,7 @@ class OrganizationsController < ApplicationController
   skip_before_action :set_current_tenant, only: [:index, :show, :new, :create]
   
   before_action :authenticate_user!
-  before_action :set_organization, only: %i[show edit update destroy]
+  before_action :set_organization, only: %i[show edit update destroy enrich]
   before_action :prepare_settings_arrays, only: %i[create update]
 
   def index
@@ -61,6 +61,15 @@ class OrganizationsController < ApplicationController
     end
   end
 
+  def enrich
+    Ai::OrganizationResearchAgent.perform_later(@organization)
+    
+    respond_to do |format|
+      format.html { redirect_to @organization, notice: "Deep Research initiated. We're building your compliance profile..." }
+      format.turbo_stream
+    end
+  end
+
   def destroy
     authorize @organization, :destroy?
     if @organization.users.count > 0
@@ -80,12 +89,13 @@ class OrganizationsController < ApplicationController
   end
 
   def prepare_settings_arrays
-    settings = params.dig(:organization, :settings)
-    return unless settings
+    # Check top-level organization params
+    org_params = params[:organization]
+    return unless org_params
 
     %i[compliance_industries compliance_jurisdictions compliance_keywords exclusion_terms].each do |key|
-      if settings[key].is_a?(String)
-        settings[key] = settings[key].split(',').map(&:strip).reject(&:blank?)
+      if org_params[key].is_a?(String)
+        org_params[key] = org_params[key].split(',').map(&:strip).reject(&:blank?)
       end
     end
   end
@@ -93,13 +103,12 @@ class OrganizationsController < ApplicationController
   def organization_params
     params.require(:organization).permit(
       :name, :slug, :domain, :status,
-      settings: [
-        :auto_assignment_enabled,
-        compliance_industries: [],
-        compliance_jurisdictions: [],
-        compliance_keywords: [],
-        exclusion_terms: []
-      ]
+      :logo_url, :primary_color, :secondary_color, :accent_color, :text_color, :background_color,
+      :auto_assignment_enabled,
+      compliance_industries: [],
+      compliance_jurisdictions: [],
+      compliance_keywords: [],
+      exclusion_terms: []
     )
   end
 end

@@ -10,7 +10,7 @@ class ComplianceFrameworksController < ApplicationController
 
   def show
     @compliance_requirements = @compliance_framework.compliance_requirements.includes(:compliance_controls)
-    @associated_regulations = @compliance_framework.organization.organization_regulations.includes(:regulation)
+    @associated_regulations = @compliance_framework.organization_regulations.includes(:regulation)
   end
 
   def new

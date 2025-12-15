@@ -1,0 +1,64 @@
+<%= form_with(model: [@organization, department], class: "space-y-6") do |form| %>
+  <% if department.errors.any? %>
+    <%= render Joyful::CardComponent.new(padding: true) do %>
+      <div class="space-y-2">
+        <h2 class="text-lg font-bold text-red-700 flex items-center gap-2">
+          <i class="fas fa-exclamation-circle"></i>
+          <%= pluralize(department.errors.count, "error") %> prohibited this department from being saved:
+        </h2>
+        <ul class="list-disc pl-5 text-red-600">
+          <% department.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  <% end %>
+
+  <%= render Joyful::CardComponent.new(title: "Department Details", icon: "building", padding: true) do %>
+    <div class="grid grid-cols-1 gap-6">
+      <%= render Joyful::InputComponent.new(
+            form: form, 
+            method: :name, 
+            label: "Department Name", 
+            placeholder: "e.g., Human Resources"
+          ) %>
+
+      <%= render Joyful::InputComponent.new(
+            form: form, 
+            method: :description, 
+            label: "Description", 
+            type: :text_area,
+            rows: 3,
+            placeholder: "Brief description of responsibilities..."
+          ) %>
+
+      <%= render Joyful::InputComponent.new(
+            form: form, 
+            method: :manager_id, 
+            label: "Manager", 
+            type: :collection_select, 
+            collection: @organization.users.order(:last_name),
+            value_method: :id,
+            text_method: :full_name,
+            options: { prompt: "Select a Manager" },
+            html_options: { class: "w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" }
+          ) %>
+    </div>
+  <% end %>
+
+  <div class="flex justify-end gap-3 pt-4">
+    <%= render Joyful::ButtonComponent.new(
+          text: "Cancel",
+          variant: :secondary,
+          path: organization_departments_path(@organization)
+        ) %>
+    
+    <%= render Joyful::ButtonComponent.new(
+          text: department.new_record? ? "Create Department" : "Update Department",
+          type: :submit,
+          variant: :primary,
+          icon: department.new_record? ? "plus" : "save"
+        ) %>
+  </div>
+<% end %>

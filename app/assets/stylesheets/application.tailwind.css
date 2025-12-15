@@ -24,6 +24,35 @@
 }
 
 
+
+/* Default Joyful Theme (Violet/Indigo) - Applied when no organization is loaded */
+:root {
+  /* Primary: Violet/Indigo */
+  --primary-color: #4F46E5;
+  --primary-50: #EEF2FF;
+  --primary-100: #E0E7FF;
+  --primary-200: #C7D2FE;
+  --primary-300: #A5B4FC;
+  --primary-400: #818CF8;
+  --primary-500: #6366F1;
+  --primary-600: #4F46E5;
+  --primary-700: #4338CA;
+  --primary-800: #3730A3;
+  --primary-900: #312E81;
+
+  /* Secondary: Gray */
+  --secondary-color: #6B7280;
+  --secondary-50: #F9FAFB;
+  
+  /* Accent: Emerald */
+  --accent-color: #10B981;
+  --accent-50: #ECFDF5;
+  
+  /* Text & Background */
+  --text-color: #1F2937;
+  --background-color: #FFFFFF;
+}
+
 /* Joyful Animations */
 
 @keyframes float {

@@ -1,0 +1,91 @@
+WickedPdf.config= is deprecated and will be removed in future versions. Use WickedPdf.configure instead.
+ActiveRecord Encryption keys configured for development/test.
+WickedPdf.config= is deprecated and will be removed in future versions. Use WickedPdf.configure instead.
+bin/rails aborted!
+ActiveRecord::StatementInvalid: PG::UndefinedTable: ERROR:  relation "regulations" does not exist (ActiveRecord::StatementInvalid)
+/home/dguardio/Documents/Projects/compliance_tracker/db/schema.rb:633:in `block in <main>'
+/home/dguardio/Documents/Projects/compliance_tracker/db/schema.rb:13:in `<main>'
+
+Caused by:
+PG::UndefinedTable: ERROR:  relation "regulations" does not exist (PG::UndefinedTable)
+/home/dguardio/Documents/Projects/compliance_tracker/db/schema.rb:633:in `block in <main>'
+/home/dguardio/Documents/Projects/compliance_tracker/db/schema.rb:13:in `<main>'
+Tasks: TOP => db:test:load_schema
+(See full trace by running task with --trace)
+ActiveRecord Encryption keys configured for development/test.
+Migrations are pending. To resolve this issue, run:
+
+        bin/rails db:migrate
+
+You have 70 pending migrations:
+
+db/migrate/20250707040942_devise_create_users.rb
+db/migrate/20250707044720_create_organizations.rb
+db/migrate/20250707045204_create_departments.rb
+db/migrate/20250707045324_create_teams.rb
+db/migrate/20250707045446_create_units.rb
+db/migrate/20250707045922_rolify_create_roles.rb
+db/migrate/20250707050045_add_multi_tenancy_to_users.rb
+db/migrate/20250707084656_create_permissions.rb
+db/migrate/20250708020331_create_compliance_frameworks.rb
+db/migrate/20250708020512_create_compliance_requirements.rb
+db/migrate/20250708020746_create_compliance_controls.rb
+db/migrate/20250711065937_add_risk_level_to_compliance_requirements.rb
+db/migrate/20250711070114_add_risk_level_to_compliance_controls.rb
+db/migrate/20250711071711_create_noticed_tables.noticed.rb
+db/migrate/20250711071712_add_notifications_count_to_noticed_event.noticed.rb
+db/migrate/20250711074731_create_versions.rb
+db/migrate/20250711190309_add_organization_id_to_roles.rb
+db/migrate/20250713002912_create_risk_assessments.rb
+db/migrate/20250713051505_add_trackable_to_users.rb
+db/migrate/20250713195820_create_documents.rb
+db/migrate/20250714150822_create_active_storage_tables.active_storage.rb
+db/migrate/20250714222449_add_regulatory_fields_to_compliance_frameworks.rb
+db/migrate/20250714223452_create_providers.rb
+db/migrate/20250714223649_change_provider_to_reference_in_compliance_frameworks.rb
+db/migrate/20250714234746_add_provider_type_to_providers.rb
+db/migrate/20250715003411_add_object_changes_to_versions.rb
+db/migrate/20250715050609_add_organization_id_to_providers.rb
+db/migrate/20250715072555_create_memberships.rb
+db/migrate/20250717161217_create_regulations.rb
+db/migrate/20250717163534_create_organization_regulations.rb
+db/migrate/20250720131542_allow_null_organization_id_in_permissions.rb
+db/migrate/20250721000000_create_regulatory_data_sources.rb
+db/migrate/20250721010000_add_provider_to_regulatory_data_sources.rb
+db/migrate/20250722000000_create_workflow_templates.rb
+db/migrate/20250722000001_create_workflow_steps.rb
+db/migrate/20250722000002_create_regulation_reviews.rb
+db/migrate/20250722010000_add_decision_options_to_workflow_steps.rb
+db/migrate/20250722010001_create_regulation_review_decisions.rb
+db/migrate/20250723000000_add_assignee_and_due_date_to_compliance_controls.rb
+db/migrate/20250724000000_create_feedbacks.rb
+db/migrate/20251113171333_create_workflow_transitions.rb
+db/migrate/20251113172705_add_position_to_workflow_steps.rb
+db/migrate/20251113201752_remove_order_from_workflow_steps.rb
+db/migrate/20251114162908_add_anchor_types_to_workflow_transitions.rb
+db/migrate/20251121052427_add_sectors_and_jurisdictions_to_regulatory_data_sources.rb
+db/migrate/20251126022814_rename_version_to_revision_in_regulations.rb
+db/migrate/20251126055636_create_custom_columns.rb
+db/migrate/20251126055646_create_regulation_extractions.rb
+db/migrate/20251126135131_create_table_templates.rb
+db/migrate/20251126170419_add_ownership_to_table_templates.rb
+db/migrate/20251126190000_add_regulation_to_documents.rb
+db/migrate/20251128031709_create_policies.rb
+db/migrate/20251128031710_create_policy_links.rb
+db/migrate/20251128035549_create_action_text_tables.action_text.rb
+db/migrate/20251128145036_create_comments.rb
+db/migrate/20251128152113_add_type_and_suggested_text_to_comments.rb
+db/migrate/20251128172555_add_assignee_to_comments.rb
+db/migrate/20251206222056_add_workflow_template_to_documents.rb
+db/migrate/20251206222445_create_evidence_requests.rb
+db/migrate/20251208051947_create_evidence_request_documents.rb
+db/migrate/20251209155827_add_documentation_to_regulatory_data_sources.rb
+db/migrate/20251209163527_add_authentication_to_regulatory_data_sources.rb
+db/migrate/20251209164846_rename_api_key_ciphertext_to_api_key.rb
+db/migrate/20251213201958_enable_pg_trgm_extension.rb
+db/migrate/20251213214416_create_flipper_tables.rb
+db/migrate/20251214051928_enable_pgvector.rb
+db/migrate/20251214052010_create_standard_requirements.rb
+db/migrate/20251214052135_add_standard_requirement_to_compliance_requirements.rb
+db/migrate/20251214204226_resize_embedding_column_to768.rb
+db/migrate/20251214214833_add_embedding_to_regulations.rb

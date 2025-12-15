@@ -1,116 +1,175 @@
-<div class="w-full">
-  <div class="flex justify-between items-center mb-6">
+<div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header Section with Gradient -->
+  <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
     <div>
-      <h1 class="font-bold text-4xl">Add Regulations</h1>
-      <p class="text-gray-600 mt-2">Browse and add regulations to your organization</p>
+      <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Discover Regulations</h1>
+      <p class="mt-1 text-gray-500">Browse our global library and adopt frameworks into your organization's compliance profile.</p>
     </div>
-    <%= link_to "Back to My Regulations", admin_organization_regulations_path, class: "rounded-lg py-3 px-5 bg-gray-600 text-white inline-block font-medium" %>
+    <%= link_to admin_organization_regulations_path, class: "group flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-all" do %>
+       <span>&larr; Back to My Regulations</span>
+    <% end %>
   </div>
 
-  <!-- Search and Filter -->
-  <div class="bg-white shadow sm:rounded-lg p-6 mb-6">
-    <%= search_form_for @q, url: available_admin_organization_regulations_path, method: :get do |f| %>
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
-        <!-- Search Input -->
-        <div class="md:col-span-4">
-          <%= f.label :title_cont, "Search", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.search_field :title_cont, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", placeholder: "Keywords..." %>
+  <!-- Search & Filter Card -->
+  <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-8 relative overflow-visible">
+    <%= search_form_for @q, url: available_admin_organization_regulations_path, method: :get, class: "space-y-6" do |f| %>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Main Search -->
+        <div class="lg:col-span-5 space-y-2">
+          <%= f.label :title_cont, "Search Keywords", class: "block text-sm font-bold text-gray-700 uppercase tracking-wider" %>
+          <div class="relative">
+             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                </svg>
+             </div>
+             <%= f.search_field :title_cont, class: "pl-10 block w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white shadow-sm transition-colors py-3 focus:ring-opacity-50", 
+                 style: "focus:border-color: #{@organization.primary_color}; focus:ring-color: #{@organization.primary_color};",
+                 placeholder: "e.g., GDPR, Privacy, ISO 27001..." %>
+          </div>
           
           <!-- Smart Search Toggle -->
-          <div class="flex items-center mt-2">
-            <%= check_box_tag :smart_search, '1', params[:smart_search] == '1', class: "h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" %>
-            <%= label_tag :smart_search, "AI Smart Search", class: "ml-2 block text-sm text-gray-900" %>
-            <div class="group relative flex items-center ml-1">
-              <svg class="h-4 w-4 text-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-900 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
-                Expands your search with related terms using AI (e.g., "banking" -> "finance", "credit").
-              </span>
-            </div>
+          <div class="flex items-center mt-3 ml-1">
+             <label class="flex items-center cursor-pointer relative">
+                <%= check_box_tag :smart_search, '1', params[:smart_search] == '1', class: "sr-only peer" %>
+                <!-- The toggle background wrapper -->
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer 
+                     peer-checked:after:translate-x-full peer-checked:after:border-white 
+                     after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
+                     after:bg-white after:border-gray-300 after:border after:rounded-full 
+                     after:h-5 after:w-5 after:transition-all"
+                     style="--tw-ring-color: <%= @organization.primary_color %>;"
+                     data-controller="style-toggle"
+                     data-style-toggle-checked-class="background-color: <%= @organization.primary_color %>">
+                </div>
+                <!-- Inline script to handle dynamic color for peer-checked since tailwind arbitrary values in erb are tricky for dynamic variables -->
+               <style>
+                  #smart_search:checked ~ div {
+                    background-color: <%= @organization.primary_color %>;
+                  }
+               </style>
+
+                <span class="ml-3 text-sm font-medium text-gray-700 flex items-center gap-2">
+                   Use AI Smart Search
+                   <span class="text-gray-400" title="Expands your keyword with semantically related terms.">
+                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                   </span>
+                </span>
+             </label>
           </div>
         </div>
 
-        <!-- Agency Filter -->
-        <div class="md:col-span-3">
-          <%= f.label :agency_in, "Agencies", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <% 
-            agency_value = params.dig(:q, :agency_in)
-            if agency_value.is_a?(Array)
-              # Clean up any JSON-encoded strings that might have slipped in
-              agency_value = agency_value.map { |v| v.start_with?('[') ? JSON.parse(v) : v }.flatten
-            end
-            agency_value = agency_value&.join(',')
-          %>
-          <%= text_field_tag 'q[agency_in][]', agency_value, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", data: { controller: "tagify", tagify_whitelist_value: @agencies } %>
-        </div>
-
-        <!-- Jurisdiction Filter -->
-        <div class="md:col-span-3">
-          <%= f.label :jurisdiction_in, "Jurisdictions", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <% 
-            jurisdiction_value = params.dig(:q, :jurisdiction_in)
-            if jurisdiction_value.is_a?(Array)
-              jurisdiction_value = jurisdiction_value.map { |v| v.start_with?('[') ? JSON.parse(v) : v }.flatten
-            end
-            jurisdiction_value = jurisdiction_value&.join(',')
-          %>
-          <%= text_field_tag 'q[jurisdiction_in][]', jurisdiction_value, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", data: { controller: "tagify", tagify_whitelist_value: @jurisdictions } %>
+        <!-- Filters (Agency & Jurisdiction) -->
+        <div class="lg:col-span-4 space-y-4">
+           <div>
+             <%= f.label :agency_in, "Agency", class: "block text-sm font-bold text-gray-700 uppercase tracking-wider mb-1" %>
+             <% 
+               agency_val = params.dig(:q, :agency_in)
+               agency_val = agency_val.is_a?(Array) ? agency_val.flatten.join(',') : agency_val
+             %>
+             <%= text_field_tag 'q[agency_in][]', agency_val, class: "tagify-input block w-full rounded-xl border-gray-200 bg-gray-50", placeholder: "Filter by Agency", data: { controller: "tagify", tagify_whitelist_value: @agencies } %>
+           </div>
+           <div>
+             <%= f.label :jurisdiction_in, "Jurisdiction", class: "block text-sm font-bold text-gray-700 uppercase tracking-wider mb-1" %>
+             <% 
+               jur_val = params.dig(:q, :jurisdiction_in)
+               jur_val = jur_val.is_a?(Array) ? jur_val.flatten.join(',') : jur_val
+             %>
+             <%= text_field_tag 'q[jurisdiction_in][]', jur_val, class: "tagify-input block w-full rounded-xl border-gray-200 bg-gray-50", placeholder: "Filter by Region", data: { controller: "tagify", tagify_whitelist_value: @jurisdictions } %>
+           </div>
         </div>
 
         <!-- Actions -->
-        <div class="md:col-span-2 flex flex-col justify-end space-y-2">
-          <%= f.submit "Search", class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-          <%= link_to "Clear", available_admin_organization_regulations_path, class: "w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        <div class="lg:col-span-3 flex flex-col justify-end space-y-3">
+           <%= f.submit "Find Regulations", 
+               class: "w-full flex justify-center py-3 px-6 border border-transparent rounded-xl shadow-lg text-base font-bold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all transform hover:-translate-y-0.5",
+               style: "background-color: #{@organization.primary_color}; box-shadow: 0 10px 15px -3px #{@organization.primary_color}4d;" %>
+           
+           <%= link_to "Clear Filters", available_admin_organization_regulations_path, class: "w-full flex justify-center py-3 px-6 border border-gray-200 rounded-xl text-base font-medium text-gray-600 bg-white hover:bg-gray-50 hover:text-gray-900 transition-colors" %>
         </div>
       </div>
     <% end %>
   </div>
 
-  <!-- Regulations List -->
-  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-gray-50">
-        <tr>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agency</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jurisdiction</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-          <th scope="col" class="relative px-6 py-3">
-            <span class="sr-only">Actions</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
-        <% @regulations.each do |regulation| %>
-          <tr>
-            <td class="px-6 py-4 text-sm font-medium text-gray-900">
-              <%= link_to regulation.title, admin_regulation_path(regulation), class: "text-blue-600 hover:text-blue-800", target: "_blank" %>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= regulation.agency %></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= regulation.jurisdiction %></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= regulation.status == 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
-                <%= regulation.status.humanize %>
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <%= button_to 'Add to Organization', admin_organization_regulations_path(regulation_id: regulation.id), method: :post, class: "inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500" %>
-            </td>
-          </tr>
-        <% end %>
-        <% if @regulations.empty? %>
-          <tr>
-            <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
-              No regulations found. Try adjusting your search criteria.
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+  <!-- Results Section -->
+  <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+     <% if @regulations.any? %>
+       <table class="min-w-full divide-y divide-gray-100">
+         <thead class="bg-gray-50/50">
+           <tr>
+             <th scope="col" class="px-8 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Regulation</th>
+             <th scope="col" class="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Agency</th>
+             <th scope="col" class="px-6 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Jurisdiction</th>
+             <th scope="col" class="px-6 py-5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+             <th scope="col" class="relative px-6 py-5">
+               <span class="sr-only">Actions</span>
+             </th>
+           </tr>
+         </thead>
+         <tbody class="divide-y divide-gray-100 bg-white">
+           <% @regulations.each do |regulation| %>
+             <tr class="group hover:bg-gray-50/80 transition-colors">
+               <td class="px-8 py-6">
+                 <div class="flex items-center">
+                   <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-lg font-bold text-lg text-white"
+                        style="background-color: <%= @organization.primary_color %>20; color: <%= @organization.primary_color %>;">
+                      <%= regulation.title.first.upcase %>
+                   </div>
+                   <div class="ml-4">
+                     <%= link_to regulation.title, admin_regulation_path(regulation), 
+                         class: "text-base font-semibold text-gray-900 transition-colors", 
+                         style: "&:hover { color: #{@organization.primary_color}; }",
+                         target: "_blank" %>
+                         <!-- Inline accent hover color via style block for simplicity or JS -->
+                     <% if regulation.metadata['summary'].present? %>
+                       <p class="text-sm text-gray-500 mt-1 line-clamp-1"><%= regulation.metadata['summary'] %></p>
+                     <% end %>
+                   </div>
+                 </div>
+               </td>
+               <td class="px-6 py-6 whitespace-nowrap">
+                 <div class="text-sm text-gray-700 font-medium"><%= regulation.agency %></div>
+               </td>
+               <td class="px-6 py-6 whitespace-nowrap">
+                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                   <%= regulation.jurisdiction %>
+                 </span>
+               </td>
+               <td class="px-6 py-6 whitespace-nowrap text-center">
+                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium <%= regulation.status == 'active' ? 'bg-green-100 text-green-700 ring-1 ring-green-600/20' : 'bg-gray-100 text-gray-600' %>">
+                   <%= regulation.status&.humanize || 'Unknown' %>
+                 </span>
+               </td>
+               <td class="px-6 py-6 whitespace-nowrap text-right text-sm font-medium">
+                 <%= button_to admin_organization_regulations_path(regulation_id: regulation.id), method: :post, 
+                     class: "inline-flex items-center justify-center rounded-xl bg-white border-2 px-4 py-2 text-sm font-bold shadow-sm transition-all transform hover:scale-105", 
+                     style: "border-color: #{@organization.primary_color}; color: #{@organization.primary_color};" do %>
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                    Add to Org
+                 <% end %>
+               </td>
+             </tr>
+           <% end %>
+         </tbody>
+       </table>
+     <% else %>
+       <div class="text-center py-16 px-6">
+          <div class="mx-auto h-24 w-24 text-gray-200 mb-4">
+             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+          </div>
+          <h3 class="mt-2 text-lg font-medium text-gray-900">No regulations found</h3>
+          <p class="mt-1 text-sm text-gray-500">We couldn't find any regulations matching your search. Try different keywords or filters.</p>
+          <div class="mt-6">
+            <%= link_to "Clear Search", available_admin_organization_regulations_path, 
+                class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none",
+                style: "background-color: #{@organization.primary_color};" %>
+          </div>
+       </div>
+     <% end %>
   </div>
 
-  <div class="mt-4">
+  <div class="mt-8 flex justify-center">
     <%= paginate @regulations %>
   </div>
 </div>

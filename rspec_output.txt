@@ -1,0 +1,105 @@
+/home/dguardio/.rbenv/versions/3.2.1/lib/ruby/gems/3.2.0/gems/io-event-1.11.2/lib/io/event/support.rb:48: warning: IO::Buffer is experimental and both the Ruby and C interface may change in the future!
+WickedPdf.config= is deprecated and will be removed in future versions. Use WickedPdf.configure instead.
+ActiveRecord Encryption keys configured for development/test.
+
+Heads up! 🔥
+
+👉 StimulusReflex requires caching to be enabled. Caching allows the session to be modified during ActionCable requests.
+
+To enable caching in development, run:
+
+  rails dev:cache
+
+To ignore any warnings and start the application anyway, you can set the SKIP_SANITY_CHECK environment variable:
+
+  SKIP_SANITY_CHECK=true rails
+
+To do this permanently, add the following directive to the StimulusReflex initializer:
+
+  StimulusReflex.configure do |config|
+    config.on_failed_sanity_checks = :warn
+  end
+
+
+Heads up! 🔥
+
+👉 StimulusReflex requires caching to be enabled.
+
+Caching allows the session to be modified during ActionCable requests. Your config.cache_store is set to :null_store, so it won't work.
+
+To ignore any warnings and start the application anyway, you can set the SKIP_SANITY_CHECK environment variable:
+
+  SKIP_SANITY_CHECK=true rails
+
+To do this permanently, add the following directive to the StimulusReflex initializer:
+
+  StimulusReflex.configure do |config|
+    config.on_failed_sanity_checks = :warn
+  end
+
+
+Ai::OrchestratorAgent
+  #execute
+    coordinates the writer and reviewer agents (FAILED - 1)
+
+Ai::RegulationSupervisor
+  #process
+DEPRECATION WARNING: `wait: :exponentially_longer` will actually wait polynomially longer and is therefore deprecated. Prefer `wait: :polynomially_longer` to avoid confusion and keep the same behavior. (called from <class:GenerateEmbeddingJob> at /home/dguardio/Documents/Projects/compliance_tracker/app/jobs/generate_embedding_job.rb:3)
+    runs agents and updates the regulation (FAILED - 2)
+
+SourceDiscoveryAgent
+  #call
+    searches google and visits results
+
+Failures:
+
+  1) Ai::OrchestratorAgent#execute coordinates the writer and reviewer agents
+     Failure/Error: draft = Ai::Agents::PolicyWriterAgent.new.run(topic: topic)
+
+       #<InstanceDouble(Ai::Agents::PolicyWriterAgent) (anonymous)> received :run with unexpected arguments
+         expected: ({:topic=>"data retention"})
+              got: ({:topic=>"dt retention"})
+       Diff:
+       @@ -1 +1 @@
+       -[{:topic=>"data retention"}]
+       +[{:topic=>"dt retention"}]
+     # ./app/services/ai/orchestrator_agent.rb:16:in `execute'
+     # ./spec/services/ai/orchestrator_agent_spec.rb:27:in `block (3 levels) in <top (required)>'
+
+  2) Ai::RegulationSupervisor#process runs agents and updates the regulation
+     Failure/Error: let(:regulation) { create(:regulation, full_text: "Some long legal text") }
+
+     KeyError:
+       Factory not registered: "regulation"
+     # ./spec/services/ai/regulation_supervisor_spec.rb:4:in `block (2 levels) in <top (required)>'
+     # ./spec/services/ai/regulation_supervisor_spec.rb:30:in `block (3 levels) in <top (required)>'
+     # ------------------
+     # --- Caused by: ---
+     # KeyError:
+     #   key not found: "regulation"
+     #   ./spec/services/ai/regulation_supervisor_spec.rb:4:in `block (2 levels) in <top (required)>'
+
+Deprecation Warnings:
+
+Rails 7.1 has deprecated the singular fixture_path in favour of an array.You should migrate to plural:
+
+
+If you need more of the backtrace for any of these deprecations to
+identify where to make the necessary changes, you can configure
+`config.raise_errors_for_deprecations!`, and it will turn the
+deprecation warnings into errors, giving you the full backtrace.
+
+1 deprecation warning total
+
+Finished in 0.19785 seconds (files took 9.76 seconds to load)
+3 examples, 2 failures
+
+Failed examples:
+
+rspec ./spec/services/ai/orchestrator_agent_spec.rb:16 # Ai::OrchestratorAgent#execute coordinates the writer and reviewer agents
+rspec ./spec/services/ai/regulation_supervisor_spec.rb:21 # Ai::RegulationSupervisor#process runs agents and updates the regulation
+
+Coverage report generated for RSpec to /home/dguardio/Documents/Projects/compliance_tracker/coverage.
+Line Coverage: 2.17% (213 / 9830)
+Lcov style coverage report generated for RSpec to coverage/lcov.info
+Stopped processing SimpleCov as a previous error not related to SimpleCov has been detected

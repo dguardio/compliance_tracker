@@ -9,6 +9,7 @@ class Regulation < ApplicationRecord
   has_many :regulation_extractions, dependent: :destroy
   has_one :document, dependent: :destroy
   has_many :comments, as: :commentable, dependent: :destroy
+  has_many :standard_requirements, dependent: :destroy
 
   # Validations
   validates :title, :agency, :jurisdiction, presence: true
@@ -17,6 +18,9 @@ class Regulation < ApplicationRecord
 
   # Scopes
   scope :active, -> { where(status: 'active') }
+  
+  has_neighbors :embedding
+
   scope :by_agency, ->(agency) { where(agency: agency) }
   scope :by_jurisdiction, ->(jurisdiction) { where(jurisdiction: jurisdiction) }
   scope :by_type, ->(reg_type) { where(reg_type: reg_type) }
