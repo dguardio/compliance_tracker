@@ -33,6 +33,10 @@ class RegulatoryDataSource < ApplicationRecord
     Regulatory::SmartConfiguratorService.new(self).call
   end
 
+  def external_scraper?
+    settings.is_a?(Hash) && settings['scraping_engine'] == 'external_scrapling'
+  end
+
   private
 
   def normalize_jsonb_attributes
