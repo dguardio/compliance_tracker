@@ -201,6 +201,7 @@ Rails.application.routes.draw do
   # API routes
   namespace :api do
     namespace :v1 do
+      post 'ingestions/webhook', to: 'ingestions#create'
       resources :organizations, only: %i[index show] do
         resources :compliance_frameworks, only: %i[index show create update destroy] do
           resources :compliance_requirements, only: %i[index show create update destroy] do
