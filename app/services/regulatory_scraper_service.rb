@@ -48,6 +48,10 @@ class RegulatoryScraperService
   private
 
   def scrape_website(data_source)
+    if data_source.settings['scraping_engine'] == 'external_scrapling'
+      return dispatch_to_python_scraper(data_source)
+    end
+
     response = HTTParty.get(data_source.url, timeout: 30)
     unless response.success?
       Rails.logger.error "Failed to fetch URL for #{data_source.name}: #{response.code} - #{response.message}"
@@ -76,6 +80,36 @@ class RegulatoryScraperService
     regulation_links_data.first(10).each do |link_data|
       process_regulation_link(link_data[:url], data_source, link_data[:title], link_data[:publication_date])
     end
+  end
+
+  def dispatch_to_python_scraper(data_source)
+    Rails.logger.info "Dispatching to external Python scraper for data source: #{data_source.name}"
+    
+    python_service_url = ENV.fetch('PYTHON_SCRAPER_URL', 'http://localhost:8000/scrape')
+    webhook_url = ENV.fetch('APP_WEBHOOK_URL', 'http://localhost:3000/api/v1/ingestions/webhook')
+    
+    payload = {
+      url: data_source.url,
+      data_source_id: data_source.id,
+      webhook_url: webhook_url,
+      provider_name: data_source.provider.name,
+      jurisdiction: data_source.provider.jurisdiction
+    }
+
+    response = HTTParty.post(
+      python_service_url,
+      body: payload.to_json,
+      headers: { 'Content-Type' => 'application/json' },
+      timeout: 10
+    )
+
+    unless response.success?
+      Rails.logger.error "Failed to dispatch to python scraper: #{response.code} - #{response.message}"
+      data_source.update(status: :error)
+      return
+    end
+
+    Rails.logger.info "Successfully dispatched to python scraper. Job accepted."
   end
 
   def scrape_rss_feed(data_source)
