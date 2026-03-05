@@ -21,41 +21,29 @@ def extract_regulation_data(url: str, provider_name: str, jurisdiction: str) -> 
         # Let's write custom CSS selectors for standard elements, or fall back to full text.
         
         # Extract title
-        title = page.css("title").text()
-        
+        title = page.css("title::text").get()
         if not title:
-            h1 = page.css("h1")
-            title = h1[0].text() if h1 else f"Regulation from {provider_name}"
+            title = page.css("h1::text").get() or f"Regulation from {provider_name}"
             
-        # Clean up title
         title = title.strip().replace("\n", " ") if title else title
             
         # Extract main text
-        # If the page has an 'article', 'main', or '.content' tag, we prefer that.
-        content = ""
-        main_content = page.css("article, main, .content, #content, .main-content")
+        content_nodes = page.css("article *::text, main *::text, .content *::text, .main-content *::text").getall()
         
-        if main_content:
-            # Join text of all matching main blocks
-            # scrapling returns ScraplingElement objects which have a .text() method
-            content = "\n\n".join(node.text() for node in main_content)
+        if content_nodes:
+            content = " ".join(t.strip() for t in content_nodes if t.strip())
         else:
-            # Fallback to body text
-            body = page.css("body")
-            content = body[0].text() if body else page.text()
+            body_nodes = page.css("body *::text").getall()
+            if body_nodes:
+                content = " ".join(t.strip() for t in body_nodes if t.strip())
+            else:
+                content = "Could not extract text from this page."
             
-        # Clean up content a bit
-        content = content.replace("  ", " ").strip() if content else ""
+        # Optional: Clean up large whitespaces
+        content = " ".join(content.split())
         
-        # Scrapling doesn't natively extract 'publication_date' magically without LLMs
-        # so we default it or try to find a time tag.
-        pub_date = None
-        time_tag = page.css("time")
-        if time_tag:
-            pub_date = time_tag[0].attrib.get('datetime') or time_tag[0].text()
-            
+        pub_date = page.css("time::attr(datetime)").get() or page.css("time::text").get()
         if not pub_date:
-            # Default to today if we must, or leave None
             pub_date = datetime.now().strftime("%Y-%m-%d")
 
         result = {
