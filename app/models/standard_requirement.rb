@@ -7,5 +7,7 @@ class StandardRequirement < ApplicationRecord
 
   has_neighbors :embedding
 
+  scope :related_to, ->(vector) { nearest_neighbors(:embedding, vector, distance: "cosine") }
+
   private
 end
