@@ -1,0 +1,295 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <%= link_to "← Back to Findings", organization_findings_path(@organization),
+                class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+
+  <!-- Finding Header -->
+  <div class="bg-white shadow rounded-lg p-6 mb-6">
+    <div class="flex flex-col md:flex-row md:justify-between md:items-start">
+      <div class="flex-1">
+        <div class="flex items-center space-x-3 mb-2">
+          <h1 class="text-2xl font-bold text-gray-900"><%= @finding.title %></h1>
+          <% severity_colors = { 'critical' => 'red', 'high' => 'orange', 'medium' => 'yellow', 'low' => 'green' } %>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= severity_colors[@finding.severity] || 'gray' %>-100 text-<%= severity_colors[@finding.severity] || 'gray' %>-800">
+            <%= @finding.severity.titleize %>
+          </span>
+          <% status_colors = { 'open' => 'blue', 'in_progress' => 'yellow', 'remediated' => 'green', 'closed' => 'gray', 'accepted' => 'purple' } %>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= status_colors[@finding.status] || 'gray' %>-100 text-<%= status_colors[@finding.status] || 'gray' %>-800">
+            <%= @finding.status.titleize %>
+          </span>
+          <% if @finding.overdue? %>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">⚠ Overdue</span>
+          <% end %>
+        </div>
+        <p class="text-gray-600 mt-2"><%= @finding.description %></p>
+      </div>
+      <div class="mt-4 md:mt-0 flex space-x-2">
+        <%= link_to "Edit", edit_organization_finding_path(@organization, @finding),
+                    class: "inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
+        <% if @finding.active? %>
+          <%= button_to "Close Finding", close_organization_finding_path(@organization, @finding),
+                        method: :patch,
+                        class: "inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700" %>
+        <% else %>
+          <%= button_to "Reopen", reopen_organization_finding_path(@organization, @finding),
+                        method: :patch,
+                        class: "inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left Column: Details -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Finding Details -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Details</h2>
+        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Source</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= @finding.source.titleize %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Root Cause</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= @finding.root_cause&.titleize || 'Not Determined' %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">SLA Deadline</dt>
+            <dd class="mt-1 text-sm <%= @finding.overdue? ? 'text-red-600 font-semibold' : 'text-gray-900' %>">
+              <%= @finding.sla_deadline&.strftime("%B %d, %Y %I:%M %p") || '—' %>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Created</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= @finding.created_at.strftime("%B %d, %Y") %></dd>
+          </div>
+          <% if @finding.compliance_framework %>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Framework</dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= @finding.compliance_framework.name %></dd>
+            </div>
+          <% end %>
+          <% if @finding.compliance_control %>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Control</dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= @finding.compliance_control.name %></dd>
+            </div>
+          <% end %>
+          <% if @finding.document %>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Related Document</dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= @finding.document.title %></dd>
+            </div>
+          <% end %>
+          <% if @finding.resolved_at %>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Resolved At</dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= @finding.resolved_at.strftime("%B %d, %Y %I:%M %p") %></dd>
+            </div>
+          <% end %>
+          <% if @finding.resolution_notes.present? %>
+            <div class="sm:col-span-2">
+              <dt class="text-sm font-medium text-gray-500">Resolution Notes</dt>
+              <dd class="mt-1 text-sm text-gray-900"><%= @finding.resolution_notes %></dd>
+            </div>
+          <% end %>
+        </dl>
+      </div>
+
+      <!-- Corrective Actions -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-semibold text-gray-900">Corrective Actions (<%= @corrective_actions.count %>)</h2>
+        </div>
+
+        <% if @corrective_actions.any? %>
+          <div class="space-y-4">
+            <% @corrective_actions.each do |ca| %>
+              <div class="border rounded-lg p-4 <%= ca.overdue? ? 'border-red-300 bg-red-50' : 'border-gray-200' %>">
+                <div class="flex justify-between items-start">
+                  <div class="flex-1">
+                    <div class="flex items-center space-x-2">
+                      <h3 class="text-sm font-medium text-gray-900"><%= ca.title %></h3>
+                      <% ca_type_colors = { 'corrective' => 'blue', 'preventive' => 'purple', 'detective' => 'teal' } %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-<%= ca_type_colors[ca.action_type] || 'gray' %>-100 text-<%= ca_type_colors[ca.action_type] || 'gray' %>-800">
+                        <%= ca.action_type.titleize %>
+                      </span>
+                      <% ca_status_colors = { 'planned' => 'gray', 'in_progress' => 'yellow', 'completed' => 'green', 'verified' => 'blue', 'cancelled' => 'red' } %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-<%= ca_status_colors[ca.status] || 'gray' %>-100 text-<%= ca_status_colors[ca.status] || 'gray' %>-800">
+                        <%= ca.status.titleize %>
+                      </span>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1"><%= ca.description %></p>
+                    <div class="flex space-x-4 mt-2 text-xs text-gray-500">
+                      <span>Priority: <strong><%= ca.priority.titleize %></strong></span>
+                      <% if ca.assigned_to %>
+                        <span>Assigned: <strong><%= ca.assigned_to.full_name %></strong></span>
+                      <% end %>
+                      <% if ca.due_date %>
+                        <span class="<%= ca.overdue? ? 'text-red-600 font-semibold' : '' %>">Due: <strong><%= ca.due_date.strftime("%b %d, %Y") %></strong></span>
+                      <% end %>
+                    </div>
+                  </div>
+                  <% if ca.active? %>
+                    <%= button_to "Complete", complete_organization_finding_corrective_action_path(@organization, @finding, ca),
+                                  method: :patch,
+                                  class: "ml-3 inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700" %>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-sm text-gray-500 text-center py-4">No corrective actions yet.</p>
+        <% end %>
+
+        <!-- New Corrective Action Form -->
+        <% if @finding.active? %>
+          <div class="mt-6 border-t pt-6">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">Add Corrective Action</h3>
+            <%= form_with model: @new_corrective_action, url: organization_finding_corrective_actions_path(@organization, @finding), class: "space-y-4" do |f| %>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="sm:col-span-2">
+                  <%= f.label :title, class: "block text-sm font-medium text-gray-700" %>
+                  <%= f.text_field :title, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm", required: true %>
+                </div>
+                <div class="sm:col-span-2">
+                  <%= f.label :description, class: "block text-sm font-medium text-gray-700" %>
+                  <%= f.text_area :description, rows: 2, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" %>
+                </div>
+                <div>
+                  <%= f.label :action_type, class: "block text-sm font-medium text-gray-700" %>
+                  <%= f.select :action_type, CorrectiveAction.action_types.keys.map { |k| [k.titleize, k] }, {}, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" %>
+                </div>
+                <div>
+                  <%= f.label :priority, class: "block text-sm font-medium text-gray-700" %>
+                  <%= f.select :priority, CorrectiveAction.priorities.keys.map { |k| [k.titleize, k] }, {}, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" %>
+                </div>
+                <div>
+                  <%= f.label :assigned_to_id, "Assign To", class: "block text-sm font-medium text-gray-700" %>
+                  <%= f.select :assigned_to_id, @organization.users.sort_by { |u| u.first_name.to_s }.map { |u| [u.full_name, u.id] }, { include_blank: "Unassigned" }, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" %>
+                </div>
+                <div>
+                  <%= f.label :due_date, class: "block text-sm font-medium text-gray-700" %>
+                  <%= f.datetime_field :due_date, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" %>
+                </div>
+              </div>
+              <div>
+                <%= f.submit "Add Corrective Action", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer" %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Right Column: Sidebar -->
+    <div class="space-y-6">
+      <!-- People -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">People</h3>
+        <dl class="space-y-3">
+          <div>
+            <dt class="text-xs text-gray-500">Created By</dt>
+            <dd class="text-sm text-gray-900"><%= @finding.created_by&.full_name || '—' %></dd>
+          </div>
+          <div>
+            <dt class="text-xs text-gray-500">Assigned To</dt>
+            <dd class="text-sm text-gray-900"><%= @finding.assigned_to&.full_name || 'Unassigned' %></dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- CAPA Progress -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">CAPA Progress</h3>
+        <% total_ca = @corrective_actions.count %>
+        <% completed_ca = @corrective_actions.count { |ca| ca.status_completed? || ca.status_verified? } %>
+        <% progress = total_ca > 0 ? (completed_ca.to_f / total_ca * 100).round : 0 %>
+        <div class="mb-2">
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600"><%= completed_ca %>/<%= total_ca %> complete</span>
+            <span class="font-medium text-gray-900"><%= progress %>%</span>
+          </div>
+          <div class="mt-1 w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-indigo-600 h-2 rounded-full" style="width: <%= progress %>%"></div>
+          </div>
+        </div>
+        <div class="mt-3 space-y-1 text-xs text-gray-500">
+          <div class="flex justify-between">
+            <span>Planned</span>
+            <span><%= @corrective_actions.count { |ca| ca.status_planned? } %></span>
+          </div>
+          <div class="flex justify-between">
+            <span>In Progress</span>
+            <span><%= @corrective_actions.count { |ca| ca.status_in_progress? } %></span>
+          </div>
+          <div class="flex justify-between">
+            <span>Completed</span>
+            <span><%= @corrective_actions.count { |ca| ca.status_completed? } %></span>
+          </div>
+          <div class="flex justify-between">
+            <span>Verified</span>
+            <span><%= @corrective_actions.count { |ca| ca.status_verified? } %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Timeline</h3>
+        <div class="flow-root">
+          <ul class="-mb-8">
+            <li class="relative pb-8">
+              <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"></span>
+              <div class="relative flex space-x-3">
+                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 ring-8 ring-white">
+                  <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                  </svg>
+                </div>
+                <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+                  <p class="text-sm text-gray-500">Finding created</p>
+                  <p class="text-xs text-gray-400 whitespace-nowrap"><%= @finding.created_at.strftime("%b %d") %></p>
+                </div>
+              </div>
+            </li>
+            <% @corrective_actions.reverse.each do |ca| %>
+              <li class="relative pb-8">
+                <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"></span>
+                <div class="relative flex space-x-3">
+                  <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-400 ring-8 ring-white">
+                    <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                  <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+                    <p class="text-sm text-gray-500">CA: <%= ca.title %> (<%= ca.status.titleize %>)</p>
+                    <p class="text-xs text-gray-400 whitespace-nowrap"><%= ca.created_at.strftime("%b %d") %></p>
+                  </div>
+                </div>
+              </li>
+            <% end %>
+            <% if @finding.resolved_at %>
+              <li class="relative">
+                <div class="relative flex space-x-3">
+                  <div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-500 ring-8 ring-white">
+                    <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                  <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+                    <p class="text-sm text-gray-500">Finding resolved</p>
+                    <p class="text-xs text-gray-400 whitespace-nowrap"><%= @finding.resolved_at.strftime("%b %d") %></p>
+                  </div>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -319,6 +319,7 @@ GEM
     globalid (1.2.1)
       activesupport (>= 6.1)
     google_search_results (2.2.0)
+    guess_html_encoding (0.0.11)
     hashdiff (1.2.0)
     hashery (2.1.2)
     hashie (5.0.0)
@@ -645,6 +646,9 @@ GEM
       faraday-multipart (>= 1)
     ruby-progressbar (1.13.0)
     ruby-rc4 (0.1.5)
+    ruby-readability (0.7.3)
+      guess_html_encoding (>= 0.0.4)
+      nokogiri (>= 1.6.0)
     ruby-saml (1.18.0)
       nokogiri (>= 1.13.10)
       rexml
@@ -877,6 +881,7 @@ DEPENDENCIES
   rubocop-rspec (~> 2.20)
   ruby-ole (~> 1.2)
   ruby-openai (~> 6.0)
+  ruby-readability (~> 0.7.3)
   ruby_llm
   rubyzip
   selenium-webdriver (~> 4.10)

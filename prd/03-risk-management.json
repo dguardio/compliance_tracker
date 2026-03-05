@@ -1,0 +1,44 @@
+{
+    "title": "Risk Management",
+    "status": "Built",
+    "priority": "High",
+    "modules": [
+        "Risk Register",
+        "Risk Assessment",
+        "Heatmap"
+    ],
+    "user_stories": [
+        {
+            "story": "As a Risk Manager, I want to maintain a Risk Register, so that I can track potential threats to the organization.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "Manager can create Risk entries.",
+                "Risks have Impact and Likelihood scores."
+            ]
+        },
+        {
+            "story": "As a Risk Manager, I want to visualize risks on a heatmap, so that I can prioritize mitigation efforts.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "Dashboard displays a 5x5 Risk Heatmap.",
+                "Risks are color-coded (High, Medium, Low)."
+            ]
+        },
+        {
+            "story": "As a Risk Manager, I want to link Risks to Controls, so that I can see how we are mitigating them.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "Manager can link a Risk to one or more Controls.",
+                "Residual risk is calculated based on control effectiveness."
+            ]
+        },
+        {
+            "story": "As a User, I want a Risk Dashboard, so that I can see my assigned risks and pending assessments.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "User sees 'My Risks' view.",
+                "User can update risk status/scores."
+            ]
+        }
+    ]
+}

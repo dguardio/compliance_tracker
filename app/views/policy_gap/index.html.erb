@@ -1,0 +1,46 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+        <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg" style="background: linear-gradient(135deg, var(--primary-color, #6366f1), #f59e0b);">
+          <i class="fas fa-search text-white text-lg"></i>
+        </span>
+        Policy Gap Analysis
+      </h1>
+      <p class="mt-1 text-gray-500">Identify missing policies and auto-draft them to close compliance gaps</p>
+    </div>
+  </div>
+
+  <% if @framework_summary.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <% @framework_summary.each do |item| %>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900"><%= item[:framework].name %></h3>
+            <span class="text-2xl font-bold" style="color: var(--primary-color, #6366f1);"><%= item[:coverage_percentage] %>%</span>
+          </div>
+          <div class="w-full bg-gray-100 rounded-full h-3 mb-3">
+            <% color = item[:coverage_percentage] >= 80 ? '#10b981' : item[:coverage_percentage] >= 50 ? '#f59e0b' : '#ef4444' %>
+            <div class="h-3 rounded-full transition-all duration-700" style="width: <%= item[:coverage_percentage] %>%; background-color: <%= color %>;"></div>
+          </div>
+          <div class="flex justify-between text-sm text-gray-500 mb-4">
+            <span><%= item[:covered_count] %>/<%= item[:total_requirements] %> requirements covered</span>
+            <% if item[:gap_count] > 0 %>
+              <span class="text-red-600 font-medium"><%= item[:gap_count] %> gaps</span>
+            <% else %>
+              <span class="text-green-600 font-medium"><i class="fas fa-check"></i> Fully covered</span>
+            <% end %>
+          </div>
+          <%= link_to analyze_organization_policy_gap_index_path(@organization, framework_id: item[:framework].id), class: "inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800" do %>
+            Analyze Gaps <i class="fas fa-arrow-right ml-2"></i>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="bg-white rounded-xl shadow-sm border p-12 text-center">
+      <i class="fas fa-search text-gray-300 text-4xl mb-3"></i>
+      <p class="text-gray-500">No compliance frameworks found. Create frameworks first to analyze policy gaps.</p>
+    </div>
+  <% end %>
+</div>

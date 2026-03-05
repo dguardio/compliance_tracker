@@ -8,6 +8,11 @@ class ComplianceControl < ApplicationRecord
   belongs_to :assignee, class_name: 'User', optional: true
   has_many :risk_assessments, dependent: :destroy
   has_many :evidence_requests, dependent: :destroy
+  has_many :findings, dependent: :nullify
+  has_many :test_plans, dependent: :destroy
+  has_many :obligation_controls, dependent: :destroy
+  has_many :obligations, through: :obligation_controls
+  has_many :maturity_snapshots, dependent: :destroy
   has_many :feedbacks, as: :feedbackable, dependent: :destroy
   has_many :comments, as: :commentable, dependent: :destroy
 
@@ -157,5 +162,55 @@ class ComplianceControl < ApplicationRecord
 
   def compliance_framework
     compliance_requirement.compliance_framework
+  end
+
+  # Auto-create Finding when effectiveness drops to low
+  after_save :auto_create_finding_for_low_effectiveness, if: :saved_change_to_effectiveness?
+  after_save :auto_close_findings_on_effectiveness_improvement, if: :saved_change_to_effectiveness?
+
+  private
+
+  def auto_create_finding_for_low_effectiveness
+    return unless low?
+    return unless organization.present?
+    return unless Flipper.enabled?(:findings_remediation, organization)
+
+    # Avoid duplicates
+    existing = Finding.where(
+      organization: organization,
+      compliance_control: self,
+      source: :control_effectiveness
+    ).where.not(status: [:closed, :accepted])
+    return if existing.exists?
+
+    Finding.create!(
+      organization: organization,
+      compliance_control: self,
+      compliance_requirement: compliance_requirement,
+      compliance_framework: compliance_framework,
+      title: "Low effectiveness detected: #{name}",
+      description: "Control '#{name}' effectiveness has been set to low. Review and remediate.",
+      source: :control_effectiveness,
+      severity: :high,
+      status: :open
+    )
+  rescue StandardError => e
+    Rails.logger.error "Auto-create finding failed for control #{id}: #{e.message}"
+  end
+
+  def auto_close_findings_on_effectiveness_improvement
+    return if low? # Only close when effectiveness improves above low
+    return unless organization.present?
+
+    Finding.where(
+      organization: organization,
+      compliance_control: self,
+      source: :control_effectiveness,
+      status: [:open, :in_progress]
+    ).find_each do |finding|
+      finding.resolve!("Auto-closed: control effectiveness improved to #{effectiveness}")
+    end
+  rescue StandardError => e
+    Rails.logger.error "Auto-close finding failed for control #{id}: #{e.message}"
   end
 end

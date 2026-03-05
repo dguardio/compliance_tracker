@@ -1,4 +1,5 @@
 class DocumentsController < ApplicationController
+  before_action -> { require_feature!(:document_management) }
   before_action :set_organization
   before_action :set_document, only: %i[show edit update destroy approve reject archive duplicate]
   before_action :authorize_document

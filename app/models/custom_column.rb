@@ -12,7 +12,7 @@ class CustomColumn < ApplicationRecord
   # Extract data for all regulations
   def extract_for_all_regulations
     Regulation.find_each do |regulation|
-      RegulationExtractionService.new(regulation, self).call
+      Ai::RegulationExtractionService.new(regulation, self).call
     end
   end
 end

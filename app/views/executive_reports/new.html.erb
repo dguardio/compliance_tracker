@@ -1,0 +1,31 @@
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <nav class="mb-6">
+    <ol class="flex items-center space-x-2 text-sm text-gray-500">
+      <li><%= link_to "Executive Reports", organization_executive_reports_path(@organization), class: "hover:text-indigo-600" %></li>
+      <li><i class="fas fa-chevron-right text-xs"></i></li>
+      <li class="text-gray-900 font-medium">New Report</li>
+    </ol>
+  </nav>
+
+  <h1 class="text-2xl font-bold text-gray-900 mb-6">Generate Executive Report</h1>
+
+  <div class="bg-white rounded-xl shadow-sm border p-6">
+    <%= form_tag(organization_executive_reports_path(@organization), method: :post) do %>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Report Type</label>
+          <%= select_tag :report_type, options_for_select([['Quarterly', 'quarterly'], ['Annual', 'annual'], ['Ad Hoc', 'ad_hoc']]), class: "block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Period Start</label>
+          <%= date_field_tag :period_start, 3.months.ago.beginning_of_quarter.to_date, class: "block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Period End</label>
+          <%= date_field_tag :period_end, Date.current, class: "block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+        </div>
+      </div>
+      <%= submit_tag "Generate Report", class: "inline-flex items-center px-6 py-3 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors cursor-pointer" %>
+    <% end %>
+  </div>
+</div>

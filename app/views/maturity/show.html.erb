@@ -1,0 +1,146 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Breadcrumb -->
+  <nav class="mb-6">
+    <ol class="flex items-center space-x-2 text-sm text-gray-500">
+      <li><%= link_to "Maturity Dashboard", organization_maturity_index_path(@organization), class: "hover:text-indigo-600" %></li>
+      <li><i class="fas fa-chevron-right text-xs"></i></li>
+      <li class="text-gray-900 font-medium"><%= @control.name %></li>
+    </ol>
+  </nav>
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900"><%= @control.name %></h1>
+      <p class="mt-1 text-gray-500">
+        <%= @control.compliance_requirement&.compliance_framework&.name %> ›
+        <%= @control.compliance_requirement&.name %>
+      </p>
+    </div>
+    <%= link_to organization_maturity_index_path(@organization), class: "text-gray-500 hover:text-gray-700" do %>
+      <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+    <% end %>
+  </div>
+
+  <!-- Current Score Card -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <!-- Score Overview -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Current Maturity Score</h2>
+      <div class="flex items-center gap-6">
+        <div class="text-center">
+          <div class="text-5xl font-bold" style="color: var(--primary-color, #6366f1);"><%= @current_score[:maturity_level] %></div>
+          <div class="text-sm font-medium text-gray-500 mt-1"><%= @current_score[:maturity_label] %></div>
+        </div>
+        <div class="flex-1">
+          <div class="mb-2">
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">Composite Score</span>
+              <span class="font-medium text-gray-900"><%= @current_score[:computed_score] %>/100</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-3">
+              <div class="h-3 rounded-full transition-all duration-700" style="width: <%= @current_score[:computed_score] %>%; background: linear-gradient(90deg, var(--primary-color, #6366f1), var(--secondary-color, #8b5cf6));"></div>
+            </div>
+          </div>
+          <% target = @control.target_maturity_level || 3 %>
+          <div class="flex items-center gap-2 mt-3">
+            <span class="text-sm text-gray-500">Target:</span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+              Level <%= target %> — <%= MaturitySnapshot::MATURITY_LEVELS[target] %>
+            </span>
+            <% gap = target - @current_score[:maturity_level] %>
+            <% if gap > 0 %>
+              <span class="text-xs text-red-600 font-medium">(<%= gap %> level<%= gap > 1 ? 's' : '' %> to go)</span>
+            <% elsif gap == 0 %>
+              <span class="text-xs text-green-600 font-medium"><i class="fas fa-check"></i> On target</span>
+            <% else %>
+              <span class="text-xs text-blue-600 font-medium">+<%= gap.abs %> above target</span>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Set Target -->
+      <div class="mt-6 pt-4 border-t border-gray-100">
+        <%= form_tag(organization_maturity_path(@organization, @control), method: :patch, class: "flex items-end gap-3") do %>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Set Target Maturity</label>
+            <%= select_tag :target_maturity_level, options_for_select(MaturitySnapshot::MATURITY_LEVELS.map { |k, v| ["#{k} — #{v}", k] }, @control.target_maturity_level || 3), class: "block rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+          </div>
+          <%= submit_tag "Update Target", class: "inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors cursor-pointer" %>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Score Breakdown -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Score Breakdown</h2>
+      <div class="space-y-4">
+        <% breakdown = [
+          { label: "Testing (30%)", score: @current_score[:testing_score], icon: "fas fa-vial", color: "#3b82f6" },
+          { label: "Evidence Freshness (25%)", score: @current_score[:evidence_freshness_score], icon: "fas fa-file-shield", color: "#10b981" },
+          { label: "Findings (25%)", score: @current_score[:finding_score], icon: "fas fa-bug", color: "#f59e0b" },
+          { label: "Documentation (20%)", score: @current_score[:documentation_score], icon: "fas fa-book", color: "#8b5cf6" }
+        ] %>
+        <% breakdown.each do |item| %>
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600 flex items-center gap-2">
+                <i class="<%= item[:icon] %>" style="color: <%= item[:color] %>;"></i>
+                <%= item[:label] %>
+              </span>
+              <span class="font-medium text-gray-900"><%= item[:score].round(1) %>/100</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-2.5">
+              <div class="h-2.5 rounded-full transition-all duration-500" style="width: <%= item[:score] %>%; background-color: <%= item[:color] %>;"></div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Historical Trend -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Maturity History</h2>
+    <% if @snapshots.present? %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Level</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Score</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Testing</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Evidence</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Findings</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Docs</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <% @snapshots.each do |snapshot| %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 text-sm text-gray-900"><%= snapshot.snapshot_date.strftime("%b %d, %Y") %></td>
+                <td class="px-4 py-3 text-center">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                    <%= snapshot.maturity_level %> — <%= snapshot.maturity_label %>
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-center text-sm font-medium text-gray-900"><%= snapshot.computed_score %></td>
+                <td class="px-4 py-3 text-center text-sm text-gray-600"><%= snapshot.testing_score&.round(1) || '—' %></td>
+                <td class="px-4 py-3 text-center text-sm text-gray-600"><%= snapshot.evidence_freshness_score&.round(1) || '—' %></td>
+                <td class="px-4 py-3 text-center text-sm text-gray-600"><%= snapshot.finding_score&.round(1) || '—' %></td>
+                <td class="px-4 py-3 text-center text-sm text-gray-600"><%= snapshot.documentation_score&.round(1) || '—' %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="text-center py-8">
+        <i class="fas fa-history text-gray-300 text-3xl mb-2"></i>
+        <p class="text-gray-500 text-sm">No historical snapshots yet. Click "Compute Scores" on the dashboard to generate the first snapshot.</p>
+      </div>
+    <% end %>
+  </div>
+</div>

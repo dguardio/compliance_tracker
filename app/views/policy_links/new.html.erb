@@ -1,0 +1,50 @@
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="md:flex md:items-center md:justify-between mb-6">
+    <div class="min-w-0 flex-1">
+      <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+        Link <%= @linkable_type.titleize %> to Policy
+      </h2>
+      <p class="mt-1 text-sm text-gray-500">
+        Linking to: <span class="font-semibold"><%= @policy.title %></span>
+      </p>
+    </div>
+  </div>
+
+  <div class="bg-white shadow sm:rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <%= form_with(model: [@organization, @policy, @policy_link], class: "space-y-6") do |form| %>
+        <%= form.hidden_field :linkable_type, value: @linkable_type %>
+
+        <div>
+          <%= form.label :linkable_id, "Select #{@linkable_type.titleize}", class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <% if @linkable_type == 'Regulation' %>
+              <%= form.collection_select :linkable_id, @linkables, :id, :title, { prompt: "Select a Regulation" }, { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+            <% else %>
+              <%= form.collection_select :linkable_id, @linkables, :id, :name, { prompt: "Select a #{@linkable_type.titleize}" }, { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+            <% end %>
+          </div>
+        </div>
+
+        <div>
+          <%= form.label :citation, "Citation / Specific Section (Optional)", class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= form.text_field :citation, placeholder: "e.g., Section 1(a), Article 4", class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+          </div>
+        </div>
+
+        <div>
+          <%= form.label :notes, "Rationale / Notes (Optional)", class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1">
+            <%= form.text_area :notes, rows: 3, placeholder: "Why is this linked?", class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-4">
+          <%= link_to "Cancel", organization_policy_path(@organization, @policy), class: "rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50" %>
+          <%= form.submit "Add Link", class: "ml-3 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

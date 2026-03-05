@@ -74,7 +74,9 @@ Rails.application.routes.draw do
 
     resources :evidence, only: [:index]
   end
-  devise_for :users
+  devise_for :users, controllers: {
+    registrations: 'users/registrations'
+  }
 
   # Provider management (top-level resource)
   resources :providers do
@@ -104,6 +106,11 @@ Rails.application.routes.draw do
         get :import, to: 'users/imports#new'
         post :import, to: 'users/imports#create'
       end
+    end
+    
+    resources :policies do
+      resources :policy_links, only: [:new, :create, :destroy]
+      resources :comments, only: [:create, :destroy]
     end
 
     # Nested hierarchical resources
@@ -181,6 +188,138 @@ Rails.application.routes.draw do
       end
     end
 
+    # Findings & CAPA
+    resources :findings do
+      member do
+        patch :close
+        patch :reopen
+      end
+      resources :corrective_actions, only: [:create, :update] do
+        member do
+          patch :complete
+        end
+      end
+    end
+
+    # Control Testing
+    resources :control_testing do
+      member do
+        post :execute
+      end
+      resources :test_executions, only: [:show, :update] do
+        member do
+          patch :review
+        end
+      end
+    end
+
+    # Policy Attestation Campaigns
+    resources :attestation_campaigns do
+      member do
+        post :launch
+        patch :close
+      end
+    end
+
+    # Obligation Management
+    resources :obligations
+
+    # Incident Management
+    resources :incidents do
+      member do
+        patch :resolve
+        patch :close
+      end
+      resources :lesson_learneds, only: [:create]
+    end
+
+    # Maturity Assessment
+    resources :maturity, only: [:index, :show, :update] do
+      collection do
+        post :snapshot
+      end
+    end
+
+    # Cross-Framework Harmonization
+    resources :harmonization, only: [:index] do
+      collection do
+        get :matrix
+        get :delta
+        get :suggestions
+        post :create_mapping
+        delete :destroy_mapping
+      end
+    end
+
+    # Workflow Intelligence & Analytics
+    resources :workflow_analytics, only: [:index] do
+      collection do
+        get :bottlenecks
+        get :workload
+      end
+    end
+
+    # Policy Gap Analysis
+    resources :policy_gap, only: [:index] do
+      collection do
+        get :analyze
+        post :draft
+      end
+    end
+
+    # Regulatory Impact Simulation
+    resources :impact_simulations, only: [:index, :show] do
+      collection do
+        post :simulate
+      end
+      member do
+        post :create_findings
+      end
+    end
+
+    # Executive Reports
+    resources :executive_reports, only: [:index, :show, :new, :create] do
+      member do
+        patch :publish
+      end
+    end
+
+    # Questionnaire Autofill
+    resources :questionnaire, only: [:index, :show] do
+      collection do
+        post :upload
+        post :approve_answer
+      end
+      member do
+        get :export
+      end
+    end
+
+    # Vendor Risk Management (TPRM)
+    resources :vendors do
+      member do
+        post :assess
+      end
+    end
+
+    # Evidence Collection Agents
+    resources :evidence_agents, only: [:index] do
+      collection do
+        get :checks
+      end
+    end
+
+    # Continuous Monitoring Dashboard
+    resources :monitoring_dashboard, only: [:index]
+
+    # External Integrations (Jira, Linear, ServiceNow)
+    resources :external_integrations do
+      member do
+        post :sync
+        post :create_ticket
+      end
+    end
+
     # Workflow management
     resources :workflow_templates do
       resources :workflow_steps, only: %i[create edit update destroy] do
@@ -250,11 +389,44 @@ Rails.application.routes.draw do
     end
   end
 
+  # User-facing Attestations
+  resources :attestations, only: [:show] do
+    member do
+      patch :attest
+    end
+  end
+
+  # Tenant-facing Regulation Library
+  resources :regulation_library, only: [:index, :show] do
+    collection do
+      get :discover
+    end
+    member do
+      post :adopt
+      delete :unadopt
+    end
+  end
+
+  # Evidence Freshness Dashboard
+  resources :evidence_freshness, only: [:index] do
+    collection do
+      post :request_refresh
+    end
+  end
+
   # My Tasks (Kanban)
   resources :tasks, only: [:index, :show]
   patch 'tasks/:id/update_status', to: 'tasks#update_status', as: :update_task_status
 
   # Feedbacks
+  # Compliance Exports (CSV)
+  scope :exports, controller: :exports, as: :exports do
+    get :frameworks
+    get :requirements
+    get :controls
+    get :risk_assessments
+  end
+
   resources :feedbacks
 
   # Mailbox

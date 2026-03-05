@@ -1,0 +1,65 @@
+{
+    "id": "PRD-012",
+    "title": "Evidence Freshness & Expiration Intelligence",
+    "status": "Pending",
+    "priority": "High",
+    "timeline": "Current — Build Now",
+    "rationale": "Auditors care about currency. Evidence that is 8 months old does not prove a control is working today. This module adds time-awareness to the existing Evidence system and tightly integrates with Findings (PRD-007).",
+    "modules": [
+        "Expiration Engine",
+        "Freshness Scoring",
+        "Auto-Refresh Requests",
+        "Stale Evidence Dashboard"
+    ],
+    "user_stories": [
+        {
+            "id": "US-12.1",
+            "story": "As a Compliance Manager, I want to set an expiration date or maximum age on evidence, so that I know when it becomes stale.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Manager can set per-control evidence validity period (e.g., 90 days).",
+                "Evidence is flagged as 'Expired' when validity period passes.",
+                "Expired evidence triggers a Finding (PRD-007) automatically."
+            ]
+        },
+        {
+            "id": "US-12.2",
+            "story": "As a Compliance Manager, I want the system to automatically request a refresh from the evidence owner before expiry, so that we maintain continuous compliance.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "System sends reminder at configurable intervals before expiry (30d, 14d, 7d).",
+                "Reminder includes link to re-upload evidence.",
+                "If not refreshed by expiry, the control's confidence score drops."
+            ]
+        },
+        {
+            "id": "US-12.3",
+            "story": "As an Auditor, I want to see a 'confidence score' on each control based on evidence freshness, so that I can focus on areas of weakness.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Each control shows a computed confidence score (High/Medium/Low).",
+                "Score factors in: evidence age, test results (PRD-008), and finding count (PRD-007).",
+                "Dashboard view highlights controls with Low confidence."
+            ]
+        },
+        {
+            "id": "US-12.4",
+            "story": "As a Compliance Manager, I want a dashboard showing all controls with expired or soon-to-expire evidence, so that I can prioritize refresh efforts.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Dashboard lists controls sorted by evidence expiry date.",
+                "Visual indicators (Red/Yellow/Green) based on days until expiry.",
+                "One-click action to request evidence refresh from the owner."
+            ]
+        }
+    ],
+    "data_model": {
+        "modifications": [
+            "Add `expires_at` and `validity_period_days` to Evidence/Document model.",
+            "Add `confidence_score` computed field to ComplianceControl."
+        ],
+        "new_models": [
+            "EvidenceRefreshRequest (evidence_id, requester_id, requested_at, fulfilled_at)"
+        ]
+    }
+}

@@ -3,18 +3,34 @@
 # The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
 
 # Clear existing data
-# puts 'Clearing existing data...'
-# User.destroy_all
-# Organization.destroy_all
-# Role.destroy_all
-# Permission.destroy_all
-# Provider.destroy_all
-# ComplianceFramework.destroy_all
-# ComplianceRequirement.destroy_all
-# ComplianceControl.destroy_all
-# Document.destroy_all
-# Regulation.destroy_all
-# OrganizationRegulation.destroy_all
+puts 'Clearing existing data...'
+# Newer models first to prevent FK issues
+TestExecution.destroy_all if Object.const_defined?("TestExecution")
+TestPlan.destroy_all if Object.const_defined?("TestPlan")
+Attestation.destroy_all if Object.const_defined?("Attestation")
+AttestationCampaign.destroy_all if Object.const_defined?("AttestationCampaign")
+VendorAssessment.destroy_all if Object.const_defined?("VendorAssessment")
+Vendor.destroy_all if Object.const_defined?("Vendor")
+MaturitySnapshot.destroy_all if Object.const_defined?("MaturitySnapshot")
+ExternalIntegration.destroy_all if Object.const_defined?("ExternalIntegration")
+Incident.destroy_all if Object.const_defined?("Incident")
+Obligation.destroy_all if Object.const_defined?("Obligation")
+ExecutiveReport.destroy_all if Object.const_defined?("ExecutiveReport")
+Policy.destroy_all if Object.const_defined?("Policy")
+RegulatoryDataSource.destroy_all if Object.const_defined?("RegulatoryDataSource")
+
+OrganizationRegulation.destroy_all
+ComplianceControl.destroy_all
+ComplianceRequirement.destroy_all
+StandardRequirement.destroy_all
+Regulation.destroy_all
+Document.destroy_all
+ComplianceFramework.destroy_all
+Provider.destroy_all
+Permission.destroy_all
+Role.destroy_all
+User.destroy_all
+Organization.destroy_all
 
 # Create organizations
 puts 'Creating organizations...'
@@ -572,9 +588,78 @@ end
 
 # Create Regulatory Data Sources
 puts 'Creating regulatory data sources...'
-# SEC RSS Feed
+
 sec_provider = Provider.find_by(code: 'SEC')
 if sec_provider
+  # 1. RSS Scrape Example (Functional)
+  RegulatoryDataSource.create!(
+    name: 'SEC Federal Register RSS',
+    description: 'RSS feed for SEC rules published in the Federal Register',
+    source_type: 'rss',
+    url: 'https://www.federalregister.gov/api/v1/documents.rss?conditions[agencies][]=securities-and-exchange-commission',
+    status: 'enabled',
+    provider: sec_provider,
+    jurisdictions: ['US'],
+    sectors: ['financial_services'],
+    settings: {
+      check_frequency: 'daily',
+      auto_import: true
+    }
+  )
+  puts "  ✓ Created Functional RSS Source: SEC Federal Register RSS"
+
+  # 2. API Example (Functional)
+  RegulatoryDataSource.create!(
+    name: 'SEC Federal Register API',
+    description: 'Paginated JSON API for SEC rules',
+    source_type: 'api',
+    url: 'https://www.federalregister.gov/api/v1/documents.json?conditions[agencies][]=securities-and-exchange-commission&per_page=10',
+    status: 'enabled',
+    provider: sec_provider,
+    jurisdictions: ['US'],
+    sectors: ['financial_services'],
+    settings: {
+      check_frequency: 'daily',
+      pagination_type: 'page_number',
+      max_pages: 2,
+      results_key: 'results',
+      title_key: 'title',
+      url_key: 'html_url',
+      publication_date_key: 'publication_date',
+      full_text_key: 'abstract' # The API only returns an abstract, but good enough for testing the pipeline
+    }
+  )
+  puts "  ✓ Created Functional API Source: SEC Federal Register API"
+  
+  # 3. Web Scraper Example (Functional)
+  # We use the OCC Bulletins page as a standard HTML list of links
+  occ_provider = Provider.find_or_create_by!(
+    name: 'Office of the Comptroller of the Currency',
+    code: 'OCC',
+    description: 'Federal banking regulator',
+    jurisdiction: 'US',
+    country: 'United States',
+    provider_type: 'platform_wide',
+    website: 'https://www.occ.treas.gov'
+  )
+
+  RegulatoryDataSource.create!(
+    name: 'OCC Bulletins Web Scraper',
+    description: 'Standard HTML scraping of OCC Bulletins using Nokogiri',
+    source_type: 'web_scrape',
+    url: 'https://www.occ.treas.gov/news-issuances/bulletins/index-bulletins.html',
+    status: 'enabled',
+    provider: occ_provider,
+    jurisdictions: ['US'],
+    sectors: ['banking'],
+    settings: {
+      scraping_method: 'nokogiri',
+      css_selector: 'table tbody tr td a[href^="/news-issuances/bulletins/"]'
+    }
+  )
+  puts "  ✓ Created Functional Web Scraper Source: OCC Bulletins Web Scraper"
+
+  # --- RESTORED PREVIOUS DUMMY SOURCES ---
   RegulatoryDataSource.create!(
     name: 'SEC Proposed Rules RSS',
     description: 'RSS feed for SEC proposed rules and regulations',
@@ -614,6 +699,7 @@ if user_provider
   )
   puts "  ✓ Created Regulatory Data Source: Internal Compliance Feed"
 end
+
 
 # Create compliance frameworks
 puts 'Creating compliance frameworks...'
@@ -1053,6 +1139,149 @@ regulations << Regulation.create!(
   }
 )
 
+# ---- Recent Feature Seeds ----
+puts 'Creating seeds for recent features...'
+default_org = orgs.first
+default_user = users.first
+test_control = controls.first
+
+if Object.const_defined?('TestPlan') && test_control
+  tp = TestPlan.create!(
+    organization: default_org,
+    compliance_control_id: test_control.id,
+    title: 'Quarterly Access Review Test',
+    description: 'Verify that all user access is reviewed quarterly.',
+    frequency: 3, # quarterly
+    status: 1, # active
+    created_by_id: default_user.id
+  )
+  puts "  ✓ Created TestPlan"
+
+  if Object.const_defined?('TestExecution')
+    TestExecution.create!(
+      test_plan: tp,
+      tester_id: default_user.id,
+      completed_at: Time.current,
+      status: 1, # passed
+      result: 1 # passed
+    )
+    puts "  ✓ Created TestExecution"
+  end
+end
+
+if Object.const_defined?('Policy')
+  default_policy = Policy.find_or_create_by!(
+    organization: default_org,
+    title: 'Information Security Policy'
+  ) do |p|
+    p.description = 'Main security policy'
+    p.content = 'Full policy content goes here'
+    p.status = 1
+  end
+
+  if Object.const_defined?('AttestationCampaign')
+    camp = AttestationCampaign.create!(
+      organization: default_org,
+      policy_id: default_policy.id,
+      title: '2026 Q1 Security Policy Acknowledgment',
+      description: 'Please review and acknowledge the updated security policy.',
+      deadline: 1.month.from_now,
+      status: 1, # active
+      created_by_id: default_user.id
+    )
+    puts "  ✓ Created AttestationCampaign"
+
+    if Object.const_defined?('Attestation')
+      Attestation.create!(
+        attestation_campaign: camp,
+        user_id: default_user.id,
+        status: 1, # attested
+        attested_at: Time.current
+      )
+      puts "  ✓ Created Attestation"
+    end
+  end
+end
+
+if Object.const_defined?('Vendor')
+  vendor = Vendor.create!(
+    organization: default_org,
+    name: 'Cloud Hosting Provider LLC',
+    website: 'https://cloudhosting.com',
+    risk_tier: 1,
+    status: 1, # active
+    description: 'Provides primary cloud infrastructure'
+  )
+  puts "  ✓ Created Vendor"
+
+  if Object.const_defined?('VendorAssessment')
+    VendorAssessment.create!(
+      vendor: vendor,
+      organization_id: default_org.id,
+      assessed_by_id: default_user.id,
+      assessment_date: Date.today,
+      status: 1, # completed
+      risk_score: 95
+    )
+    puts "  ✓ Created VendorAssessment"
+  end
+end
+
+if Object.const_defined?('ExternalIntegration')
+  ExternalIntegration.create!(
+    organization: default_org,
+    provider: 'jira',
+    label: 'Ticketing Integration',
+    status: 1, # active
+    encrypted_credentials: { 'token' => 'dummy_token' },
+    config: { 'project_key' => 'SEC' }
+  )
+  puts "  ✓ Created ExternalIntegration"
+end
+
+if Object.const_defined?('Incident')
+  Incident.create!(
+    organization: default_org,
+    title: 'Unauthorized Access Attempt',
+    description: 'A brief unauthorized access attempt was blocked.',
+    severity: 2,
+    status: 0, # open
+    reported_by_id: default_user.id
+  )
+  puts "  ✓ Created Incident"
+end
+
+if Object.const_defined?('Obligation')
+  Obligation.create!(
+    organization: default_org,
+    title: 'Data Breach Notification',
+    description: 'Notify authorities within 72 hours of a breach.',
+    status: 0 # open
+  )
+  puts "  ✓ Created Obligation"
+end
+
+if Object.const_defined?('MaturitySnapshot')
+  MaturitySnapshot.create!(
+    organization: default_org,
+    compliance_control_id: test_control.id,
+    maturity_level: 3,
+    computed_score: 3.5,
+    snapshot_date: Date.today
+  )
+  puts "  ✓ Created MaturitySnapshot"
+end
+
+if Object.const_defined?('ExecutiveReport')
+  ExecutiveReport.create!(
+    organization: default_org,
+    title: 'Q1 Compliance Posture',
+    report_type: 0,
+    narrative: 'Overall compliance is strong.'
+  )
+  puts "  ✓ Created ExecutiveReport"
+end
+
 # Update organization compliance profiles for testing
 puts 'Updating organization compliance profiles for auto-assignment testing...'
 
@@ -1143,4 +1372,19 @@ puts '✓ Updated organization compliance profiles'
 
 # Load Table Templates
 load Rails.root.join('db', 'seeds', 'table_templates.rb')
+
+puts "\nEnabling Flipper Feature Flags..."
+features = [
+  :compliance_management, :regulatory_intelligence, :policies, :document_management, 
+  :evidence_freshness, :findings_remediation, :control_testing, :policy_attestation, 
+  :obligation_management, :incident_management, :maturity_assessment, :workflow_intelligence, 
+  :policy_gap_analysis, :regulatory_impact_simulation, :executive_reporting, 
+  :questionnaire_autofill, :vendor_risk_management, :evidence_agents, :continuous_monitoring, 
+  :external_integrations
+]
+
+features.each do |feature|
+  Flipper.enable(feature)
+end
+puts "✓ Enabled #{features.length} feature flags globally!"
 

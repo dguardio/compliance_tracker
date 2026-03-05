@@ -1,0 +1,46 @@
+{
+    "id": "PRD-F06",
+    "title": "Executive Reporting & Board Narrative Generator",
+    "status": "Draft",
+    "priority": "Medium",
+    "timeline": "Future",
+    "rationale": "Executives need narrative trend analysis, not raw data. This AI-heavy feature builds on top of all other modules (findings, incidents, testing, evidence) and is best built after those data sources exist. Deferred because it is a presentation layer on top of operational data that doesn't yet exist.",
+    "modules": [
+        "AI Narrative Generator",
+        "Quarterly Report Builder",
+        "Trend Analysis",
+        "Export to PDF/PowerPoint"
+    ],
+    "user_stories": [
+        {
+            "id": "US-F6.1",
+            "story": "As a CISO, I want to generate a quarterly board-ready compliance report with one click, so that I don't spend days building slide decks.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "System generates a narrative report covering: compliance score trend, key risks, findings velocity, regulatory changes.",
+                "Report includes charts and visualizations.",
+                "Report is exportable as PDF and PowerPoint."
+            ]
+        },
+        {
+            "id": "US-F6.2",
+            "story": "As an Executive, I want to see risk trend analysis and forecasted exposure by geography, so that I can make strategic resource allocation decisions.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "Dashboard shows risk exposure trends over 6/12 months.",
+                "Filterable by jurisdiction, framework, and department.",
+                "AI provides brief explanations for significant trend changes."
+            ]
+        },
+        {
+            "id": "US-F6.3",
+            "story": "As a CISO, I want the report to include control maturity scoring and remediation velocity metrics, so that I can demonstrate program improvement.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "Report includes avg time-to-remediate findings.",
+                "Report includes control maturity progression (if PRD-F09 implemented).",
+                "Report includes evidence freshness and testing coverage metrics."
+            ]
+        }
+    ]
+}

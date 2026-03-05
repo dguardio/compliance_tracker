@@ -1,0 +1,52 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+        <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg" style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
+          <i class="fas fa-file-alt text-white text-lg"></i>
+        </span>
+        Executive Reports
+      </h1>
+      <p class="mt-1 text-gray-500">AI-generated compliance reports for board and executive teams</p>
+    </div>
+    <%= link_to new_organization_executive_report_path(@organization), class: "inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors" do %>
+      <i class="fas fa-plus mr-2"></i> Generate Report
+    <% end %>
+  </div>
+
+  <% if @reports.any? %>
+    <div class="space-y-4">
+      <% @reports.each do |report| %>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900"><%= report.title %></h3>
+              <p class="text-sm text-gray-500 mt-1"><%= report.period_label %></p>
+            </div>
+            <div class="flex items-center gap-3">
+              <% status_colors = { 'generating' => 'yellow', 'draft' => 'blue', 'published' => 'green' } %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= status_colors[report.status] %>-100 text-<%= status_colors[report.status] %>-800">
+                <%= report.status.titleize %>
+              </span>
+              <%= link_to organization_executive_report_path(@organization, report), class: "text-indigo-600 hover:text-indigo-800 text-sm font-medium" do %>
+                View <i class="fas fa-arrow-right ml-1"></i>
+              <% end %>
+            </div>
+          </div>
+          <% if report.metrics.present? %>
+            <div class="flex gap-4 mt-4 text-sm">
+              <span class="text-gray-500">Score: <strong class="text-gray-900"><%= report.metric('compliance_score') %>%</strong></span>
+              <span class="text-gray-500">Findings: <strong class="text-gray-900"><%= report.metric('findings')&.dig('opened') || 0 %></strong></span>
+              <span class="text-gray-500">Maturity: <strong class="text-gray-900"><%= report.metric('maturity')&.dig('average_maturity') || 'N/A' %></strong></span>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="bg-white rounded-xl shadow-sm border p-12 text-center">
+      <i class="fas fa-file-alt text-gray-300 text-4xl mb-3"></i>
+      <p class="text-gray-500">No reports generated yet. Click "Generate Report" to create your first executive compliance report.</p>
+    </div>
+  <% end %>
+</div>

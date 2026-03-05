@@ -1,7 +1,8 @@
 <%# locals: { organization: organization } %>
-<% profile = organization.settings['ai_compliance_profile'] || {} %>
-<% report = organization.settings['ai_research_report'] %>
-<% error = organization.settings['ai_research_error'] %>
+<% settings = organization.settings || {} %>
+<% profile = settings['ai_compliance_profile'] || {} %>
+<% report = settings['ai_research_report'] %>
+<% error = settings['ai_research_error'] %>
 
 <div id="compliance_profile_card" class="bg-white rounded-card shadow-sm border border-slate-100 p-6 mb-8 animate-fade-in-up">
   <% if error %>

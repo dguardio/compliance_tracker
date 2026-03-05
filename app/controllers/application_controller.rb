@@ -1,6 +1,26 @@
 class ApplicationController < ActionController::Base
   include Pundit::Authorization
 
+  # Feature Flags
+  helper_method :feature_enabled?
+
+  def feature_enabled?(feature_name, actor = current_organization)
+    Flipper.enabled?(feature_name, actor)
+  end
+
+  # Controller guard: use as `before_action -> { require_feature!(:policies) }`
+  def require_feature!(feature_name)
+    return if feature_enabled?(feature_name)
+
+    respond_to do |format|
+      format.html do
+        flash[:alert] = "This feature is not available for your organization."
+        redirect_back(fallback_location: dashboard_path)
+      end
+      format.json { render json: { error: "Feature not available" }, status: :forbidden }
+    end
+  end
+
   # Multi-tenancy configuration
   set_current_tenant_through_filter
   before_action :set_current_tenant

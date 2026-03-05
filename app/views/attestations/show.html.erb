@@ -1,0 +1,48 @@
+<div class="container mx-auto px-4 py-8 max-w-3xl">
+  <div class="bg-white shadow rounded-lg overflow-hidden">
+    <div class="bg-indigo-600 px-6 py-8 text-center">
+      <h1 class="text-2xl font-bold text-white">Policy Attestation Required</h1>
+      <p class="text-indigo-200 mt-1"><%= @campaign.title %></p>
+    </div>
+
+    <div class="px-6 py-6">
+      <!-- Policy Content -->
+      <div class="mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-3"><%= @policy.title %></h2>
+        <div class="prose prose-sm max-w-none text-gray-700 border rounded-lg p-4 max-h-96 overflow-y-auto bg-gray-50">
+          <% if @policy.content.present? %>
+            <%= @policy.content %>
+          <% else %>
+            <p class="text-gray-400 italic">Policy content not available.</p>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Attestation Action -->
+      <% if @attestation.status_pending? %>
+        <div class="border-t pt-6">
+          <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+            <p class="text-sm text-yellow-800">
+              By clicking "I Acknowledge", you confirm that you have read and understood the policy above.
+              This action will be recorded with your identity, timestamp, and IP address for compliance purposes.
+            </p>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-500">Deadline: <strong><%= @campaign.deadline&.strftime("%B %d, %Y") || '—' %></strong></span>
+            <%= button_to "I Acknowledge This Policy", attest_attestation_path(@attestation),
+                          method: :patch,
+                          class: "inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700" %>
+          </div>
+        </div>
+      <% else %>
+        <div class="border-t pt-6">
+          <div class="bg-green-50 border-l-4 border-green-400 p-4">
+            <p class="text-sm text-green-800">
+              ✅ You have already attested to this policy on <strong><%= @attestation.attested_at&.strftime("%B %d, %Y at %I:%M %p") %></strong>.
+            </p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

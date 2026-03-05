@@ -1,0 +1,1364 @@
+{
+  "project_name": "Compliance Tracker",
+  "generated_at": "2026-02-15T01:39:04Z",
+  "stats": {
+    "total_modules": 23,
+    "current_modules_count": 13,
+    "future_modules_count": 10,
+    "total_user_stories": 88
+  },
+  "current_features": [
+    {
+      "title": "Core Platform & Administration",
+      "status": "Built",
+      "priority": "Critical",
+      "modules": [
+        "Multi-tenancy",
+        "User Management",
+        "Authentication",
+        "Role-Based Access Control (RBAC)"
+      ],
+      "user_stories": [
+        {
+          "story": "As a System Admin, I want to create new Organizations (Tenants), so that I can onboard new customers.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "Admin can create an organization with a name and slug.",
+            "Data is strictly isolated between organizations."
+          ]
+        },
+        {
+          "story": "As a User, I want to log in securely, so that I can access my organization's data.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "User can sign in with email/password.",
+            "User is redirected to their organization's dashboard upon login."
+          ]
+        },
+        {
+          "story": "As an Org Admin, I want to invite users and assign roles, so that I can delegate compliance tasks.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "Org Admin can invite users by email.",
+            "Org Admin can assign roles (e.g., Compliance Manager, Read Only).",
+            "Users inherit permissions based on roles."
+          ]
+        },
+        {
+          "story": "As an Org Admin, I want to configure organization settings (logo, colors), so that the platform reflects our brand.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "Org Admin can upload a logo.",
+            "Org Admin can set primary/secondary brand colors.",
+            "UI reflects these branding choices."
+          ]
+        },
+        {
+          "story": "As a User, I want to manage my profile and notifications, so that I stay informed.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "User can update profile details (name, title).",
+            "User can toggle email/in-app notifications."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Compliance Management",
+      "status": "Built",
+      "priority": "Critical",
+      "modules": [
+        "Frameworks",
+        "Requirements",
+        "Controls",
+        "Evidence"
+      ],
+      "user_stories": [
+        {
+          "story": "As a Compliance Manager, I want to define Compliance Frameworks (e.g., SOC2, ISO27001), so that I can structure our compliance efforts.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "Manager can create/edit Frameworks.",
+            "Manager can import Frameworks from templates."
+          ]
+        },
+        {
+          "story": "As a Compliance Manager, I want to break down Frameworks into Requirements, so that they are actionable.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "Manager can add Requirements to a Framework.",
+            "Requirements can be nested or grouped."
+          ]
+        },
+        {
+          "story": "As a Compliance Manager, I want to define Controls and link them to Requirements, so that we can demonstrate compliance.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "Manager can create internal Controls.",
+            "Manager can map one Control to multiple Requirements (many-to-many)."
+          ]
+        },
+        {
+          "story": "As an Auditor, I want to request evidence for specific controls, so that I can verify their effectiveness.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "Auditor can create an Evidence Request.",
+            "Assignees are notified to upload evidence."
+          ]
+        },
+        {
+          "story": "As a User, I want to upload documents as evidence, so that I can fulfill audit requests.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "User can upload files (PDF, Docx, etc.) to a Request.",
+            "Documents are versioned and stored securely."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Document & Policy Management",
+      "status": "In Progress",
+      "priority": "High",
+      "modules": [
+        "Document Library",
+        "Policy Management",
+        "Approval Workflows"
+      ],
+      "user_stories": [
+        {
+          "story": "As a Staff Member, I want a centralized Document Library, so that I can find official company documents.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "Users can view documents they have access to.",
+            "Documents can be categorized and tagged.",
+            "Search functionality filters by content and metadata."
+          ]
+        },
+        {
+          "story": "As a Policy Owner, I want to draft and edit Policies directly in the platform, so that we have a single source of truth.",
+          "status": "In Progress",
+          "acceptance_criteria": [
+            "Owner can create a Policy with a rich text editor.",
+            "Owner can upload extensive policy documents (PDF/Word) which are parsed.",
+            "Policies have statuses (Draft, Active, Archived)."
+          ]
+        },
+        {
+          "story": "As a Policy Owner, I want to link Policies to specific Regulations and Controls, so that I can show coverage.",
+          "status": "In Progress",
+          "acceptance_criteria": [
+            "Owner can link a Policy to a Regulation.",
+            "Owner can link a Policy to a Compliance Control."
+          ]
+        },
+        {
+          "story": "As a Reviewer, I want to approve or reject documents via a workflow, so that quality is maintained.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "Documents can be submitted for review.",
+            "Designated approvers can Approve or Request Changes.",
+            "History of approvals is logged."
+          ]
+        },
+        {
+          "story": "As a User, I want to access Policy Management from my organization dashboard, so that I don't need admin access.",
+          "status": "In Progress",
+          "acceptance_criteria": [
+            "Standard users see 'Policy Management' in the sidebar (gated by feature flag).",
+            "Tenant-scoped view ensures no cross-org data leakage."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Risk Management",
+      "status": "Built",
+      "priority": "High",
+      "modules": [
+        "Risk Register",
+        "Risk Assessment",
+        "Heatmap"
+      ],
+      "user_stories": [
+        {
+          "story": "As a Risk Manager, I want to maintain a Risk Register, so that I can track potential threats to the organization.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "Manager can create Risk entries.",
+            "Risks have Impact and Likelihood scores."
+          ]
+        },
+        {
+          "story": "As a Risk Manager, I want to visualize risks on a heatmap, so that I can prioritize mitigation efforts.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "Dashboard displays a 5x5 Risk Heatmap.",
+            "Risks are color-coded (High, Medium, Low)."
+          ]
+        },
+        {
+          "story": "As a Risk Manager, I want to link Risks to Controls, so that I can see how we are mitigating them.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "Manager can link a Risk to one or more Controls.",
+            "Residual risk is calculated based on control effectiveness."
+          ]
+        },
+        {
+          "story": "As a User, I want a Risk Dashboard, so that I can see my assigned risks and pending assessments.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "User sees 'My Risks' view.",
+            "User can update risk status/scores."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Regulatory Intelligence (The Watchdog)",
+      "status": "In Progress / Pending MVP",
+      "priority": "MVP",
+      "modules": [
+        "Global Ingestion",
+        "Discovery Agent",
+        "Regulatory Library"
+      ],
+      "user_stories": [
+        {
+          "story": "As a Compliance Officer, I want to browse a 'Global Library' of regulations, so that I can find laws relevant to my business.",
+          "status": "Pending MVP",
+          "acceptance_criteria": [
+            "User can search a global database of regulations (Tier 2).",
+            "User can filter by Sector and Jurisdiction."
+          ]
+        },
+        {
+          "story": "As a Compliance Officer, I want to 'Adopt' a regulation from the Global Library into my organization, so that I can track compliance against it.",
+          "status": "Pending MVP",
+          "acceptance_criteria": [
+            "User can click 'Adopt' on a regulation.",
+            "Regulation is copied/linked to the Organization's active register.",
+            "Adoption triggers the deep analysis (Tier 3) process."
+          ]
+        },
+        {
+          "story": "As a System, I want to continuously crawl global sources (Tier 1), so that the regulation bank is always up-to-date.",
+          "status": "In Progress",
+          "acceptance_criteria": [
+            "System crawls seed sites (Regulations.gov, etc.).",
+            "System stores 'Raw' regulation text cheaply.",
+            "System classifies 'Is Regulation?' to filter noise."
+          ]
+        },
+        {
+          "story": "As a User, I want to be notified when an adopted regulation changes, so that I can update my compliance controls.",
+          "status": "Pending MVP",
+          "acceptance_criteria": [
+            "System detects updates to source text.",
+            "System creates a 'New Version' record.",
+            "User receives a notification of the change."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Reporting & Analytics",
+      "status": "Mixed",
+      "priority": "Medium",
+      "modules": [
+        "Compliance Dashboard",
+        "Exporting"
+      ],
+      "user_stories": [
+        {
+          "story": "As an Executive, I want a high-level Compliance Dashboard, so that I can see our overall standing at a glance.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "Dashboard shows overall compliance score.",
+            "Dashboard shows breakdown by Framework.",
+            "Dashboard highlights critical risks and overdue tasks."
+          ]
+        },
+        {
+          "story": "As an Auditor, I want to export compliance data (CSV/PDF), so that I can review it offline or in other tools.",
+          "status": "Pending MVP",
+          "acceptance_criteria": [
+            "User can export lists of Requirements/Controls to CSV.",
+            "User can generate a 'Compliance Statement' PDF."
+          ]
+        },
+        {
+          "story": "As a Compliance Manager, I want to utilize AI to summarize complex regulations, so that I can understand them quickly.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "User can view AI-generated summaries of regulation text.",
+            "Summaries highlight key obligations."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Platform Infrastructure: Feature Flags",
+      "status": "Built",
+      "priority": "Technical Enabler",
+      "modules": [
+        "Flipper Integration",
+        "Tenant Gating"
+      ],
+      "user_stories": [
+        {
+          "story": "As a Product Manager, I want to enable experimental features for specific tenants only, so that we can test safely.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "Admin can enable a feature (e.g., 'policies') for a specific Organization ID.",
+            "Feature remains disabled for all other Organizations."
+          ]
+        },
+        {
+          "story": "As an Admin, I want a UI to manage feature flags, so that I don't need to deploy code to toggle features.",
+          "status": "Completed",
+          "acceptance_criteria": [
+            "Admin can access `/flipper` dashboard.",
+            "Dashboard allows toggling features on/off per user or group."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PRD-007",
+      "title": "Findings & Remediation Management (CAPA)",
+      "status": "Pending",
+      "priority": "Critical",
+      "timeline": "Current — Build Now",
+      "rationale": "Transforms the platform from an evidence repository into an operational compliance system. Directly extends existing Risk, Controls, and Evidence modules.",
+      "modules": [
+        "Findings Register",
+        "Corrective Action Plans",
+        "SLA Tracking",
+        "Auto-Generation from Control Failures"
+      ],
+      "user_stories": [
+        {
+          "id": "US-7.1",
+          "story": "As a Compliance Manager, when a control fails, I want a remediation ticket (Finding) automatically created and assigned, so that I don't have to manually chase engineering.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "System auto-creates a Finding when an Evidence Agent returns 'Fail'.",
+            "System auto-creates a Finding when evidence expires.",
+            "System auto-creates a Finding when an auditor flags a deficiency.",
+            "Finding is linked to the originating Control, Risk, and Evidence."
+          ]
+        },
+        {
+          "id": "US-7.2",
+          "story": "As a Compliance Manager, I want to assign a remediation owner and set an SLA deadline on a Finding, so that accountability is clear.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Manager can assign a user as the remediation owner.",
+            "Manager can set a due date (SLA) for the finding.",
+            "Overdue findings are visually flagged on dashboards.",
+            "Assignee receives notification upon assignment."
+          ]
+        },
+        {
+          "id": "US-7.3",
+          "story": "As a Remediation Owner, I want to document my corrective action plan and attach evidence of the fix, so that the finding can be validated and closed.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Owner can add a description of the corrective action taken.",
+            "Owner can upload evidence of remediation.",
+            "Owner can submit the finding for verification."
+          ]
+        },
+        {
+          "id": "US-7.4",
+          "story": "As a Compliance Manager, I want findings to auto-close when the associated evidence passes again, so that resolved issues don't require manual closure.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "When a linked Evidence Agent next returns 'Pass', the Finding is auto-resolved.",
+            "An audit log entry records the auto-closure with timestamp and evidence reference."
+          ]
+        },
+        {
+          "id": "US-7.5",
+          "story": "As a Compliance Manager, I want to track root causes of findings, so that I can identify systemic issues.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Manager can select a root cause category (Process, People, Technology, Policy).",
+            "Dashboard shows root cause distribution across all findings."
+          ]
+        },
+        {
+          "id": "US-7.6",
+          "story": "As an Org Admin, I want to integrate findings with our project management tool (Jira/Linear/ServiceNow), so that engineering gets tickets in their existing workflow.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Admin can configure a Jira/Linear integration.",
+            "When a Finding is created, a corresponding ticket is created in the external tool.",
+            "Status syncs bidirectionally (external close → Finding resolves)."
+          ]
+        }
+      ],
+      "data_model": {
+        "new_models": [
+          "Finding (status, severity, root_cause, sla_date, finding_type)",
+          "CorrectiveAction (description, evidence, submitted_at)",
+          "FindingLink (polymorphic: Control, Risk, Evidence, Regulation)"
+        ],
+        "enums": {
+          "finding_status": [
+            "open",
+            "in_progress",
+            "pending_verification",
+            "closed",
+            "overdue"
+          ],
+          "finding_type": [
+            "control_failure",
+            "evidence_expiry",
+            "audit_deficiency",
+            "policy_outdated"
+          ],
+          "root_cause": [
+            "process",
+            "people",
+            "technology",
+            "policy",
+            "third_party"
+          ]
+        }
+      }
+    },
+    {
+      "id": "PRD-008",
+      "title": "Control Testing & Assurance Program",
+      "status": "Pending",
+      "priority": "Critical",
+      "timeline": "Current — Build Now",
+      "rationale": "SOC 2, ISO 27001, and SOX all require formal control testing documentation. Without this, the platform is a documentation system, not an assurance system. Extends existing Controls and Evidence modules.",
+      "modules": [
+        "Test Plans",
+        "Test Execution",
+        "Sampling",
+        "Tester Sign-off"
+      ],
+      "user_stories": [
+        {
+          "id": "US-8.1",
+          "story": "As a Compliance Manager, I want to define a testing schedule for each control (Quarterly/Annual), so that we maintain continuous assurance.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Manager can set testing frequency per control (Monthly, Quarterly, Semi-Annual, Annual).",
+            "System generates upcoming test tasks based on schedule.",
+            "Dashboard shows controls due for testing."
+          ]
+        },
+        {
+          "id": "US-8.2",
+          "story": "As a Compliance Manager, I want to define formal test procedures for each control, so that testing is consistent and repeatable.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Manager can write step-by-step test procedures linked to a control.",
+            "Procedures are versioned.",
+            "Tester sees the procedure when executing a test."
+          ]
+        },
+        {
+          "id": "US-8.3",
+          "story": "As an Internal Auditor, I want to execute a test by selecting a sample and recording Pass/Fail results, so that I have documented evidence of testing.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Tester can select a sample size.",
+            "System suggests random samples from the evidence population where possible.",
+            "Tester records Pass/Fail per sample item.",
+            "Tester can add notes and attach evidence for each test item."
+          ]
+        },
+        {
+          "id": "US-8.4",
+          "story": "As an Internal Auditor, I want a sign-off workflow for completed tests, so that results are formally approved.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Tester submits completed test for review.",
+            "Reviewer can approve, reject, or request re-test.",
+            "Approved tests are immutably logged with timestamp and reviewer identity."
+          ]
+        },
+        {
+          "id": "US-8.5",
+          "story": "As a Compliance Manager, I want to view historical test results and trend analysis, so that I can identify weakening controls.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Dashboard shows pass/fail rate per control over time.",
+            "Controls with declining pass rates are flagged.",
+            "Exportable test history for external auditors."
+          ]
+        }
+      ],
+      "data_model": {
+        "new_models": [
+          "TestPlan (control_id, frequency, procedure_text, next_test_date)",
+          "TestExecution (test_plan_id, tester_id, reviewer_id, status, executed_at)",
+          "TestSample (test_execution_id, evidence_id, result, notes)"
+        ],
+        "enums": {
+          "test_frequency": [
+            "monthly",
+            "quarterly",
+            "semi_annual",
+            "annual"
+          ],
+          "test_result": [
+            "pass",
+            "fail",
+            "inconclusive",
+            "not_applicable"
+          ],
+          "test_status": [
+            "scheduled",
+            "in_progress",
+            "pending_review",
+            "approved",
+            "rejected"
+          ]
+        }
+      }
+    },
+    {
+      "id": "PRD-009",
+      "title": "Obligation Extraction & Tracking",
+      "status": "Pending",
+      "priority": "High",
+      "timeline": "Current — Build Now",
+      "rationale": "Regulations contain specific legal duties (deadlines, reporting requirements, retention mandates). Currently these are buried in regulation text. This module extracts them into actionable, trackable items. Directly extends Regulatory Intelligence and existing AI processing pipeline.",
+      "modules": [
+        "AI Obligation Extractor",
+        "Obligation Register",
+        "Deadline & Calendar Tracking",
+        "Obligation-to-Control Mapping"
+      ],
+      "user_stories": [
+        {
+          "id": "US-9.1",
+          "story": "As a Compliance Officer, when a regulation is adopted, I want the system to automatically extract key obligations (deadlines, requirements, reporting duties), so that I don't have to read hundreds of pages manually.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "AI processes regulation text and extracts structured obligations.",
+            "Each obligation has: text, responsible role, deadline/recurrence, severity.",
+            "Officer can review and accept/reject extracted obligations."
+          ]
+        },
+        {
+          "id": "US-9.2",
+          "story": "As a Compliance Officer, I want to see all my organization's obligations in a single register with due dates, so that nothing falls through the cracks.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Obligation Register shows all active obligations.",
+            "Filterable by regulation, deadline, status, assigned owner.",
+            "Overdue obligations are visually flagged."
+          ]
+        },
+        {
+          "id": "US-9.3",
+          "story": "As a Compliance Officer, I want deadline reminders and calendar integration, so that I am proactively alerted before an obligation comes due.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "System sends email/in-app reminders at configurable intervals (30d, 14d, 7d, 1d).",
+            "Obligations can be exported to ICS/Google Calendar.",
+            "Recurring obligations auto-regenerate after completion."
+          ]
+        },
+        {
+          "id": "US-9.4",
+          "story": "As a Compliance Officer, I want to link obligations to specific controls and evidence, so that I can demonstrate we are fulfilling our legal duties.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Officer can link an obligation to one or more controls.",
+            "Officer can attach evidence of fulfillment.",
+            "Obligation status auto-updates when linked evidence is submitted."
+          ]
+        },
+        {
+          "id": "US-9.5",
+          "story": "As a System, when an incident is logged, I want to automatically trigger conditional obligations (e.g., GDPR 72h breach notification timer), so that time-sensitive requirements are not missed.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "System identifies conditional obligations linked to event types.",
+            "When a matching incident is logged, the timer starts.",
+            "Countdown and escalation notifications are displayed prominently."
+          ]
+        }
+      ],
+      "data_model": {
+        "new_models": [
+          "Obligation (regulation_id, text, responsible_role, deadline_type, recurrence, status)",
+          "ObligationFulfillment (obligation_id, evidence, fulfilled_at, fulfilled_by)"
+        ],
+        "enums": {
+          "deadline_type": [
+            "fixed_date",
+            "recurring",
+            "conditional",
+            "ongoing"
+          ],
+          "obligation_status": [
+            "pending",
+            "in_progress",
+            "fulfilled",
+            "overdue",
+            "waived"
+          ]
+        }
+      }
+    },
+    {
+      "id": "PRD-010",
+      "title": "Incident & Breach Management",
+      "status": "Pending",
+      "priority": "High",
+      "timeline": "Current — Build Now",
+      "rationale": "Closes the loop between Security Ops and Compliance. Risks predict what could happen; incidents track what did happen. This connects incidents to obligations, controls, and regulatory reporting — the full lifecycle. Extends existing Risk Management and integrates with Obligation Management (PRD-009) and Findings (PRD-007).",
+      "modules": [
+        "Incident Logging",
+        "Categorization & Severity",
+        "Regulatory Obligation Triggers",
+        "Post-Incident Reporting",
+        "Root Cause & Lessons Learned"
+      ],
+      "user_stories": [
+        {
+          "id": "US-10.1",
+          "story": "As a Security Analyst, I want to log an incident with category, severity, and affected systems, so that the compliance team has immediate visibility.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "User can create an incident with title, description, category, severity.",
+            "Incident is linked to impacted controls and risks.",
+            "Compliance team is notified immediately."
+          ]
+        },
+        {
+          "id": "US-10.2",
+          "story": "As a Compliance Officer, when an incident is logged, I want the system to automatically identify triggered regulatory obligations (e.g., GDPR 72h breach notification), so that I know exactly what we must report and when.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "System matches incident category to conditional obligations.",
+            "Countdown timer starts for time-sensitive obligations.",
+            "Dashboard shows all triggered obligations with deadlines."
+          ]
+        },
+        {
+          "id": "US-10.3",
+          "story": "As a Compliance Officer, I want to generate a post-incident report that includes timeline, root cause, impact, and corrective actions, so that I can satisfy regulatory reporting requirements.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "System provides a report template pre-filled with incident data.",
+            "Report includes linked controls, obligations triggered, and remediation actions.",
+            "Report is exportable as PDF."
+          ]
+        },
+        {
+          "id": "US-10.4",
+          "story": "As a Risk Manager, I want incidents to automatically create Findings (PRD-007), so that corrective actions are tracked to closure.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "When an incident is closed, a Finding is auto-created for each root cause.",
+            "Finding links back to the originating incident."
+          ]
+        },
+        {
+          "id": "US-10.5",
+          "story": "As a Compliance Manager, I want a 'Lessons Learned' repository linked to incidents, so that the organization can improve over time.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Each closed incident can have a 'Lessons Learned' entry.",
+            "Lessons are searchable and browsable.",
+            "Lessons can be linked to updated controls or policies."
+          ]
+        }
+      ],
+      "data_model": {
+        "new_models": [
+          "Incident (title, description, category, severity, status, reported_by, resolved_at)",
+          "IncidentLink (polymorphic: Control, Risk, Regulation, Obligation)",
+          "LessonLearned (incident_id, description, linked_controls, linked_policies)"
+        ],
+        "enums": {
+          "incident_category": [
+            "security",
+            "privacy",
+            "compliance",
+            "operational",
+            "financial"
+          ],
+          "incident_severity": [
+            "critical",
+            "high",
+            "medium",
+            "low"
+          ],
+          "incident_status": [
+            "reported",
+            "investigating",
+            "contained",
+            "resolved",
+            "closed"
+          ]
+        }
+      }
+    },
+    {
+      "id": "PRD-011",
+      "title": "Policy Attestation & Training Tracking",
+      "status": "Pending",
+      "priority": "High",
+      "timeline": "Current — Build Now",
+      "rationale": "Policy management is incomplete without employee acknowledgment tracking. Required for ISO, SOC 2, HIPAA, and GDPR. Directly extends the existing Policy Management module (PRD-002).",
+      "modules": [
+        "Policy Distribution",
+        "Attestation Tracking",
+        "Training Completion",
+        "Escalation Engine"
+      ],
+      "user_stories": [
+        {
+          "id": "US-11.1",
+          "story": "As a Compliance Manager, I want to push a policy to all users (or a specific group) for mandatory acknowledgment, so that I can prove employees have read it.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Manager selects a policy and target audience (all users, department, role).",
+            "Each target user receives an in-app notification and email.",
+            "User must click 'I have read and understood this policy' to attest."
+          ]
+        },
+        {
+          "id": "US-11.2",
+          "story": "As a Compliance Manager, I want to see a real-time completion dashboard, so that I know who has and hasn't acknowledged a policy.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Dashboard shows % completion and list of pending users.",
+            "Filterable by department, role, policy.",
+            "Exportable as CSV for audit evidence."
+          ]
+        },
+        {
+          "id": "US-11.3",
+          "story": "As a Compliance Manager, I want the system to automatically escalate to a user's manager after a configurable deadline, so that attestation doesn't stall.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Manager sets a deadline for attestation (e.g., 14 days).",
+            "At 7 days, a reminder is sent.",
+            "At deadline, user's manager is notified.",
+            "Post-deadline, the finding is flagged as overdue."
+          ]
+        },
+        {
+          "id": "US-11.4",
+          "story": "As an Auditor, I want to see a legal record of all policy attestations with timestamps and user identity, so that I can verify compliance during an audit.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Each attestation is immutably logged with user ID, timestamp, IP, and policy version.",
+            "Attestation log is exportable.",
+            "Historical attestations are preserved even if the policy is updated."
+          ]
+        },
+        {
+          "id": "US-11.5",
+          "story": "As a Compliance Manager, I want to track mandatory training completion alongside policy attestation, so that I have a unified view of employee compliance awareness.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Manager can attach a training requirement to a policy.",
+            "System tracks training completion (manual entry or LMS integration).",
+            "Dashboard shows combined attestation + training status."
+          ]
+        }
+      ],
+      "data_model": {
+        "new_models": [
+          "AttestationCampaign (policy_id, target_scope, deadline, status)",
+          "Attestation (campaign_id, user_id, attested_at, ip_address, policy_version)",
+          "TrainingRequirement (policy_id, title, description, due_date)"
+        ],
+        "enums": {
+          "campaign_status": [
+            "draft",
+            "active",
+            "completed",
+            "overdue"
+          ],
+          "target_scope": [
+            "all_users",
+            "department",
+            "role",
+            "custom_list"
+          ]
+        }
+      }
+    },
+    {
+      "id": "PRD-012",
+      "title": "Evidence Freshness & Expiration Intelligence",
+      "status": "Pending",
+      "priority": "High",
+      "timeline": "Current — Build Now",
+      "rationale": "Auditors care about currency. Evidence that is 8 months old does not prove a control is working today. This module adds time-awareness to the existing Evidence system and tightly integrates with Findings (PRD-007).",
+      "modules": [
+        "Expiration Engine",
+        "Freshness Scoring",
+        "Auto-Refresh Requests",
+        "Stale Evidence Dashboard"
+      ],
+      "user_stories": [
+        {
+          "id": "US-12.1",
+          "story": "As a Compliance Manager, I want to set an expiration date or maximum age on evidence, so that I know when it becomes stale.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Manager can set per-control evidence validity period (e.g., 90 days).",
+            "Evidence is flagged as 'Expired' when validity period passes.",
+            "Expired evidence triggers a Finding (PRD-007) automatically."
+          ]
+        },
+        {
+          "id": "US-12.2",
+          "story": "As a Compliance Manager, I want the system to automatically request a refresh from the evidence owner before expiry, so that we maintain continuous compliance.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "System sends reminder at configurable intervals before expiry (30d, 14d, 7d).",
+            "Reminder includes link to re-upload evidence.",
+            "If not refreshed by expiry, the control's confidence score drops."
+          ]
+        },
+        {
+          "id": "US-12.3",
+          "story": "As an Auditor, I want to see a 'confidence score' on each control based on evidence freshness, so that I can focus on areas of weakness.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Each control shows a computed confidence score (High/Medium/Low).",
+            "Score factors in: evidence age, test results (PRD-008), and finding count (PRD-007).",
+            "Dashboard view highlights controls with Low confidence."
+          ]
+        },
+        {
+          "id": "US-12.4",
+          "story": "As a Compliance Manager, I want a dashboard showing all controls with expired or soon-to-expire evidence, so that I can prioritize refresh efforts.",
+          "status": "Pending",
+          "acceptance_criteria": [
+            "Dashboard lists controls sorted by evidence expiry date.",
+            "Visual indicators (Red/Yellow/Green) based on days until expiry.",
+            "One-click action to request evidence refresh from the owner."
+          ]
+        }
+      ],
+      "data_model": {
+        "modifications": [
+          "Add `expires_at` and `validity_period_days` to Evidence/Document model.",
+          "Add `confidence_score` computed field to ComplianceControl."
+        ],
+        "new_models": [
+          "EvidenceRefreshRequest (evidence_id, requester_id, requested_at, fulfilled_at)"
+        ]
+      }
+    }
+  ],
+  "future_features": [
+    {
+      "id": "PRD-001",
+      "title": "Automated Evidence Collection Agents",
+      "status": "Draft",
+      "summary": "Implementation of AI-driven agents that connect to third-party systems (AWS, GitHub, Google Workspace) to automatically verify compliance controls and collect evidence, replacing manual screenshots.",
+      "goals": [
+        "Reduce manual effort in collecting audit evidence by 80%.",
+        "Enable near real-time validation of technical controls.",
+        "Provide immutable audit trails of compliance checks."
+      ],
+      "user_stories": [
+        {
+          "id": "US-1.1",
+          "role": "Compliance Officer",
+          "action": "connect a GitHub repository",
+          "outcome": "the system automatically verifies that branch protection rules are enabled."
+        },
+        {
+          "id": "US-1.2",
+          "role": "Auditor",
+          "action": "view a control",
+          "outcome": "see a JSON log or screenshot generated by the system today, rather than a manual upload from last month."
+        },
+        {
+          "id": "US-1.3",
+          "role": "Admin",
+          "action": "configure a schedule",
+          "outcome": "evidence is collected daily, weekly, or monthly automatically."
+        }
+      ],
+      "technical_spec": {
+        "architecture": {
+          "component": "EvidenceAgent",
+          "pattern": "Adapter Pattern",
+          "description": "Base class for all integrations. Each service (GitHub, AWS) will have a specific adapter."
+        },
+        "data_model": {
+          "new_models": [
+            "IntegrationCredential (encrypted)",
+            "EvidenceCheck (stores the result of a run)",
+            "ControlMapping (links a technical check to a specific Compliance Control)"
+          ]
+        },
+        "api_integrations": [
+          "GitHub API (Octokit)",
+          "AWS SDK",
+          "Google Workspace API"
+        ]
+      },
+      "acceptance_criteria": [
+        "User can securely save API keys/OAuth tokens for a provider.",
+        "System can run a check (e.g., 'MFA Enabled') and return Pass/Fail.",
+        "Pass/Fail result is automatically attached to the relevant Control as Evidence."
+      ]
+    },
+    {
+      "id": "PRD-002",
+      "title": "Questionnaire Autofill (RFP Responder)",
+      "status": "Draft",
+      "summary": "An intelligent agent that uses RAG (Retrieval-Augmented Generation) to answer security questionnaires (Excel, CSV) using the organization's existing Policy and Control data.",
+      "goals": [
+        "Reduce time spent on vendor security questionnaires by 90%.",
+        "Ensure consistent answers across different customers.",
+        "Leverage existing compliance data as the 'source of truth'."
+      ],
+      "user_stories": [
+        {
+          "id": "US-2.1",
+          "role": "Sales Engineer",
+          "action": "upload a security questionnaire CSV",
+          "outcome": "the system populates the 'Answer' column with high-confidence responses based on our live policies."
+        },
+        {
+          "id": "US-2.2",
+          "role": "Compliance Officer",
+          "action": "review AI-generated answers",
+          "outcome": "edit them if necessary and approve them, adding the final approved answer to the knowledge base for future use."
+        },
+        {
+          "id": "US-2.3",
+          "role": "System",
+          "action": "encounter a new question",
+          "outcome": "search specific policy PDF content to find the nuance required."
+        }
+      ],
+      "technical_spec": {
+        "ai_logic": {
+          "model": "Gemini 1.5 Pro (large context window)",
+          "technique": "RAG over Vector Database (pgvector)",
+          "sources": [
+            "Policies",
+            "Controls",
+            "Previous Questionnaire Answers"
+          ]
+        },
+        "file_processing": {
+          "input_formats": [
+            "csv",
+            "xlsx"
+          ],
+          "output_formats": [
+            "csv",
+            "xlsx"
+          ]
+        }
+      },
+      "acceptance_criteria": [
+        "System parses uploaded Excel/CSV headers correctly.",
+        "For each question, the system retrieves relevant chunks from vector DB.",
+        "Generated answers reference the specific Policy they are derived from.",
+        "User can export the completed file."
+      ]
+    },
+    {
+      "id": "PRD-003",
+      "title": "Policy Gap Analysis & Auto-Drafting",
+      "status": "Draft",
+      "summary": "Automated analysis of the organization's current policy library against a selected Framework (e.g., SOC 2, ISO 27001) to identify coverage gaps and auto-draft missing policies.",
+      "goals": [
+        "Instantaneously identify compliance voids.",
+        "Reduce the barrier to entry for new frameworks.",
+        "Provide 'starter' content for missing policies to unblock teams."
+      ],
+      "user_stories": [
+        {
+          "id": "US-3.1",
+          "role": "CISO",
+          "action": "select a new framework (e.g., HIPAA)",
+          "outcome": "see a matrix of checks showing which required policies are missing."
+        },
+        {
+          "id": "US-3.2",
+          "role": "Compliance Manager",
+          "action": "click 'Draft Missing Policy'",
+          "outcome": "receive an AI-generated policy tailored to the organization's industry and the specific requirement."
+        }
+      ],
+      "technical_spec": {
+        "logic": {
+          "mapping": "Many-to-Many mapping between Framework Requirements and Policy Types.",
+          "gap_detection": "If Framework requires 'Access Control Policy' and Organization has none of type 'Access Control', flag as Gap."
+        },
+        "generation": {
+          "agent": "PolicyWriterAgent (Existing)",
+          "inputs": [
+            "Company Name",
+            "Industry",
+            "Requirement Text"
+          ]
+        }
+      },
+      "acceptance_criteria": [
+        "Visual dashboard showing % coverage of a Framework by Policies.",
+        "One-click generation of a draft policy for a detected gap.",
+        "Generated policy is saved as a draft in the content management system."
+      ]
+    },
+    {
+      "id": "PRD-004",
+      "title": "Continuous Monitoring Dashboard",
+      "status": "Draft",
+      "summary": "A real-time 'Security Watchtower' dashboard that aggregates the status of all Automated Evidence Agents, providing a live view of compliance health.",
+      "goals": [
+        "Shift from 'point-in-time' audits to continuous compliance.",
+        "Alert stakeholders immediately when a control fails.",
+        "Visualize health trends over time."
+      ],
+      "user_stories": [
+        {
+          "id": "US-4.1",
+          "role": "Admin",
+          "action": "log in to the dashboard",
+          "outcome": "see a traffic light system (Green/Red) for all connected technical controls."
+        },
+        {
+          "id": "US-4.2",
+          "role": "Security Engineer",
+          "action": "investigate a red indicator",
+          "outcome": "drill down to see the specific error (e.g., 'S3 Bucket X is invalid')."
+        }
+      ],
+      "technical_spec": {
+        "frontend": {
+          "technology": "Hotwire / Turbo Streams",
+          "components": [
+            "StatusBadge",
+            "HealthChart",
+            "ActivityStream"
+          ]
+        },
+        "backend": {
+          "data_source": "Latest EvidenceCheck records",
+          "aggregation": "Group by Framework or Criticality"
+        }
+      },
+      "acceptance_criteria": [
+        "Dashboard loads under 200ms.",
+        "Status updates via WebSocket (Turbo Stream) when a check completes.",
+        "Clear distinction between 'Passing', 'Failing', and 'Error' (agent failure)."
+      ]
+    },
+    {
+      "id": "PRD-F05",
+      "title": "Third-Party Risk Management (TPRM)",
+      "status": "Draft",
+      "priority": "High",
+      "timeline": "Future",
+      "rationale": "Most breaches happen through third parties. CISOs need to know which vendors introduce the most regulatory exposure. This is a large new module requiring its own data model, UI, and workflows. Deferred to Future because it does not extend an existing module — it is a net-new pillar.",
+      "modules": [
+        "Vendor Registry",
+        "Risk Tiering",
+        "Vendor Questionnaires",
+        "SOC Report Analysis",
+        "Contract Tracking"
+      ],
+      "user_stories": [
+        {
+          "id": "US-F5.1",
+          "story": "As a Compliance Manager, I want to maintain a vendor registry with risk tiers, so that I can prioritize oversight of high-risk vendors.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "Manager can add vendors with name, category, and tier (Critical, High, Medium, Low).",
+            "Tier is auto-suggested based on data access level and integration type.",
+            "Dashboard shows vendor count by tier."
+          ]
+        },
+        {
+          "id": "US-F5.2",
+          "story": "As a Compliance Manager, I want to send inherent risk questionnaires to vendors and score their responses, so that I can objectively assess their risk.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "Manager can select a questionnaire template.",
+            "System sends the questionnaire to the vendor's contact email.",
+            "Responses are scored and an inherent risk score is calculated."
+          ]
+        },
+        {
+          "id": "US-F5.3",
+          "story": "As a Compliance Manager, I want to upload a vendor's SOC 2 report and have the AI summarize findings, so that I can quickly assess their compliance posture.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "Manager can upload a SOC 2 PDF.",
+            "AI extracts key findings, exceptions, and complementary user entity controls.",
+            "Summary is stored against the vendor record."
+          ]
+        },
+        {
+          "id": "US-F5.4",
+          "story": "As a Compliance Manager, I want to track vendor contract renewal dates and re-assessment schedules, so that assessments stay current.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "Manager can set contract expiry and next assessment date.",
+            "System sends reminders before re-assessment is due.",
+            "Overdue vendor assessments are flagged on dashboard."
+          ]
+        }
+      ],
+      "data_model": {
+        "new_models": [
+          "Vendor (name, category, tier, primary_contact, status)",
+          "VendorAssessment (vendor_id, questionnaire_id, score, assessed_at)",
+          "VendorContract (vendor_id, start_date, end_date, renewal_date)"
+        ]
+      }
+    },
+    {
+      "id": "PRD-F06",
+      "title": "Executive Reporting & Board Narrative Generator",
+      "status": "Draft",
+      "priority": "Medium",
+      "timeline": "Future",
+      "rationale": "Executives need narrative trend analysis, not raw data. This AI-heavy feature builds on top of all other modules (findings, incidents, testing, evidence) and is best built after those data sources exist. Deferred because it is a presentation layer on top of operational data that doesn't yet exist.",
+      "modules": [
+        "AI Narrative Generator",
+        "Quarterly Report Builder",
+        "Trend Analysis",
+        "Export to PDF/PowerPoint"
+      ],
+      "user_stories": [
+        {
+          "id": "US-F6.1",
+          "story": "As a CISO, I want to generate a quarterly board-ready compliance report with one click, so that I don't spend days building slide decks.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "System generates a narrative report covering: compliance score trend, key risks, findings velocity, regulatory changes.",
+            "Report includes charts and visualizations.",
+            "Report is exportable as PDF and PowerPoint."
+          ]
+        },
+        {
+          "id": "US-F6.2",
+          "story": "As an Executive, I want to see risk trend analysis and forecasted exposure by geography, so that I can make strategic resource allocation decisions.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "Dashboard shows risk exposure trends over 6/12 months.",
+            "Filterable by jurisdiction, framework, and department.",
+            "AI provides brief explanations for significant trend changes."
+          ]
+        },
+        {
+          "id": "US-F6.3",
+          "story": "As a CISO, I want the report to include control maturity scoring and remediation velocity metrics, so that I can demonstrate program improvement.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "Report includes avg time-to-remediate findings.",
+            "Report includes control maturity progression (if PRD-F09 implemented).",
+            "Report includes evidence freshness and testing coverage metrics."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PRD-F07",
+      "title": "Regulatory Impact Simulation",
+      "status": "Draft",
+      "priority": "Medium",
+      "timeline": "Future",
+      "rationale": "When a new regulation appears, CISOs need to know: What controls are affected? What policies need updates? What risks increase? This is an advanced AI feature that requires the Obligation Management (PRD-009) and Control Testing (PRD-008) modules to be built first.",
+      "modules": [
+        "Regulation Diff Engine",
+        "Impact Predictor",
+        "Remediation Estimator"
+      ],
+      "user_stories": [
+        {
+          "id": "US-F7.1",
+          "story": "As a Compliance Officer, when a regulation is updated, I want the system to compare the old and new versions and highlight what changed, so that I understand the impact immediately.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "System shows a diff between regulation versions.",
+            "Changed sections are highlighted with AI-generated summary of changes."
+          ]
+        },
+        {
+          "id": "US-F7.2",
+          "story": "As a Compliance Officer, I want the system to predict which of my existing controls, policies, and obligations are impacted by a new regulation, so that I can plan remediation.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "AI scans new regulation text against existing control/policy descriptions.",
+            "Returns a scored list of impacted items (High/Medium/Low impact).",
+            "Creates draft Findings (PRD-007) for high-impact items."
+          ]
+        },
+        {
+          "id": "US-F7.3",
+          "story": "As a CISO, I want an estimated remediation effort (hours/cost) for adopting a new regulation, so that I can budget appropriately.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "System estimates effort based on number of impacted controls and historical remediation velocity.",
+            "Estimate is displayed alongside the impact report."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PRD-F08",
+      "title": "Cross-Framework Harmonization",
+      "status": "Draft",
+      "priority": "Medium",
+      "timeline": "Future",
+      "rationale": "Compliance officers managing multiple frameworks (SOC 2 + ISO 27001 + HIPAA) waste time implementing duplicate controls. This module identifies overlap and suggests unified controls. Deferred because it requires rich framework and control data to produce meaningful results.",
+      "modules": [
+        "Overlap Detection Engine",
+        "Unified Control Suggestions",
+        "Framework Delta Analysis"
+      ],
+      "user_stories": [
+        {
+          "id": "US-F8.1",
+          "story": "As a Compliance Manager, I want to see a matrix showing which controls satisfy requirements across multiple frameworks, so that I can eliminate duplication.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "System generates a cross-reference matrix (Control × Framework).",
+            "Matrix highlights controls that satisfy requirements in 2+ frameworks.",
+            "Matrix highlights framework requirements with no mapped control."
+          ]
+        },
+        {
+          "id": "US-F8.2",
+          "story": "As a Compliance Manager, when I consider adopting a new framework, I want to see the delta (additional controls needed) compared to what I already have, so that I can estimate the effort.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "System compares new framework requirements against existing controls.",
+            "Shows % already covered vs. % gap.",
+            "Gap items can be converted to tasks or findings with one click."
+          ]
+        },
+        {
+          "id": "US-F8.3",
+          "story": "As a Compliance Manager, I want AI to suggest which existing controls can be extended to cover additional framework requirements, so that I can minimize new work.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "AI analyzes control descriptions and requirement text.",
+            "Suggests 'extend control X to also cover requirement Y' recommendations.",
+            "Manager can accept or dismiss suggestions."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PRD-F09",
+      "title": "Control Maturity & Capability Assessment",
+      "status": "Draft",
+      "priority": "Low",
+      "timeline": "Future",
+      "rationale": "Risk heatmaps show exposure; maturity scoring shows operational discipline. Important for PE-backed companies, IPO prep, and internal audit reporting. Deferred because it requires Control Testing (PRD-008) and Findings (PRD-007) data to compute meaningful scores.",
+      "modules": [
+        "Maturity Model Definition",
+        "Control Scoring",
+        "Progression Tracking"
+      ],
+      "user_stories": [
+        {
+          "id": "US-F9.1",
+          "story": "As a Compliance Manager, I want each control scored on a maturity scale (Ad-hoc → Optimized), so that I can identify areas needing process improvement.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "Each control has a maturity level: Ad-hoc (1), Repeatable (2), Defined (3), Managed (4), Optimized (5).",
+            "Maturity is computed from: testing frequency, pass rate, evidence freshness, finding count.",
+            "Manual override option for nuanced assessment."
+          ]
+        },
+        {
+          "id": "US-F9.2",
+          "story": "As a CISO, I want to see maturity progression over time, so that I can demonstrate program improvement to the board.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "Dashboard shows maturity trend per control/framework over quarters.",
+            "Exportable as chart for board presentation."
+          ]
+        },
+        {
+          "id": "US-F9.3",
+          "story": "As an Internal Auditor, I want a target maturity level per control, so that I can measure the gap between current and desired state.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "Manager can set target maturity per control.",
+            "Dashboard shows current vs. target gap.",
+            "Controls below target are flagged for improvement."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PRD-F10",
+      "title": "Workflow Intelligence & Bottleneck Detection",
+      "status": "Draft",
+      "priority": "Low",
+      "timeline": "Future",
+      "rationale": "Compliance is cross-functional and bottlenecks are invisible. This analytics layer requires rich operational data from Findings (PRD-007), Testing (PRD-008), Evidence (PRD-012), and Attestation (PRD-011) to produce meaningful insights. Deferred until those data sources are live.",
+      "modules": [
+        "Operational Metrics Dashboard",
+        "Bottleneck Detection",
+        "Workload Distribution",
+        "SLA Performance"
+      ],
+      "user_stories": [
+        {
+          "id": "US-F10.1",
+          "story": "As a Compliance Manager, I want to see average time-to-close for findings, so that I can measure team responsiveness.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "Dashboard shows avg/median time-to-close by severity, team, and quarter.",
+            "Trend lines show improvement or degradation."
+          ]
+        },
+        {
+          "id": "US-F10.2",
+          "story": "As a Compliance Manager, I want to identify which users or departments delay approvals the most, so that I can unblock bottlenecks.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "System tracks time between request and approval for each workflow step.",
+            "Dashboard highlights individuals/teams with highest avg delay.",
+            "Drill-down shows specific pending items."
+          ]
+        },
+        {
+          "id": "US-F10.3",
+          "story": "As a CISO, I want to see framework coverage velocity (how fast we're closing gaps), so that I can forecast audit readiness.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "Dashboard shows % framework coverage over time.",
+            "Projects completion date at current velocity.",
+            "Identifies frameworks at risk of missing audit deadlines."
+          ]
+        },
+        {
+          "id": "US-F10.4",
+          "story": "As a Compliance Manager, I want workload distribution visibility across the team, so that I can balance assignments fairly.",
+          "status": "Draft",
+          "acceptance_criteria": [
+            "Dashboard shows open items per user: findings, tests, evidence requests, attestations.",
+            "Highlights overloaded team members.",
+            "Supports rebalancing via bulk reassignment."
+          ]
+        }
+      ]
+    }
+  ]
+}

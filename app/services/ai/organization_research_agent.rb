@@ -20,24 +20,12 @@ module Ai
         )
       end
 
-      # 1. Initialize the Coordinator (The Brain)
-      # Using gemini-1.5-pro for reasoning capabilities
-      # 1. Initialize the Coordinator (The Brain)
-      # Using gemini-1.5-pro via Google AI Studio (API Key)
-      # Explicitly forcing google provider to avoid VertexAI default/errors
-      coordinator = RubyLLM.chat(
-        model: 'gemini-2.0-flash',
-        provider: :gemini
+      response = Ai::Client.agent_chat(
+        research_prompt,
+        tools: [Ai::Tools::GoogleSearchTool, Ai::Tools::WebReaderTool],
+        instructions: system_instructions,
+        agent_name: "OrganizationResearchAgent"
       )
-                           .with_tools(Ai::Tools::GoogleSearchTool, Ai::Tools::WebReaderTool)
-                           .with_instructions(system_instructions)
-
-      broadcast_log("🤖 Agent initialized (Gemini 2.0 Flash)", type: :action)
-      broadcast_log("🌐 Searching the open web for compliance data...", type: :action)
-
-      # 2. Execute the Research Loop
-      # We ask it to produce a specific JSON structure *and* a Report
-      response = coordinator.ask(research_prompt)
 
       # 3. Process the Result
       # The model should return the final synthesis after using tools

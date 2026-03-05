@@ -4,6 +4,7 @@ require 'tempfile'
 require 'pdf-reader'
 require 'docx'
 require 'rss'
+require 'readability'
 
 # Service to scrape regulatory websites and ingest regulations.
 class RegulatoryScraperService
@@ -21,22 +22,28 @@ class RegulatoryScraperService
 
   # Scrapes a single data source based on its type.
   #
+  # Scrapes a single data source based on its type.
+  #
   # @param data_source [RegulatoryDataSource] The data source to scrape.
-  def scrape_data_source(data_source)
-    Rails.logger.info "Scraping data source: #{data_source.name} (Type: #{data_source.source_type})"
+  # @param options [Hash] Optional parameters (e.g., limit: 5 for testing)
+  def scrape_data_source(data_source, options = {})
+    Rails.logger.info "Scraping data source: #{data_source.name} (Type: #{data_source.source_type}) with options: #{options}"
     
     begin
       case data_source.source_type.to_sym
       when :web_scrape
-        scrape_website(data_source)
+        scrape_website(data_source, options)
       when :rss
-        scrape_rss_feed(data_source)
+        scrape_rss_feed(data_source, options)
       when :api
-        scrape_api(data_source)
+        scrape_api(data_source, options)
       else
         Rails.logger.warn "Unsupported source type: #{data_source.source_type} for data source ##{data_source.id}"
       end
-    rescue HTTParty::Error, SocketError, URI::InvalidURIError => e
+      
+      # Update the sync timestamp on success
+      data_source.update(last_synced_at: Time.current)
+    rescue HTTParty::Error, SocketError, URI::InvalidURIError, OpenSSL::SSL::SSLError => e
       Rails.logger.error "Error fetching or processing data for #{data_source.name} from #{data_source.url}: #{e.message}"
       data_source.update(status: :error)
     rescue StandardError => e
@@ -47,8 +54,8 @@ class RegulatoryScraperService
 
   private
 
-  def scrape_website(data_source)
-    response = HTTParty.get(data_source.url, timeout: 30)
+  def scrape_website(data_source, options = {})
+    response = HTTParty.get(data_source.url, timeout: 30, headers: { 'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }, verify: false)
     unless response.success?
       Rails.logger.error "Failed to fetch URL for #{data_source.name}: #{response.code} - #{response.message}"
       return
@@ -72,14 +79,11 @@ class RegulatoryScraperService
       end
     end
 
-    # Limit to the first 10 results to conserve tokens (TODO: Remove this limit in production)
-    regulation_links_data.first(10).each do |link_data|
-      process_regulation_link(link_data[:url], data_source, link_data[:title], link_data[:publication_date])
-    end
+    dispatch_links(regulation_links_data, data_source, options)
   end
 
-  def scrape_rss_feed(data_source)
-    response = HTTParty.get(data_source.url, timeout: 30)
+  def scrape_rss_feed(data_source, options = {})
+    response = HTTParty.get(data_source.url, timeout: 30, headers: { 'User-Agent' => 'Mozilla/5.0' }, verify: false)
     unless response.success?
       Rails.logger.error "Failed to fetch RSS feed for #{data_source.name}: #{response.code} - #{response.message}"
       return
@@ -88,15 +92,48 @@ class RegulatoryScraperService
     feed = RSS::Parser.parse(response.body, false)
     Rails.logger.info "Processing RSS feed: #{feed.channel.title} with #{feed.items.size} items."
 
-    # Limit to the first 10 results to conserve tokens (TODO: Remove this limit in production)
-    feed.items.first(10).each do |item|
-      process_regulation_link(item.link, data_source, item.title, item.pubDate.to_date)
+    regulation_links_data = feed.items.map do |item|
+      { url: item.link, title: item.title, publication_date: item.pubDate&.to_date }
+    end
+
+    dispatch_links(regulation_links_data, data_source, options)
+  end
+
+  # Filters and dispatches links to Background Jobs
+  def dispatch_links(links_data, data_source, options)
+    last_sync = data_source.last_synced_at
+    
+    # 1. Date Filter (Smart Cutoff)
+    if last_sync.present?
+      links_data.select! do |data|
+        pub_date = data[:publication_date]
+        # If we can't determine the date, we MUST process it (and rely on ETag/Hash checks later)
+        pub_date.nil? || pub_date >= last_sync.to_date
+      end
+    end
+
+    # 2. Manual Test Limit
+    if options[:limit].present?
+      limit = options[:limit].to_i
+      Rails.logger.info "Applying testing limit: #{limit} out of #{links_data.size} links found."
+      links_data = links_data.first(limit)
+    end
+
+    # 3. Fan out to background jobs
+    Rails.logger.info "Dispatching #{links_data.size} links to IngestRegulationLinkJob."
+    links_data.each do |link_data|
+      # We encode the primitive hash data to ensure it serializes cleanly into Redis for Sidekiq
+      api_payload = { title: link_data[:title], publication_date: link_data[:publication_date] }
+      IngestRegulationLinkJob.perform_later(link_data[:url], data_source.id, api_payload)
     end
   end
 
-  def scrape_api(data_source)
+  def scrape_api(data_source, options = {})
     page = 1
     max_pages = data_source.settings['max_pages'] || 5 # Safety limit
+    last_sync = data_source.last_synced_at
+    total_processed = 0
+    limit = options[:limit]&.to_i
     
     loop do
       Rails.logger.info "Scraping API page #{page} for #{data_source.name}"
@@ -115,7 +152,7 @@ class RegulatoryScraperService
       
       uri.query = URI.encode_www_form(params)
       
-      response = HTTParty.get(uri.to_s, timeout: 30)
+      response = HTTParty.get(uri.to_s, timeout: 30, headers: { 'User-Agent' => 'Mozilla/5.0' }, verify: false)
       unless response.success?
         Rails.logger.error "Failed to fetch API for #{data_source.name}: #{response.code} - #{response.message}"
         break
@@ -140,7 +177,12 @@ class RegulatoryScraperService
         break
       end
 
+      # Process items on this page
+      break_pagination = false
+
       results.each do |item|
+        break if break_pagination || (limit && total_processed >= limit)
+
         # Extract fields using settings map
         item_url = item.dig(*data_source.settings['url_key'].split('.'))
         title = item.dig(*data_source.settings['title_key'].split('.'))
@@ -148,23 +190,40 @@ class RegulatoryScraperService
         
         publication_date = Date.parse(pub_date_str) rescue nil if pub_date_str.present?
         
+        # Smart Cutoff: If this item is older than our last sync, we can assume the rest 
+        # of the paginated API results are older too (assuming descending order by API).
+        if last_sync.present? && publication_date.present? && publication_date < last_sync.to_date
+          Rails.logger.info "Hit historical record (#{publication_date}) older than last sync (#{last_sync.to_date}). Stopping pagination."
+          break_pagination = true
+          break
+        end
+
+        total_processed += 1
+
         # Check for direct full text
         full_text = nil
         if data_source.settings['full_text_key'].present?
           full_text = item.dig(*data_source.settings['full_text_key'].split('.'))
         end
 
+        api_payload = { title: title, publication_date: publication_date, api_payload: item }
+
         if full_text.present?
-           # Handle relative URLs if present, otherwise use a placeholder or nil
+           # If we already have the full text from the API, we can ingest directly, but to keep
+           # the fan-out architecture clean, we will enqueue a special job or pass it encoded.
+           # Since IngestRegulationLinkJob relies on fetching the URL, and here we don't need to fetch,
+           # we can bypass the job and process it natively (since no network call is needed for the payload).
            full_url = item_url.present? ? URI.join(data_source.url, item_url).to_s : nil
            ingest_regulation(full_text, full_url, data_source, title, publication_date, 'text/plain', {}, item)
         elsif item_url.present?
-          # Handle relative URLs
+          # Handle relative URLs and enqueue for background processing
           full_url = URI.join(data_source.url, item_url).to_s
-          process_regulation_link(full_url, data_source, title, publication_date, item)
+          IngestRegulationLinkJob.perform_later(full_url, data_source.id, api_payload)
         end
       end
       
+      break if break_pagination
+      break if limit && total_processed >= limit
       break if data_source.settings['pagination_type'].blank?
       break if page >= max_pages
       
@@ -177,9 +236,9 @@ class RegulatoryScraperService
     
     # Smart Caching: Check HEAD first
     begin
-      head_response = HTTParty.head(url, timeout: 30)
+      head_response = HTTParty.head(url, timeout: 30, headers: { 'User-Agent' => 'Mozilla/5.0' }, verify: false)
       if head_response.success?
-        existing_regulation = Regulation.find_by(external_id: url)
+        existing_regulation = Regulation.where(external_id: url).order(revision: :desc).first
         if existing_regulation
           last_modified = head_response.headers['Last-Modified']
           etag = head_response.headers['ETag']
@@ -199,7 +258,7 @@ class RegulatoryScraperService
       Rails.logger.warn "HEAD request failed for #{url}: #{e.message}. Proceeding with GET."
     end
     
-    regulation_response = HTTParty.get(url, timeout: 60)
+    regulation_response = HTTParty.get(url, timeout: 60, headers: { 'User-Agent' => 'Mozilla/5.0' }, verify: false)
     unless regulation_response.success?
       Rails.logger.error "Failed to fetch regulation resource #{url}: #{regulation_response.code}"
       return
@@ -241,7 +300,7 @@ class RegulatoryScraperService
       return
     end
 
-    existing_regulation = Regulation.find_by(external_id: url)
+    existing_regulation = Regulation.where(external_id: url).order(revision: :desc).first
 
     if existing_regulation
       handle_existing_regulation(existing_regulation, attributes)
@@ -251,6 +310,31 @@ class RegulatoryScraperService
   end
 
   def extract_content_with_llm(html_content)
+    # 1. Attempt Native Fast Extraction First
+    begin
+      doc = Nokogiri::HTML(html_content)
+      
+      # Try to guess the title natively
+      native_title = doc.at('title')&.text&.strip || doc.at('h1')&.text&.strip
+
+      # Use Readability to strip boilerplate and get the main article content
+      readability_doc = Readability::Document.new(html_content, tags: %w[div p h1 h2 h3 h4 h5 h6 ul ol li strong em b i], remove_empty_nodes: true)
+      native_text = Nokogiri::HTML(readability_doc.content).text.strip.gsub(/\s+/, ' ') # Clean up whitespace
+
+      if native_text.length > 500
+        Rails.logger.info "Successfully extracted #{native_text.length} characters of HTML natively using Readability."
+        return {
+          title: native_title,
+          publication_date: nil, # Hard to reliably extract natively across all domains
+          full_text: native_text
+        }
+      end
+    rescue => e
+      Rails.logger.warn "Native Readability extraction failed or yielded too little text: #{e.message}. Falling back to LLM."
+    end
+
+    # 2. Fallback to LLM if native extraction yielded junk or too little text
+    Rails.logger.info "Native extraction yielded < 500 characters. Falling back to RubyLLM for HTML extraction."
     doc = Nokogiri::HTML(html_content)
     doc.css('script, style, header, footer, nav').remove
     cleaned_html = doc.at('body')&.inner_html || ''

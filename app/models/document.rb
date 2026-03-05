@@ -14,6 +14,12 @@ class Document < ApplicationRecord
 
   has_many :evidence_request_documents, dependent: :destroy
   has_many :evidence_requests, through: :evidence_request_documents
+  has_many :evidence_refresh_requests, dependent: :destroy
+  has_many :findings, dependent: :nullify
+
+  # Auto-create Finding when evidence expires, auto-close when renewed
+  after_save :auto_create_finding_for_expiration, if: :saved_change_to_status?
+  after_save :auto_close_findings_on_renewal, if: :saved_change_to_status?
 
   # Active Storage for file attachments
   has_many :versions, class_name: 'DocumentVersion', dependent: :destroy
@@ -525,5 +531,50 @@ class Document < ApplicationRecord
     content.length > 1000 ? content[0..1000] + "\n\n... (content truncated)" : content
   rescue StandardError => e
     "Error reading file: #{e.message}"
+  end
+
+  def auto_create_finding_for_expiration
+    return unless expired?
+    return unless organization.present?
+    return unless Flipper.enabled?(:findings_remediation, organization)
+
+    # Avoid duplicates
+    existing = Finding.where(
+      organization: organization,
+      document: self,
+      source: :evidence_expiration
+    ).where.not(status: [:closed, :accepted])
+    return if existing.exists?
+
+    Finding.create!(
+      organization: organization,
+      document: self,
+      compliance_control: compliance_control,
+      compliance_requirement: compliance_requirement,
+      compliance_framework: compliance_framework,
+      title: "Evidence expired: #{title}",
+      description: "Document '#{title}' has expired. Upload fresh evidence or renew the document.",
+      source: :evidence_expiration,
+      severity: :medium,
+      status: :open
+    )
+  rescue StandardError => e
+    Rails.logger.error "Auto-create finding failed for document #{id}: #{e.message}"
+  end
+
+  def auto_close_findings_on_renewal
+    return if expired? # Only close when document is no longer expired
+    return unless organization.present?
+
+    Finding.where(
+      organization: organization,
+      document: self,
+      source: :evidence_expiration,
+      status: [:open, :in_progress]
+    ).find_each do |finding|
+      finding.resolve!("Auto-closed: document renewed with status '#{status}'")
+    end
+  rescue StandardError => e
+    Rails.logger.error "Auto-close finding failed for document #{id}: #{e.message}"
   end
 end

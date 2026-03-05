@@ -1,0 +1,77 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header -->
+  <div class="flex items-end justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Your Regulation Library</h1>
+      <p class="mt-2 text-lg text-gray-500">Regulations adopted by <span class="font-semibold text-indigo-600"><%= @organization.name %></span>.</p>
+    </div>
+    <%= link_to discover_regulation_library_index_path, class: "inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm" do %>
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" /></svg>
+      Discover Regulations
+    <% end %>
+  </div>
+
+  <!-- Search -->
+  <% if @regulations.any? || params.dig(:q, :title_cont).present? %>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-8">
+      <%= search_form_for @q, url: regulation_library_index_path, class: "flex items-center gap-4" do |f| %>
+        <div class="flex-1">
+          <%= f.search_field :title_cont, placeholder: "Search your adopted regulations...", class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" %>
+        </div>
+        <%= f.submit "Search", class: "inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors cursor-pointer" %>
+        <%= link_to "Clear", regulation_library_index_path, class: "text-sm text-gray-500 hover:text-gray-700" %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Adopted Regulations -->
+  <% if @regulations.any? %>
+    <div class="space-y-4">
+      <% @regulations.each do |regulation| %>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+          <div class="flex items-start justify-between">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-3 mb-2">
+                <%= link_to regulation.title, regulation_library_path(regulation), class: "text-lg font-semibold text-gray-900 hover:text-indigo-600 transition-colors" %>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                  Adopted
+                </span>
+              </div>
+              <% if regulation.respond_to?(:summary) && regulation.summary.present? %>
+                <p class="text-sm text-gray-600 line-clamp-2 mb-3"><%= regulation.summary %></p>
+              <% end %>
+              <div class="flex items-center gap-4 text-xs text-gray-500">
+                <% if regulation.respond_to?(:jurisdiction) && regulation.jurisdiction.present? %>
+                  <span class="flex items-center gap-1">
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3" /></svg>
+                    <%= regulation.jurisdiction %>
+                  </span>
+                <% end %>
+                <% if regulation.effective_date.present? %>
+                  <span>Effective: <%= regulation.effective_date.strftime("%b %d, %Y") %></span>
+                <% end %>
+              </div>
+            </div>
+            <div class="ml-4 flex-shrink-0">
+              <%= button_to "Remove", unadopt_regulation_library_path(regulation), method: :delete, class: "inline-flex items-center px-3 py-1.5 text-red-600 text-xs font-medium rounded-lg border border-red-200 hover:bg-red-50 transition-colors", form: { data: { turbo_confirm: "Remove this regulation from your organization?" } } %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="mt-8"><%= paginate @regulations %></div>
+  <% else %>
+    <!-- Empty State -->
+    <div class="text-center py-16 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+      <svg class="mx-auto h-16 w-16 text-slate-300 mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No Regulations Adopted Yet</h3>
+      <p class="text-gray-500 max-w-md mx-auto mb-6">Browse the global regulation library to discover and adopt regulations relevant to your organization.</p>
+      <%= link_to discover_regulation_library_index_path, class: "inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors" do %>
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+        Discover Regulations
+      <% end %>
+    </div>
+  <% end %>
+</div>

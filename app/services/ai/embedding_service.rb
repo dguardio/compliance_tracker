@@ -1,32 +1,14 @@
 module Ai
   class EmbeddingService
-    def generate(text)
-      return nil if text.blank?
-
-      begin
-        response = RubyLLM.embed(text)
-        
-        # Based on docs:
-        # embedding = RubyLLM.embed("text")
-        # vector = embedding.vectors
-        #
-        # If vector is the array of floats, we return it.
-        # If it returns an array of arrays (one per input), we take the first.
-        
-        vectors = response.vectors
-        if vectors.first.is_a?(Array)
-          vectors.first
-        else
-          vectors
-        end
-      rescue => e
-        Rails.logger.error("Embedding generation failed: #{e.message}")
-        nil
-      end
+    # Generates embeddings for a single string or an array of strings.
+    # Delegates to Ai::Client to get automatic tracing, token, and cost tracking.
+    def generate(text_or_array)
+      return nil if text_or_array.blank?
+      Ai::Client.embed(text_or_array, agent_name: "EmbeddingService")
     end
 
-    def self.generate(text)
-      new.generate(text)
+    def self.generate(text_or_array)
+      new.generate(text_or_array)
     end
   end
 end

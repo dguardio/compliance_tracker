@@ -112,9 +112,14 @@
                   <span class="text-xs text-gray-500">(Custom Branding)</span>
                 <% end %>
               </div>
-            <% else %>
-              <h1 class="text-2xl font-bold text-indigo-600">ComplianceTracker</h1>
             <% end %>
+          </div>
+
+          <!-- Modules Drawer Toggle (Center/Left) -->
+          <div class="flex flex-1 justify-center px-2 sm:px-8">
+            <% if user_signed_in? && current_user.organization %>
+               <%= render 'shared/app_drawer' %>
+             <% end %>
           </div>
           
           <!-- Hamburger for mobile -->
@@ -134,60 +139,13 @@
                   My Work
                   <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                 </button>
-                <div class="absolute left-0 top-full w-48 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div class="absolute left-0 top-full w-48 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
                   <%= link_to "Dashboard", dashboard_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
                   <%= link_to "My Reviews", regulation_reviews_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
                   <%= link_to "My Tasks", tasks_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
                   <%= link_to "Notifications", mailboxes_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
                 </div>
               </div>
-
-              <% if current_user.organization %>
-                <!-- Library Dropdown -->
-                <div class="relative group">
-                  <button class="text-gray-600 hover:text-gray-800 font-medium transition-colors focus:outline-none flex items-center">
-                    Library
-                    <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                  </button>
-                  <div class="absolute left-0 top-full w-56 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    <%= link_to "Compliance Frameworks", organization_compliance_frameworks_path(current_user.organization), class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                    <%= link_to "Regulation Library", admin_regulations_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                    <%= link_to "Policy Management", admin_policies_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                    <%= link_to "Documents", organization_documents_path(current_user.organization), class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                    <%= link_to "Audit Evidence", organization_evidence_requests_path(current_user.organization), class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                  </div>
-                </div>
-
-                <!-- Management Dropdown -->
-                <div class="relative group">
-                  <button class="text-gray-600 hover:text-gray-800 font-medium transition-colors focus:outline-none flex items-center">
-                    Management
-                    <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                  </button>
-                  <div class="absolute left-0 top-full w-56 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    <%= link_to "Organization Settings", organization_path(current_user.organization), class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                    <%= link_to "Users", organization_users_path(current_user.organization), class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                    <%= link_to "Roles & Permissions", organization_roles_path(current_user.organization), class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                    <%= link_to "Workflow Templates", organization_workflow_templates_path(current_user.organization), class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                    <%= link_to "Risk Dashboard", risk_dashboard_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                  </div>
-                </div>
-
-                <!-- Admin Dropdown -->
-                <% if current_user.super_admin? %>
-                <div class="relative group">
-                  <button class="text-gray-600 hover:text-gray-800 font-medium transition-colors focus:outline-none flex items-center">
-                    Admin
-                    <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                  </button>
-                  <div class="absolute left-0 top-full w-56 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    <%= link_to "Manage Regulations", admin_regulations_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                    <%= link_to "Regulatory Data Sources", admin_regulatory_data_sources_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                    <%= link_to "Feature Flags", "/admin/flipper", class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                  </div>
-                </div>
-                <% end %>
-              <% end %>
 
               <!-- Profile Dropdown -->
               <div class="relative group">
@@ -196,7 +154,7 @@
                   <span><%= current_user.first_name.presence || current_user.email %></span>
                   <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                 </button>
-                <div class="absolute right-0 top-full w-48 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div class="absolute right-0 top-full w-48 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
                   <%= link_to mailboxes_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100 flex justify-between items-center" do %>
                     <span>Notifications</span>
                     <% if current_user.notifications.unread.any? %>
@@ -218,31 +176,29 @@
         </div>
         <!-- Mobile menu (hidden by default) -->
         <div id="mobile-menu" class="lg:hidden hidden mt-2">
-          <div class="flex flex-col space-y-2">
+          <div class="flex flex-col space-y-2 pb-3">
             <% if user_signed_in? %>
-              <%= link_to "Dashboard", dashboard_path, class: "text-indigo-600 hover:text-indigo-800 font-medium transition-colors" %>
-              <% if current_user.organization %>
-                <div class="border-t border-gray-200 my-2"></div>
-                <span class="text-gray-600 font-semibold px-4">Compliance</span>
-                <%= link_to "Frameworks", organization_compliance_frameworks_path(current_user.organization), class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                <%= link_to "Requirements", organization_compliance_frameworks_path(current_user.organization, anchor: 'requirements'), class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                <%= link_to "Controls", organization_compliance_frameworks_path(current_user.organization, anchor: 'controls'), class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                <%= link_to "Risk Dashboard", risk_dashboard_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                <%= link_to "Documents", organization_documents_path(current_user.organization), class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                <%= link_to "Documents", organization_documents_path(current_user.organization), class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                <div class="border-t border-gray-200 my-2"></div>
-                <span class="text-gray-600 font-semibold px-4">Organization</span>
-                <%= link_to "Organizations", organizations_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                <%= link_to "Permissions", organization_permissions_path(current_user.organization), class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                <%= link_to "Roles", organization_roles_path(current_user.organization), class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-                <%= link_to "Users", organization_users_path(current_user.organization), class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
+              <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 pt-2">My Work</span>
+              <%= link_to "Dashboard", dashboard_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100 font-medium" %>
+              <%= link_to "My Reviews", regulation_reviews_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100 font-medium" %>
+              <%= link_to "My Tasks", tasks_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100 font-medium" %>
+              
+              <div class="border-t border-gray-100 my-1"></div>
+              
+              <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 pt-2">Account</span>
+              <%= link_to mailboxes_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100 font-medium flex justify-between items-center" do %>
+                <span>Notifications</span>
+                <% if current_user.notifications.unread.any? %>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    <%= current_user.notifications.unread.count %>
+                  </span>
+                <% end %>
               <% end %>
-              <%= link_to "Notifications", mailboxes_path, class: "text-gray-600 hover:text-gray-800 font-medium transition-colors flex items-center" %>
-              <%= link_to "Profile", profile_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100" %>
-              <%= link_to "Sign out", destroy_user_session_path, data: { turbo_method: :delete }, class: "block px-4 py-2 text-red-600 hover:bg-red-100" %>
+              <%= link_to "Profile", profile_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100 font-medium" %>
+              <%= link_to "Sign out", destroy_user_session_path, data: { turbo_method: :delete }, class: "block px-4 py-2 text-red-600 hover:bg-red-50 font-medium" %>
             <% else %>
-              <%= link_to "Sign in", new_user_session_path, class: "text-indigo-600 hover:text-indigo-800 font-medium transition-colors" %>
-              <%= link_to "Sign up", new_user_registration_path, class: "bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors" %>
+              <%= link_to "Sign in", new_user_session_path, class: "block px-4 py-2 text-primary-600 hover:bg-gray-50 font-medium transition-colors" %>
+              <%= link_to "Sign up", new_user_registration_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-50 font-medium transition-colors" %>
             <% end %>
           </div>
         </div>

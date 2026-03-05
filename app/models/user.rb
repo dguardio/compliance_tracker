@@ -1,4 +1,6 @@
 class User < ApplicationRecord
+  include Flipper::Identifier
+  attr_accessor :organization_name
   rolify
   acts_as_tenant(:organization)
   # Include default devise modules. Others available are:
@@ -8,6 +10,7 @@ class User < ApplicationRecord
 
   # Noticed associations
   has_many :notifications, as: :recipient, class_name: 'Noticed::Notification', dependent: :destroy
+  has_many :attestations, dependent: :destroy
 
   # Risk assessment associations
   has_many :created_risk_assessments, class_name: 'RiskAssessment', foreign_key: 'created_by_id', dependent: :destroy

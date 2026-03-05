@@ -1,0 +1,2 @@
+class ObligationPolicy < ApplicationPolicy
+end

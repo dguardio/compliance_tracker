@@ -1,0 +1,95 @@
+{
+    "id": "PRD-008",
+    "title": "Control Testing & Assurance Program",
+    "status": "Pending",
+    "priority": "Critical",
+    "timeline": "Current — Build Now",
+    "rationale": "SOC 2, ISO 27001, and SOX all require formal control testing documentation. Without this, the platform is a documentation system, not an assurance system. Extends existing Controls and Evidence modules.",
+    "modules": [
+        "Test Plans",
+        "Test Execution",
+        "Sampling",
+        "Tester Sign-off"
+    ],
+    "user_stories": [
+        {
+            "id": "US-8.1",
+            "story": "As a Compliance Manager, I want to define a testing schedule for each control (Quarterly/Annual), so that we maintain continuous assurance.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Manager can set testing frequency per control (Monthly, Quarterly, Semi-Annual, Annual).",
+                "System generates upcoming test tasks based on schedule.",
+                "Dashboard shows controls due for testing."
+            ]
+        },
+        {
+            "id": "US-8.2",
+            "story": "As a Compliance Manager, I want to define formal test procedures for each control, so that testing is consistent and repeatable.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Manager can write step-by-step test procedures linked to a control.",
+                "Procedures are versioned.",
+                "Tester sees the procedure when executing a test."
+            ]
+        },
+        {
+            "id": "US-8.3",
+            "story": "As an Internal Auditor, I want to execute a test by selecting a sample and recording Pass/Fail results, so that I have documented evidence of testing.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Tester can select a sample size.",
+                "System suggests random samples from the evidence population where possible.",
+                "Tester records Pass/Fail per sample item.",
+                "Tester can add notes and attach evidence for each test item."
+            ]
+        },
+        {
+            "id": "US-8.4",
+            "story": "As an Internal Auditor, I want a sign-off workflow for completed tests, so that results are formally approved.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Tester submits completed test for review.",
+                "Reviewer can approve, reject, or request re-test.",
+                "Approved tests are immutably logged with timestamp and reviewer identity."
+            ]
+        },
+        {
+            "id": "US-8.5",
+            "story": "As a Compliance Manager, I want to view historical test results and trend analysis, so that I can identify weakening controls.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Dashboard shows pass/fail rate per control over time.",
+                "Controls with declining pass rates are flagged.",
+                "Exportable test history for external auditors."
+            ]
+        }
+    ],
+    "data_model": {
+        "new_models": [
+            "TestPlan (control_id, frequency, procedure_text, next_test_date)",
+            "TestExecution (test_plan_id, tester_id, reviewer_id, status, executed_at)",
+            "TestSample (test_execution_id, evidence_id, result, notes)"
+        ],
+        "enums": {
+            "test_frequency": [
+                "monthly",
+                "quarterly",
+                "semi_annual",
+                "annual"
+            ],
+            "test_result": [
+                "pass",
+                "fail",
+                "inconclusive",
+                "not_applicable"
+            ],
+            "test_status": [
+                "scheduled",
+                "in_progress",
+                "pending_review",
+                "approved",
+                "rejected"
+            ]
+        }
+    }
+}

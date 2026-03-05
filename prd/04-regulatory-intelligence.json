@@ -1,0 +1,47 @@
+{
+    "title": "Regulatory Intelligence (The Watchdog)",
+    "status": "In Progress / Pending MVP",
+    "priority": "MVP",
+    "modules": [
+        "Global Ingestion",
+        "Discovery Agent",
+        "Regulatory Library"
+    ],
+    "user_stories": [
+        {
+            "story": "As a Compliance Officer, I want to browse a 'Global Library' of regulations, so that I can find laws relevant to my business.",
+            "status": "Pending MVP",
+            "acceptance_criteria": [
+                "User can search a global database of regulations (Tier 2).",
+                "User can filter by Sector and Jurisdiction."
+            ]
+        },
+        {
+            "story": "As a Compliance Officer, I want to 'Adopt' a regulation from the Global Library into my organization, so that I can track compliance against it.",
+            "status": "Pending MVP",
+            "acceptance_criteria": [
+                "User can click 'Adopt' on a regulation.",
+                "Regulation is copied/linked to the Organization's active register.",
+                "Adoption triggers the deep analysis (Tier 3) process."
+            ]
+        },
+        {
+            "story": "As a System, I want to continuously crawl global sources (Tier 1), so that the regulation bank is always up-to-date.",
+            "status": "In Progress",
+            "acceptance_criteria": [
+                "System crawls seed sites (Regulations.gov, etc.).",
+                "System stores 'Raw' regulation text cheaply.",
+                "System classifies 'Is Regulation?' to filter noise."
+            ]
+        },
+        {
+            "story": "As a User, I want to be notified when an adopted regulation changes, so that I can update my compliance controls.",
+            "status": "Pending MVP",
+            "acceptance_criteria": [
+                "System detects updates to source text.",
+                "System creates a 'New Version' record.",
+                "User receives a notification of the change."
+            ]
+        }
+    ]
+}

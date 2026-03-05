@@ -1,0 +1,87 @@
+{
+    "id": "PRD-009",
+    "title": "Obligation Extraction & Tracking",
+    "status": "Pending",
+    "priority": "High",
+    "timeline": "Current — Build Now",
+    "rationale": "Regulations contain specific legal duties (deadlines, reporting requirements, retention mandates). Currently these are buried in regulation text. This module extracts them into actionable, trackable items. Directly extends Regulatory Intelligence and existing AI processing pipeline.",
+    "modules": [
+        "AI Obligation Extractor",
+        "Obligation Register",
+        "Deadline & Calendar Tracking",
+        "Obligation-to-Control Mapping"
+    ],
+    "user_stories": [
+        {
+            "id": "US-9.1",
+            "story": "As a Compliance Officer, when a regulation is adopted, I want the system to automatically extract key obligations (deadlines, requirements, reporting duties), so that I don't have to read hundreds of pages manually.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "AI processes regulation text and extracts structured obligations.",
+                "Each obligation has: text, responsible role, deadline/recurrence, severity.",
+                "Officer can review and accept/reject extracted obligations."
+            ]
+        },
+        {
+            "id": "US-9.2",
+            "story": "As a Compliance Officer, I want to see all my organization's obligations in a single register with due dates, so that nothing falls through the cracks.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Obligation Register shows all active obligations.",
+                "Filterable by regulation, deadline, status, assigned owner.",
+                "Overdue obligations are visually flagged."
+            ]
+        },
+        {
+            "id": "US-9.3",
+            "story": "As a Compliance Officer, I want deadline reminders and calendar integration, so that I am proactively alerted before an obligation comes due.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "System sends email/in-app reminders at configurable intervals (30d, 14d, 7d, 1d).",
+                "Obligations can be exported to ICS/Google Calendar.",
+                "Recurring obligations auto-regenerate after completion."
+            ]
+        },
+        {
+            "id": "US-9.4",
+            "story": "As a Compliance Officer, I want to link obligations to specific controls and evidence, so that I can demonstrate we are fulfilling our legal duties.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Officer can link an obligation to one or more controls.",
+                "Officer can attach evidence of fulfillment.",
+                "Obligation status auto-updates when linked evidence is submitted."
+            ]
+        },
+        {
+            "id": "US-9.5",
+            "story": "As a System, when an incident is logged, I want to automatically trigger conditional obligations (e.g., GDPR 72h breach notification timer), so that time-sensitive requirements are not missed.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "System identifies conditional obligations linked to event types.",
+                "When a matching incident is logged, the timer starts.",
+                "Countdown and escalation notifications are displayed prominently."
+            ]
+        }
+    ],
+    "data_model": {
+        "new_models": [
+            "Obligation (regulation_id, text, responsible_role, deadline_type, recurrence, status)",
+            "ObligationFulfillment (obligation_id, evidence, fulfilled_at, fulfilled_by)"
+        ],
+        "enums": {
+            "deadline_type": [
+                "fixed_date",
+                "recurring",
+                "conditional",
+                "ongoing"
+            ],
+            "obligation_status": [
+                "pending",
+                "in_progress",
+                "fulfilled",
+                "overdue",
+                "waived"
+            ]
+        }
+    }
+}

@@ -6,13 +6,18 @@
 - **Multi-tenancy** with organizations, departments, teams, and units
 - **User management** with roles and permissions (global and organization-specific)
 - **Document management** with comprehensive preview functionality (PDF, Word, Excel, PowerPoint, images, text, CSV)
-- **Basic compliance framework** structure (frameworks, requirements, controls)
-- **Risk assessment** basic functionality
+- **Compliance framework** structure (frameworks, requirements, controls)
+- **Risk assessment** with register, heatmap, and control linking
 - **Provider management** system (platform-wide and organization-specific)
-- **Database schema** and migrations
-- **Seed file** with sample data
-- **URL generation** and Active Storage configuration
-- **Document preview** with multiple file type support
+- **Findings & Remediation (CAPA)** with auto-creation, SLA tracking, corrective actions
+- **Control Testing & Assurance** with test plans, sampling, sign-off workflows
+- **Obligation Management** with AI extraction, conditional triggers (GDPR 72h)
+- **Incident & Breach Management** with obligation triggering, auto-findings, lessons learned
+- **Policy Attestation** with campaign management, immutable legal records
+- **Evidence Freshness** with expiration tracking, refresh requests
+- **Phase 5 Intelligence** (11 modules): Maturity, Harmonization, Workflow Intelligence, Policy Gap, Impact Simulation, Executive Reports, Questionnaire Autofill, Vendor TPRM, Evidence Agents, Monitoring Dashboard, Jira/Linear/ServiceNow Integration
+- **23 Flipper feature flags** gating all modules
+- **AI Stack**: `ruby_llm` gem with Google Gemini (`gemini-2.0-flash`, `text-embedding-004`) — 17 active AI services + 6 upgrade candidates
 
 ### 🔧 **Recently Fixed Issues**
 - Database schema mismatches between seed file and models
@@ -28,6 +33,8 @@
 - **Organization Regulation Management**: Added ability for organizations to manage their own regulation library (`/admin/organization_regulations`).
 - **Inline Custom Column Creation**: Added modal for creating custom columns directly within Active Tables.
 - **Auto-Assignment**: Updated auto-assignment logic to work with organization regulation management and show "System" added regulations.
+- **Joyful UI Refactor**: Redesigned "Add Regulation" view (`available.html.erb`) with organization-branded gradients, modern cards, and tagify filters. Verified and reverted global header changes per feedback.
+- **Neighbor Gem Stability**: Verified `Regulation.has_neighbors` availability and resolved potential transient 500 errors.
 
 ---
 
@@ -47,11 +54,11 @@ This plan focuses on implementing the "Golden Source" and "Intelligence Layer" s
 - [x] **Data Drift Resilience:**
     - [x] Implement checks for `effective_date` and `status` changes to handle versioning.
 
-### **Phase 2: Golden Source Integration**
-*Goal: Connect to high-value official APIs.*
-- [ ] **US Federal:** Configure `RegulatoryDataSource` for **Regulations.gov** API.
-- [ ] **US State:** Configure integration with **OpenStates.org** (GraphQL).
-- [ ] **EU/UK:** Assess feasibility of **legislation.gov.uk** XML ingestion.
+### **Phase 2: Ingestion Capabilities Testing**
+*Goal: Ensure the existing ingestion connections work accurately and harden their implementations while strictly managing token costs.*
+- [ ] **Verify Seeded Sources:** Check the functionality of existing `RegulatoryDataSource` records (SEC API, SEC RSS, OCC Web Scraper, Internal API).
+- [ ] **Cost-Controlled Testing:** Implement and use a strict `limit` parameter when testing to process only a very small number of regulations (e.g., 1-3) to prevent excessive LLM token spend.
+- [ ] **Harden Implementations:** Address any parsing errors, unhandled edge cases, or robustness issues discovered during testing.
 
 ### **Phase 3: Advanced Intelligence & Standardization**
 *Goal: Improve accuracy and interoperability.*
@@ -129,6 +136,18 @@ This section outlines areas for further enhancement and polish based on the curr
 
 ---
 
+## 🤖 **next: AI Improvement Sprint**
+
+All 23 AI-driven features need consolidation and upgrading. See `project_status/ai_improvement_sprint.md` for the full analysis.
+
+**Key priorities:**
+- [ ] Create shared `Ai::Client` wrapper (centralized logging, token tracking, retries)
+- [ ] Create `Ai::ResponseParser` (replace 10+ duplicate JSON extraction patterns)
+- [ ] Activate `ModelRouter` across all services (currently dead code)
+- [ ] Wire `AgentTrace` recording into all AI calls
+- [ ] Upgrade 6 keyword-matching services to use `RubyLLM`
+- [ ] Deduplicate `RegulationProcessorService` vs `RegulationSupervisor`
+
 ## ⚖️ **Legal & Compliance Enhancements (Roadmap)**
 
 ### **1. The "Golden Thread" of Traceability**
@@ -151,5 +170,5 @@ This section outlines areas for further enhancement and polish based on the curr
 
 ---
 
-*Last Updated: [Current Date]*
-*Next Review: [Date + 2 weeks]*
+*Last Updated: 2026-02-18*
+*Status: Phases 1-5 Complete. AI Improvement Sprint planned next.*

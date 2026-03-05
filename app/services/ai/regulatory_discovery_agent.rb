@@ -22,6 +22,16 @@ module Ai
 
     def run
       Rails.logger.info "🐕 Watchdog Agent Starting Global Scan..."
+      trace = begin
+                Ai::AgentTrace.start_trace(
+                  run_id: SecureRandom.uuid,
+                  agent_name: "RegulatoryDiscoveryAgent",
+                  action: "global_scan",
+                  input: { topics: @queue.dup }
+                )
+              rescue
+                nil
+              end
       
       iterations = 0
       while @queue.any? && iterations < MAX_ITERATIONS
@@ -33,6 +43,10 @@ module Ai
       end
       
       Rails.logger.info "✅ Watchdog Scan Complete. Discovered #{@found_regulations.count} new regulations."
+      trace&.complete!(output: "Discovered #{@found_regulations.count} new regulations", metadata: { discovered_urls: @found_regulations })
+    rescue => e
+      trace&.fail!(error_message: e.message)
+      raise e
     end
 
     private

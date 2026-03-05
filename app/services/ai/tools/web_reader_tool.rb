@@ -20,7 +20,7 @@ module Ai
           text = doc.text.squish
           
           # Truncate to avoid context window explosion (though Gemini Pro is huge, being safe)
-          text.truncate(20_000, separator: ' ')
+          Ai::ContextManager.truncate(text, model: 'gemini-2.0-flash', reserve_tokens: 5000)
         rescue => e
           "Error reading page: #{e.message}"
         end

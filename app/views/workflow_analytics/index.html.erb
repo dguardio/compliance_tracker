@@ -1,0 +1,92 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+        <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg" style="background: linear-gradient(135deg, var(--primary-color, #6366f1), #10b981);">
+          <i class="fas fa-tachometer-alt text-white text-lg"></i>
+        </span>
+        Workflow Intelligence
+      </h1>
+      <p class="mt-1 text-gray-500">Operational metrics, bottleneck detection, and workload analysis</p>
+    </div>
+    <div class="flex gap-3">
+      <%= link_to bottlenecks_organization_workflow_analytics_path(@organization), class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" do %>
+        <i class="fas fa-hourglass-half mr-2 text-amber-500"></i> Bottlenecks
+      <% end %>
+      <%= link_to workload_organization_workflow_analytics_path(@organization), class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" do %>
+        <i class="fas fa-users mr-2 text-blue-500"></i> Workload
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Findings Velocity -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Findings Velocity</h2>
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+      <div class="text-center p-4 rounded-lg bg-gray-50">
+        <p class="text-2xl font-bold text-gray-900"><%= @velocity[:overall][:total_closed] %></p>
+        <p class="text-xs text-gray-500">Total Closed</p>
+      </div>
+      <div class="text-center p-4 rounded-lg bg-blue-50">
+        <p class="text-2xl font-bold text-blue-600"><%= @velocity[:overall][:avg_days] %></p>
+        <p class="text-xs text-gray-500">Avg Days to Close</p>
+      </div>
+      <div class="text-center p-4 rounded-lg bg-indigo-50">
+        <p class="text-2xl font-bold text-indigo-600"><%= @velocity[:overall][:median_days] %></p>
+        <p class="text-xs text-gray-500">Median Days</p>
+      </div>
+      <div class="text-center p-4 rounded-lg bg-green-50">
+        <p class="text-2xl font-bold text-green-600"><%= @velocity[:overall][:fastest] %></p>
+        <p class="text-xs text-gray-500">Fastest (days)</p>
+      </div>
+      <div class="text-center p-4 rounded-lg bg-red-50">
+        <p class="text-2xl font-bold text-red-600"><%= @velocity[:overall][:slowest] %></p>
+        <p class="text-xs text-gray-500">Slowest (days)</p>
+      </div>
+    </div>
+
+    <!-- By Severity -->
+    <h3 class="text-sm font-medium text-gray-500 uppercase mb-3">Time to Close by Severity</h3>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+      <% severity_colors = { 'critical' => 'red', 'high' => 'orange', 'medium' => 'yellow', 'low' => 'green' } %>
+      <% @velocity[:by_severity].each do |sev, stats| %>
+        <div class="border rounded-lg p-3">
+          <div class="flex items-center justify-between mb-2">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-<%= severity_colors[sev] || 'gray' %>-100 text-<%= severity_colors[sev] || 'gray' %>-800">
+              <%= sev.titleize %>
+            </span>
+            <span class="text-xs text-gray-400"><%= stats[:count] %> findings</span>
+          </div>
+          <p class="text-lg font-bold text-gray-900"><%= stats[:avg_days] %> days</p>
+          <p class="text-xs text-gray-500">median: <%= stats[:median_days] %> days</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Framework Coverage -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Framework Coverage</h2>
+    <% if @coverage.any? %>
+      <div class="space-y-4">
+        <% @coverage.each do |item| %>
+          <div class="border rounded-lg p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-medium text-gray-900"><%= item[:framework].name %></span>
+              <span class="text-sm font-bold" style="color: var(--primary-color, #6366f1);"><%= item[:coverage_percentage] %>%</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-3">
+              <div class="h-3 rounded-full transition-all duration-700" style="width: <%= item[:coverage_percentage] %>%; background: linear-gradient(90deg, var(--primary-color, #6366f1), var(--secondary-color, #8b5cf6));"></div>
+            </div>
+            <div class="flex justify-between text-xs text-gray-500 mt-1">
+              <span><%= item[:covered_requirements] %>/<%= item[:total_requirements] %> requirements covered</span>
+              <span><%= item[:gap_count] %> gaps</span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-gray-500 text-center py-6">No frameworks found.</p>
+    <% end %>
+  </div>
+</div>

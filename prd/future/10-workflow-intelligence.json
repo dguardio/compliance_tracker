@@ -1,0 +1,55 @@
+{
+    "id": "PRD-F10",
+    "title": "Workflow Intelligence & Bottleneck Detection",
+    "status": "Draft",
+    "priority": "Low",
+    "timeline": "Future",
+    "rationale": "Compliance is cross-functional and bottlenecks are invisible. This analytics layer requires rich operational data from Findings (PRD-007), Testing (PRD-008), Evidence (PRD-012), and Attestation (PRD-011) to produce meaningful insights. Deferred until those data sources are live.",
+    "modules": [
+        "Operational Metrics Dashboard",
+        "Bottleneck Detection",
+        "Workload Distribution",
+        "SLA Performance"
+    ],
+    "user_stories": [
+        {
+            "id": "US-F10.1",
+            "story": "As a Compliance Manager, I want to see average time-to-close for findings, so that I can measure team responsiveness.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "Dashboard shows avg/median time-to-close by severity, team, and quarter.",
+                "Trend lines show improvement or degradation."
+            ]
+        },
+        {
+            "id": "US-F10.2",
+            "story": "As a Compliance Manager, I want to identify which users or departments delay approvals the most, so that I can unblock bottlenecks.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "System tracks time between request and approval for each workflow step.",
+                "Dashboard highlights individuals/teams with highest avg delay.",
+                "Drill-down shows specific pending items."
+            ]
+        },
+        {
+            "id": "US-F10.3",
+            "story": "As a CISO, I want to see framework coverage velocity (how fast we're closing gaps), so that I can forecast audit readiness.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "Dashboard shows % framework coverage over time.",
+                "Projects completion date at current velocity.",
+                "Identifies frameworks at risk of missing audit deadlines."
+            ]
+        },
+        {
+            "id": "US-F10.4",
+            "story": "As a Compliance Manager, I want workload distribution visibility across the team, so that I can balance assignments fairly.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "Dashboard shows open items per user: findings, tests, evidence requests, attestations.",
+                "Highlights overloaded team members.",
+                "Supports rebalancing via bulk reassignment."
+            ]
+        }
+    ]
+}

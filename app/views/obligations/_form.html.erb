@@ -1,0 +1,60 @@
+<%= form_with model: @obligation, url: @obligation.persisted? ? organization_obligation_path(@organization, @obligation) : organization_obligations_path(@organization), class: "space-y-6" do |f| %>
+  <% if @obligation.errors.any? %>
+    <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded">
+      <ul class="text-sm text-red-700 list-disc list-inside"><% @obligation.errors.full_messages.each do |msg| %><li><%= msg %></li><% end %></ul>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="md:col-span-2">
+      <%= f.label :title, class: "block text-sm font-medium text-gray-700" %>
+      <%= f.text_field :title, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", required: true %>
+    </div>
+    <div class="md:col-span-2">
+      <%= f.label :description, class: "block text-sm font-medium text-gray-700" %>
+      <%= f.text_area :description, rows: 3, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+    </div>
+    <div>
+      <%= f.label :obligation_type, "Type", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.select :obligation_type, Obligation.obligation_types.keys.map { |k| [k.titleize, k] }, {}, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+    </div>
+    <div>
+      <%= f.label :priority, class: "block text-sm font-medium text-gray-700" %>
+      <%= f.select :priority, Obligation.priorities.keys.map { |k| [k.titleize, k] }, {}, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+    </div>
+    <div>
+      <%= f.label :status, class: "block text-sm font-medium text-gray-700" %>
+      <%= f.select :status, Obligation.statuses.keys.map { |k| [k.titleize, k] }, {}, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+    </div>
+    <div>
+      <%= f.label :frequency, class: "block text-sm font-medium text-gray-700" %>
+      <%= f.select :frequency, Obligation.frequencies.keys.map { |k| [k.titleize, k] }, {}, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+    </div>
+    <div>
+      <%= f.label :due_date, class: "block text-sm font-medium text-gray-700" %>
+      <%= f.date_field :due_date, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+    </div>
+    <div>
+      <%= f.label :regulation_id, "Regulation", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.select :regulation_id, Regulation.order(:title).map { |r| [r.title, r.id] }, { include_blank: "None" }, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+    </div>
+    <div class="md:col-span-2">
+      <%= f.label :source_text, class: "block text-sm font-medium text-gray-700" %>
+      <%= f.text_area :source_text, rows: 3, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", placeholder: "Original regulation text this obligation is derived from..." %>
+    </div>
+    <div class="md:col-span-2">
+      <%= f.label :compliance_control_ids, "Linked Controls", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.collection_check_boxes :compliance_control_ids, @organization.compliance_controls.order(:name), :id, :name do |b| %>
+        <div class="flex items-center mt-1">
+          <%= b.check_box(class: "rounded border-gray-300 text-indigo-600 focus:ring-indigo-500") %>
+          <%= b.label(class: "ml-2 text-sm text-gray-700") %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="flex justify-end space-x-3 pt-4 border-t">
+    <%= link_to "Cancel", @obligation.persisted? ? organization_obligation_path(@organization, @obligation) : organization_obligations_path(@organization), class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
+    <%= f.submit @obligation.persisted? ? "Update Obligation" : "Create Obligation", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer" %>
+  </div>
+<% end %>

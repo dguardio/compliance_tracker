@@ -1,0 +1,55 @@
+{
+    "title": "Core Platform & Administration",
+    "status": "Built",
+    "priority": "Critical",
+    "modules": [
+        "Multi-tenancy",
+        "User Management",
+        "Authentication",
+        "Role-Based Access Control (RBAC)"
+    ],
+    "user_stories": [
+        {
+            "story": "As a System Admin, I want to create new Organizations (Tenants), so that I can onboard new customers.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "Admin can create an organization with a name and slug.",
+                "Data is strictly isolated between organizations."
+            ]
+        },
+        {
+            "story": "As a User, I want to log in securely, so that I can access my organization's data.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "User can sign in with email/password.",
+                "User is redirected to their organization's dashboard upon login."
+            ]
+        },
+        {
+            "story": "As an Org Admin, I want to invite users and assign roles, so that I can delegate compliance tasks.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "Org Admin can invite users by email.",
+                "Org Admin can assign roles (e.g., Compliance Manager, Read Only).",
+                "Users inherit permissions based on roles."
+            ]
+        },
+        {
+            "story": "As an Org Admin, I want to configure organization settings (logo, colors), so that the platform reflects our brand.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "Org Admin can upload a logo.",
+                "Org Admin can set primary/secondary brand colors.",
+                "UI reflects these branding choices."
+            ]
+        },
+        {
+            "story": "As a User, I want to manage my profile and notifications, so that I stay informed.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "User can update profile details (name, title).",
+                "User can toggle email/in-app notifications."
+            ]
+        }
+    ]
+}

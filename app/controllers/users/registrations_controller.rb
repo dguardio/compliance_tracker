@@ -1,19 +1,10 @@
-class Users::RegistrationsController < ApplicationController
-  # Skip tenant scoping for registration
-  skip_before_action :set_current_tenant
-
-  before_action :authenticate_user!, only: %i[new create]
-
-  def new
-    @user = User.new
-    @user.organization_id = params[:organization_id] if params[:organization_id].present?
-    @user.email = params[:email] if params[:email].present?
-    @organizations = Organization.active.order(:name)
-  end
+class Users::RegistrationsController < Devise::RegistrationsController
+  # Devise RegistrationsController automatically skips standard authentication for new/create,
+  # but we still need to skip our custom tenant scoping so users can create accounts without an organization
+  skip_before_action :set_current_tenant, only: [:new, :create]
 
   def create
-    @user = User.new(user_params)
-    @organizations = Organization.active.order(:name)
+    build_resource(sign_up_params)
 
     # Process settings
     settings = {}
@@ -27,28 +18,50 @@ class Users::RegistrationsController < ApplicationController
     settings[:ui_preferences] = {}
     settings[:custom_fields] = {}
 
-    @user.settings = settings
+    resource.settings = settings
 
-    # Set default role
-    @user.add_role(:user) if @user.valid?
+    # Auto-build Organization for Self-Serve flow
+    org_name = params[:user][:organization_name]
+    if org_name.present?
+      resource.build_organization(name: org_name, status: 'active')
+    end
 
-    if @user.save
-      # Send welcome email or notification
-      # UserMailer.welcome_email(@user).deliver_later
+    resource.save
+    yield resource if block_given?
+    
+    if resource.persisted?
+      # Set default roles
+      resource.add_role(:user)
+      if org_name.present?
+        # Make them the Admin of their newly created organization
+        resource.add_role('Admin', resource.organization)
+        resource.add_role(:org_admin, resource.organization)
+      end
 
-      redirect_to dashboard_path, notice: 'User was successfully created and can now sign in.'
+      if resource.active_for_authentication?
+        set_flash_message! :notice, :signed_up
+        sign_up(resource_name, resource)
+        respond_with resource, location: after_sign_up_path_for(resource)
+      else
+        set_flash_message! :notice, :"signed_up_but_#{resource.inactive_message}"
+        expire_data_after_sign_in!
+        respond_with resource, location: after_inactive_sign_up_path_for(resource)
+      end
     else
-      render :new, status: :unprocessable_entity
+      clean_up_passwords resource
+      set_minimum_password_length
+      respond_with resource, status: :unprocessable_entity
     end
   end
 
-  private
+  protected
 
-  def user_params
+  def sign_up_params
     params.require(:user).permit(
       :email, :password, :password_confirmation,
       :organization_id, :department_id, :team_id, :unit_id,
-      :first_name, :last_name, :job_title, :phone, :timezone
+      :first_name, :last_name, :job_title, :phone, :timezone,
+      :organization_name
     )
   end
 end

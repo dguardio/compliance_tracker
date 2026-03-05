@@ -1,0 +1,112 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <%= link_to "← Back to Test Plans", organization_control_testing_index_path(@organization),
+                class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+
+  <!-- Header -->
+  <div class="bg-white shadow rounded-lg p-6 mb-6">
+    <div class="flex justify-between items-start">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900"><%= @test_plan.title %></h1>
+        <p class="mt-1 text-sm text-gray-500">Control: <strong><%= @test_plan.compliance_control.name %></strong></p>
+        <div class="flex space-x-2 mt-2">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"><%= @test_plan.frequency.titleize %></span>
+          <% status_colors = { 'active' => 'green', 'draft' => 'gray', 'paused' => 'yellow', 'retired' => 'red' } %>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= status_colors[@test_plan.status] || 'gray' %>-100 text-<%= status_colors[@test_plan.status] || 'gray' %>-800"><%= @test_plan.status.titleize %></span>
+          <% if @test_plan.overdue? %>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">⚠ Overdue</span>
+          <% end %>
+        </div>
+      </div>
+      <div class="flex space-x-2">
+        <%= link_to "Edit", edit_organization_control_testing_path(@organization, @test_plan),
+                    class: "inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
+        <% if @test_plan.status_active? %>
+          <%= button_to "Start Test", execute_organization_control_testing_path(@organization, @test_plan),
+                        method: :post,
+                        class: "inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Procedures -->
+      <% if @test_plan.procedures.present? %>
+        <div class="bg-white shadow rounded-lg p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-3">Test Procedures</h2>
+          <div class="prose prose-sm max-w-none text-gray-700"><%= simple_format(@test_plan.procedures) %></div>
+        </div>
+      <% end %>
+
+      <!-- Test Execution History -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Execution History</h2>
+        <% if @test_executions.any? %>
+          <div class="space-y-3">
+            <% @test_executions.each do |exec| %>
+              <div class="border rounded-lg p-4">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <div class="flex items-center space-x-2">
+                      <% result_colors = { 'pass' => 'green', 'fail' => 'red', 'partial' => 'yellow', 'pending' => 'gray', 'not_applicable' => 'blue' } %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-<%= result_colors[exec.result] || 'gray' %>-100 text-<%= result_colors[exec.result] || 'gray' %>-800"><%= exec.result.titleize %></span>
+                      <% exec_status_colors = { 'not_started' => 'gray', 'in_progress' => 'yellow', 'completed' => 'blue', 'reviewed' => 'green', 'rejected' => 'red' } %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-<%= exec_status_colors[exec.status] || 'gray' %>-100 text-<%= exec_status_colors[exec.status] || 'gray' %>-800"><%= exec.status.titleize %></span>
+                    </div>
+                    <div class="mt-1 text-sm text-gray-500">
+                      Tester: <strong><%= exec.tester&.full_name || '—' %></strong>
+                      · Samples: <strong><%= exec.test_samples.count %></strong>
+                      · Pass Rate: <strong><%= exec.sample_pass_rate %>%</strong>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-1"><%= exec.created_at.strftime("%b %d, %Y %I:%M %p") %></div>
+                  </div>
+                  <div class="flex space-x-2">
+                    <% if exec.status_in_progress? %>
+                      <%= link_to "Continue", organization_control_testing_test_execution_path(@organization, @test_plan, exec),
+                                  class: "text-sm text-indigo-600 hover:text-indigo-800" %>
+                    <% elsif exec.status_completed? %>
+                      <%= button_to "Approve", review_organization_control_testing_test_execution_path(@organization, @test_plan, exec),
+                                    params: { approve: true },
+                                    method: :patch,
+                                    class: "text-sm text-green-600 hover:text-green-800" %>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-sm text-gray-500 text-center py-4">No tests executed yet.</p>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+      <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Details</h3>
+        <dl class="space-y-3">
+          <div>
+            <dt class="text-xs text-gray-500">Next Due Date</dt>
+            <dd class="text-sm text-gray-900"><%= @test_plan.next_due_date&.strftime("%B %d, %Y") || 'Not scheduled' %></dd>
+          </div>
+          <div>
+            <dt class="text-xs text-gray-500">Last Tested</dt>
+            <dd class="text-sm text-gray-900"><%= @test_plan.last_tested_at&.strftime("%B %d, %Y") || 'Never' %></dd>
+          </div>
+          <div>
+            <dt class="text-xs text-gray-500">Created By</dt>
+            <dd class="text-sm text-gray-900"><%= @test_plan.created_by&.full_name || '—' %></dd>
+          </div>
+          <div>
+            <dt class="text-xs text-gray-500">Overall Pass Rate</dt>
+            <dd class="text-sm font-medium <%= @test_plan.pass_rate >= 80 ? 'text-green-600' : @test_plan.pass_rate >= 50 ? 'text-yellow-600' : 'text-red-600' %>"><%= @test_plan.pass_rate %>%</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>

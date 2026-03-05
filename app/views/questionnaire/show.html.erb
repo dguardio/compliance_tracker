@@ -1,0 +1,60 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <nav class="mb-6">
+    <ol class="flex items-center space-x-2 text-sm text-gray-500">
+      <li><%= link_to "Questionnaire Autofill", organization_questionnaire_index_path(@organization), class: "hover:text-indigo-600" %></li>
+      <li><i class="fas fa-chevron-right text-xs"></i></li>
+      <li class="text-gray-900 font-medium"><%= @upload.filename %></li>
+    </ol>
+  </nav>
+
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900"><%= @upload.filename %></h1>
+      <p class="text-sm text-gray-500 mt-1"><%= @upload.response_count %> answers • <%= @upload.completion_rate %>% approved</p>
+    </div>
+    <%= link_to export_organization_questionnaire_path(@organization, @upload), class: "inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors" do %>
+      <i class="fas fa-download mr-2"></i> Export CSV
+    <% end %>
+  </div>
+
+  <div class="space-y-4">
+    <% @answers.each_with_index do |answer, i| %>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex-1">
+            <p class="text-xs font-medium text-gray-400 uppercase mb-1">Question #<%= i + 1 %></p>
+            <p class="text-sm font-medium text-gray-900"><%= answer.question_text %></p>
+          </div>
+          <div class="flex items-center gap-2 ml-4">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+              <%= answer.confidence&.round(0) || '?' %>% confidence
+            </span>
+            <% status_colors = { 'pending' => 'yellow', 'approved' => 'green', 'edited' => 'blue' } %>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-<%= status_colors[answer.status] %>-100 text-<%= status_colors[answer.status] %>-800">
+              <%= answer.status.titleize %>
+            </span>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg p-4 mb-3">
+          <p class="text-sm text-gray-700"><%= answer.approved_answer.presence || answer.ai_answer %></p>
+        </div>
+
+        <% if answer.source_policy %>
+          <p class="text-xs text-gray-400 mb-3">
+            <i class="fas fa-link mr-1"></i> Source: <%= answer.source_policy.title %>
+          </p>
+        <% end %>
+
+        <% unless answer.status_approved? %>
+          <%= form_tag(approve_answer_organization_questionnaire_index_path(@organization, answer_id: answer.id), method: :post, class: "flex items-end gap-2") do %>
+            <div class="flex-1">
+              <%= text_area_tag :approved_answer, answer.ai_answer, rows: 2, class: "block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" %>
+            </div>
+            <%= submit_tag "Approve", class: "px-3 py-2 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg cursor-pointer" %>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

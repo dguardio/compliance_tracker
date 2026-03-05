@@ -65,11 +65,15 @@ class DashboardController < ApplicationController
     # METRICS FOR JOYFUL DASHBOARD
     # 1. Compliance Score (Simple heuristic: 100 - penalties)
     # Penalties: High Risk Assessment (-10), Overdue Task (-5), Overdue Risk (-5)
-    high_risk_penalty = (@stats[:high_risk_assessments] || 0) * 10
-    overdue_task_penalty = (@stats[:overdue_tasks] || 0) * 5
-    overdue_risk_penalty = (@stats[:overdue_risk_assessments] || 0) * 5
-    raw_score = 100 - (high_risk_penalty + overdue_task_penalty + overdue_risk_penalty)
-    @compliance_score = [raw_score, 0].max
+    if @stats[:compliance_frameworks].zero? && @stats[:total_tasks].zero?
+      @compliance_score = 0
+    else
+      high_risk_penalty = (@stats[:high_risk_assessments] || 0) * 10
+      overdue_task_penalty = (@stats[:overdue_tasks] || 0) * 5
+      overdue_risk_penalty = (@stats[:overdue_risk_assessments] || 0) * 5
+      raw_score = 100 - (high_risk_penalty + overdue_task_penalty + overdue_risk_penalty)
+      @compliance_score = [raw_score, 0].max
+    end
 
     # 2. Streak (Days since last High Risk created)
     # If no high risk items ever, use organization creation date

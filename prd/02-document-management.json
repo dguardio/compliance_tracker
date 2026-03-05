@@ -1,0 +1,55 @@
+{
+    "title": "Document & Policy Management",
+    "status": "In Progress",
+    "priority": "High",
+    "modules": [
+        "Document Library",
+        "Policy Management",
+        "Approval Workflows"
+    ],
+    "user_stories": [
+        {
+            "story": "As a Staff Member, I want a centralized Document Library, so that I can find official company documents.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "Users can view documents they have access to.",
+                "Documents can be categorized and tagged.",
+                "Search functionality filters by content and metadata."
+            ]
+        },
+        {
+            "story": "As a Policy Owner, I want to draft and edit Policies directly in the platform, so that we have a single source of truth.",
+            "status": "In Progress",
+            "acceptance_criteria": [
+                "Owner can create a Policy with a rich text editor.",
+                "Owner can upload extensive policy documents (PDF/Word) which are parsed.",
+                "Policies have statuses (Draft, Active, Archived)."
+            ]
+        },
+        {
+            "story": "As a Policy Owner, I want to link Policies to specific Regulations and Controls, so that I can show coverage.",
+            "status": "In Progress",
+            "acceptance_criteria": [
+                "Owner can link a Policy to a Regulation.",
+                "Owner can link a Policy to a Compliance Control."
+            ]
+        },
+        {
+            "story": "As a Reviewer, I want to approve or reject documents via a workflow, so that quality is maintained.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "Documents can be submitted for review.",
+                "Designated approvers can Approve or Request Changes.",
+                "History of approvals is logged."
+            ]
+        },
+        {
+            "story": "As a User, I want to access Policy Management from my organization dashboard, so that I don't need admin access.",
+            "status": "In Progress",
+            "acceptance_criteria": [
+                "Standard users see 'Policy Management' in the sidebar (gated by feature flag).",
+                "Tenant-scoped view ensures no cross-org data leakage."
+            ]
+        }
+    ]
+}

@@ -1,0 +1,64 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <%= link_to "← Back to Test Plan", organization_control_testing_path(@organization, @test_plan),
+                class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+
+  <div class="bg-white shadow rounded-lg p-6 mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Test Execution</h1>
+    <p class="mt-1 text-sm text-gray-500">
+      Plan: <strong><%= @test_plan.title %></strong> · 
+      Control: <strong><%= @test_plan.compliance_control.name %></strong> ·
+      Tester: <strong><%= @test_execution.tester&.full_name || '—' %></strong>
+    </p>
+    <div class="flex space-x-2 mt-2">
+      <% result_colors = { 'pass' => 'green', 'fail' => 'red', 'partial' => 'yellow', 'pending' => 'gray' } %>
+      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= result_colors[@test_execution.result] || 'gray' %>-100 text-<%= result_colors[@test_execution.result] || 'gray' %>-800">
+        Result: <%= @test_execution.result.titleize %>
+      </span>
+      <span class="text-sm text-gray-500">Pass Rate: <strong><%= @test_execution.sample_pass_rate %>%</strong></span>
+    </div>
+  </div>
+
+  <!-- Sample Recording Form -->
+  <%= form_tag organization_control_testing_test_execution_path(@organization, @test_plan, @test_execution), method: :patch do %>
+    <div class="bg-white shadow rounded-lg overflow-hidden mb-6">
+      <div class="px-6 py-4 bg-gray-50 border-b">
+        <h2 class="text-lg font-semibold text-gray-900">Test Samples</h2>
+        <p class="text-sm text-gray-500">Record pass/fail for each sample item</p>
+      </div>
+      <div class="divide-y divide-gray-200">
+        <% @test_samples.each do |sample| %>
+          <div class="px-6 py-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+              <div>
+                <label class="block text-sm font-medium text-gray-900"><%= sample.sample_identifier %></label>
+                <span class="text-xs text-gray-400">#<%= sample.id %></span>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Result</label>
+                <%= select_tag "test_samples[#{sample.id}][result]",
+                    options_for_select([["Not Tested", "not_tested"], ["Pass", "pass"], ["Fail", "fail"], ["N/A", "not_applicable"]], sample.result),
+                    class: "block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" %>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-medium text-gray-500 mb-1">Notes</label>
+                <%= text_field_tag "test_samples[#{sample.id}][notes]", sample.notes,
+                    class: "block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm",
+                    placeholder: "Observations..." %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="flex justify-end space-x-3">
+      <%= submit_tag "Save Progress", class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer" %>
+      <button type="submit" name="complete" value="true"
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 cursor-pointer">
+        Complete & Submit for Review
+      </button>
+    </div>
+  <% end %>
+</div>

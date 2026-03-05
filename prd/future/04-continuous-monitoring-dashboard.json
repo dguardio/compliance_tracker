@@ -1,0 +1,44 @@
+{
+    "id": "PRD-004",
+    "title": "Continuous Monitoring Dashboard",
+    "status": "Draft",
+    "summary": "A real-time 'Security Watchtower' dashboard that aggregates the status of all Automated Evidence Agents, providing a live view of compliance health.",
+    "goals": [
+        "Shift from 'point-in-time' audits to continuous compliance.",
+        "Alert stakeholders immediately when a control fails.",
+        "Visualize health trends over time."
+    ],
+    "user_stories": [
+        {
+            "id": "US-4.1",
+            "role": "Admin",
+            "action": "log in to the dashboard",
+            "outcome": "see a traffic light system (Green/Red) for all connected technical controls."
+        },
+        {
+            "id": "US-4.2",
+            "role": "Security Engineer",
+            "action": "investigate a red indicator",
+            "outcome": "drill down to see the specific error (e.g., 'S3 Bucket X is invalid')."
+        }
+    ],
+    "technical_spec": {
+        "frontend": {
+            "technology": "Hotwire / Turbo Streams",
+            "components": [
+                "StatusBadge",
+                "HealthChart",
+                "ActivityStream"
+            ]
+        },
+        "backend": {
+            "data_source": "Latest EvidenceCheck records",
+            "aggregation": "Group by Framework or Criticality"
+        }
+    },
+    "acceptance_criteria": [
+        "Dashboard loads under 200ms.",
+        "Status updates via WebSocket (Turbo Stream) when a check completes.",
+        "Clear distinction between 'Passing', 'Failing', and 'Error' (agent failure)."
+    ]
+}

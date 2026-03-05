@@ -1,0 +1,27 @@
+{
+    "title": "Platform Infrastructure: Feature Flags",
+    "status": "Built",
+    "priority": "Technical Enabler",
+    "modules": [
+        "Flipper Integration",
+        "Tenant Gating"
+    ],
+    "user_stories": [
+        {
+            "story": "As a Product Manager, I want to enable experimental features for specific tenants only, so that we can test safely.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "Admin can enable a feature (e.g., 'policies') for a specific Organization ID.",
+                "Feature remains disabled for all other Organizations."
+            ]
+        },
+        {
+            "story": "As an Admin, I want a UI to manage feature flags, so that I don't need to deploy code to toggle features.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "Admin can access `/flipper` dashboard.",
+                "Dashboard allows toggling features on/off per user or group."
+            ]
+        }
+    ]
+}

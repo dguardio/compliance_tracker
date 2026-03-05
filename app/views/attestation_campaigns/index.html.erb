@@ -1,0 +1,85 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <%= link_to "← Back to Organization", organization_path(@organization),
+                class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Policy Attestation</h1>
+      <p class="mt-1 text-sm text-gray-500">Track policy acknowledgments across <%= @organization.name %></p>
+    </div>
+    <div>
+      <%= link_to "New Campaign", new_organization_attestation_campaign_path(@organization),
+                  class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700" %>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white shadow rounded-lg p-4">
+      <dt class="text-xs font-medium text-gray-500">Total Campaigns</dt>
+      <dd class="mt-1 text-2xl font-semibold text-gray-900"><%= @stats[:total] %></dd>
+    </div>
+    <div class="bg-white shadow rounded-lg p-4">
+      <dt class="text-xs font-medium text-gray-500">Active</dt>
+      <dd class="mt-1 text-2xl font-semibold text-green-600"><%= @stats[:active] %></dd>
+    </div>
+    <div class="bg-white shadow rounded-lg p-4">
+      <dt class="text-xs font-medium text-gray-500">Overdue</dt>
+      <dd class="mt-1 text-2xl font-semibold text-red-600"><%= @stats[:overdue] %></dd>
+    </div>
+    <div class="bg-white shadow rounded-lg p-4">
+      <dt class="text-xs font-medium text-gray-500">Avg Completion</dt>
+      <dd class="mt-1 text-2xl font-semibold text-indigo-600"><%= @stats[:avg_completion] %>%</dd>
+    </div>
+  </div>
+
+  <!-- Campaigns -->
+  <% if @campaigns.any? %>
+    <div class="space-y-4">
+      <% @campaigns.each do |campaign| %>
+        <div class="bg-white shadow rounded-lg p-5">
+          <div class="flex justify-between items-start">
+            <div class="flex-1">
+              <div class="flex items-center space-x-2">
+                <h3 class="text-lg font-medium text-gray-900"><%= campaign.title %></h3>
+                <% status_colors = { 'draft' => 'gray', 'active' => 'green', 'closed' => 'blue', 'cancelled' => 'red' } %>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-<%= status_colors[campaign.status] || 'gray' %>-100 text-<%= status_colors[campaign.status] || 'gray' %>-800"><%= campaign.status.titleize %></span>
+                <% if campaign.overdue? %>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Overdue</span>
+                <% end %>
+              </div>
+              <p class="text-sm text-gray-500 mt-1">Policy: <strong><%= campaign.policy.title %></strong></p>
+              <div class="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                <span>Deadline: <strong><%= campaign.deadline&.strftime("%b %d, %Y") || '—' %></strong></span>
+                <span>Completion: <strong><%= campaign.completion_rate %>%</strong></span>
+                <span><%= campaign.completed_count %>/<%= campaign.attestations.count %> attested</span>
+              </div>
+              <!-- Progress bar -->
+              <div class="mt-2 w-full bg-gray-200 rounded-full h-2 max-w-md">
+                <div class="bg-indigo-600 h-2 rounded-full" style="width: <%= campaign.completion_rate %>%"></div>
+              </div>
+            </div>
+            <div class="ml-4">
+              <%= link_to "View", organization_attestation_campaign_path(@organization, campaign),
+                          class: "text-sm text-indigo-600 hover:text-indigo-900" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center py-12 bg-white rounded-lg shadow">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <h3 class="mt-2 text-lg font-medium text-gray-900">No attestation campaigns</h3>
+      <p class="mt-1 text-sm text-gray-500">Create a campaign to push policies to users for acknowledgment.</p>
+      <div class="mt-6">
+        <%= link_to "Create Campaign", new_organization_attestation_campaign_path(@organization),
+                    class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" %>
+      </div>
+    </div>
+  <% end %>
+</div>
