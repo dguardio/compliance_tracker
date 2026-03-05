@@ -1,0 +1,121 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <%= link_to "← Back to Organization", organization_path(@organization),
+                class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Control Testing</h1>
+      <p class="mt-1 text-sm text-gray-500">Testing schedules and execution tracking for <%= @organization.name %></p>
+    </div>
+    <div>
+      <%= link_to "New Test Plan", new_organization_control_testing_path(@organization),
+                  class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700" %>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white shadow rounded-lg p-4">
+      <dt class="text-xs font-medium text-gray-500">Total Plans</dt>
+      <dd class="mt-1 text-2xl font-semibold text-gray-900"><%= @stats[:total] %></dd>
+    </div>
+    <div class="bg-white shadow rounded-lg p-4">
+      <dt class="text-xs font-medium text-gray-500">Active</dt>
+      <dd class="mt-1 text-2xl font-semibold text-green-600"><%= @stats[:active] %></dd>
+    </div>
+    <div class="bg-white shadow rounded-lg p-4">
+      <dt class="text-xs font-medium text-gray-500">Overdue</dt>
+      <dd class="mt-1 text-2xl font-semibold text-red-600"><%= @stats[:overdue] %></dd>
+    </div>
+    <div class="bg-white shadow rounded-lg p-4">
+      <dt class="text-xs font-medium text-gray-500">Due Soon</dt>
+      <dd class="mt-1 text-2xl font-semibold text-yellow-600"><%= @stats[:due_soon] %></dd>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white shadow rounded-lg p-4 mb-6">
+    <%= form_tag organization_control_testing_index_path(@organization), method: :get, class: "flex flex-wrap gap-3 items-end" do %>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Status</label>
+        <%= select_tag :status, options_for_select([["All", ""], ["Active", "active"], ["Draft", "draft"], ["Paused", "paused"], ["Retired", "retired"]], params[:status]),
+                       class: "block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" %>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Frequency</label>
+        <%= select_tag :frequency, options_for_select([["All", ""], ["Monthly", "monthly"], ["Quarterly", "quarterly"], ["Semi-Annual", "semi_annual"], ["Annual", "annual"], ["Ad Hoc", "ad_hoc"]], params[:frequency]),
+                       class: "block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" %>
+      </div>
+      <div>
+        <%= submit_tag "Filter", class: "inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Test Plans Table -->
+  <% if @test_plans.any? %>
+    <div class="overflow-x-auto shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+      <table class="min-w-full divide-y divide-gray-300">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Test Plan</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Control</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">Frequency</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">Status</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">Next Due</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">Pass Rate</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @test_plans.each do |plan| %>
+            <tr class="<%= 'bg-red-50' if plan.overdue? %>">
+              <td class="px-4 py-4">
+                <div class="text-sm font-medium text-gray-900"><%= plan.title %></div>
+              </td>
+              <td class="px-4 py-4 text-sm text-gray-500 hidden sm:table-cell"><%= plan.compliance_control.name %></td>
+              <td class="px-4 py-4 whitespace-nowrap hidden md:table-cell">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"><%= plan.frequency.titleize %></span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap hidden md:table-cell">
+                <% status_colors = { 'active' => 'green', 'draft' => 'gray', 'paused' => 'yellow', 'retired' => 'red' } %>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= status_colors[plan.status] || 'gray' %>-100 text-<%= status_colors[plan.status] || 'gray' %>-800"><%= plan.status.titleize %></span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm hidden lg:table-cell">
+                <% if plan.next_due_date %>
+                  <span class="<%= plan.overdue? ? 'text-red-600 font-semibold' : 'text-gray-900' %>"><%= plan.next_due_date.strftime("%b %d, %Y") %></span>
+                  <% if plan.overdue? %>
+                    <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Overdue</span>
+                  <% end %>
+                <% else %>
+                  <span class="text-gray-400">—</span>
+                <% end %>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm hidden lg:table-cell">
+                <% rate = plan.pass_rate %>
+                <span class="<%= rate >= 80 ? 'text-green-600' : rate >= 50 ? 'text-yellow-600' : 'text-red-600' %>"><%= rate %>%</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                <%= link_to "View", organization_control_testing_path(@organization, plan), class: "text-indigo-600 hover:text-indigo-900" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="text-center py-12 bg-white rounded-lg shadow">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+      </svg>
+      <h3 class="mt-2 text-lg font-medium text-gray-900">No test plans</h3>
+      <p class="mt-1 text-sm text-gray-500">Create a test plan to start testing your controls.</p>
+      <div class="mt-6">
+        <%= link_to "Create Test Plan", new_organization_control_testing_path(@organization),
+                    class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" %>
+      </div>
+    </div>
+  <% end %>
+</div>

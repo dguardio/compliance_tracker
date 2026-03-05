@@ -1,0 +1,8 @@
+/home/dguardio/.rbenv/versions/3.2.1/lib/ruby/gems/3.2.0/gems/io-event-1.11.2/lib/io/event/support.rb:48: warning: IO::Buffer is experimental and both the Ruby and C interface may change in the future!
+WickedPdf.config= is deprecated and will be removed in future versions. Use WickedPdf.configure instead.
+ActiveRecord Encryption keys configured for development/test.
+[["Internal Compliance Feed", "error"],
+ ["OCC Bulletins Web Scraper", "error"],
+ ["SEC Federal Register API", "error"],
+ ["SEC Federal Register RSS", "enabled"],
+ ["SEC Proposed Rules RSS", "enabled"]]

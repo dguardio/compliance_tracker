@@ -1,4 +1,5 @@
 class RiskAssessmentsController < ApplicationController
+  before_action -> { require_feature!(:risk_management) }
   before_action :set_organization
   before_action :set_compliance_framework, if: -> { params[:compliance_framework_id].present? }
   before_action :set_compliance_requirement, if: -> { params[:compliance_requirement_id].present? }

@@ -1,0 +1,95 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <nav class="mb-6">
+    <ol class="flex items-center space-x-2 text-sm text-gray-500">
+      <li><%= link_to "Workflow Intelligence", organization_workflow_analytics_path(@organization), class: "hover:text-indigo-600" %></li>
+      <li><i class="fas fa-chevron-right text-xs"></i></li>
+      <li class="text-gray-900 font-medium">Bottleneck Detection</li>
+    </ol>
+  </nav>
+
+  <h1 class="text-2xl font-bold text-gray-900 mb-6">Bottleneck Detection</h1>
+
+  <!-- Findings Bottlenecks -->
+  <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">
+      <i class="fas fa-bug text-amber-500 mr-2"></i>Findings Backlog by Assignee
+    </h2>
+    <% if @bottlenecks[:findings].any? %>
+      <div class="space-y-3">
+        <% @bottlenecks[:findings].each do |item| %>
+          <div class="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600">
+                <%= item[:user].respond_to?(:full_name) ? item[:user].full_name&.first&.upcase || '?' : '?' %>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-900"><%= item[:user].respond_to?(:full_name) ? item[:user].full_name.presence || item[:user].email : 'Unassigned' %></p>
+                <p class="text-xs text-gray-500">Avg age: <%= item[:avg_age_days] %> days</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="text-center">
+                <p class="text-lg font-bold text-gray-900"><%= item[:pending_count] %></p>
+                <p class="text-xs text-gray-500">Pending</p>
+              </div>
+              <% if item[:critical_count] > 0 %>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                  <%= item[:critical_count] %> critical/high
+                </span>
+              <% end %>
+              <% if item[:overdue_count] > 0 %>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                  <%= item[:overdue_count] %> overdue
+                </span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-gray-500 text-center py-4">No finding bottlenecks detected.</p>
+    <% end %>
+  </div>
+
+  <!-- Test Bottlenecks -->
+  <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">
+      <i class="fas fa-vial text-blue-500 mr-2"></i>Pending Test Executions
+    </h2>
+    <% if @bottlenecks[:tests].any? %>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <% @bottlenecks[:tests].each do |item| %>
+          <div class="border rounded-lg p-3 text-center">
+            <% user = User.find_by(id: item[:user_id]) %>
+            <p class="text-sm font-medium text-gray-900"><%= user&.full_name.presence || user&.email || "User ##{item[:user_id]}" %></p>
+            <p class="text-2xl font-bold text-blue-600 mt-1"><%= item[:pending_tests] %></p>
+            <p class="text-xs text-gray-500">pending tests</p>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-gray-500 text-center py-4">No test bottlenecks detected.</p>
+    <% end %>
+  </div>
+
+  <!-- Attestation Bottlenecks -->
+  <div class="bg-white rounded-xl shadow-sm border p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">
+      <i class="fas fa-file-signature text-purple-500 mr-2"></i>Pending Attestations
+    </h2>
+    <% if @bottlenecks[:attestations].any? %>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <% @bottlenecks[:attestations].each do |item| %>
+          <div class="border rounded-lg p-3 text-center">
+            <% user = User.find_by(id: item[:user_id]) %>
+            <p class="text-sm font-medium text-gray-900"><%= user&.full_name.presence || user&.email || "User ##{item[:user_id]}" %></p>
+            <p class="text-2xl font-bold text-purple-600 mt-1"><%= item[:pending_attestations] %></p>
+            <p class="text-xs text-gray-500">pending attestations</p>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-gray-500 text-center py-4">No attestation bottlenecks detected.</p>
+    <% end %>
+  </div>
+</div>

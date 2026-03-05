@@ -1,0 +1,84 @@
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <nav class="mb-6">
+    <ol class="flex items-center space-x-2 text-sm text-gray-500">
+      <li><%= link_to "Vendors", organization_vendors_path(@organization), class: "hover:text-indigo-600" %></li>
+      <li><i class="fas fa-chevron-right text-xs"></i></li>
+      <li class="text-gray-900 font-medium"><%= @vendor.name %></li>
+    </ol>
+  </nav>
+
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900"><%= @vendor.name %></h1>
+      <p class="text-sm text-gray-500"><%= @vendor.website %></p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to edit_organization_vendor_path(@organization, @vendor), class: "text-sm text-indigo-600 hover:text-indigo-800 font-medium" do %>
+        <i class="fas fa-edit mr-1"></i> Edit
+      <% end %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <div class="bg-white rounded-lg border p-4">
+      <p class="text-xs text-gray-500 mb-1">Risk Tier</p>
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-<%= @vendor.risk_tier_color %>-100 text-<%= @vendor.risk_tier_color %>-800">
+        <%= @vendor.risk_tier.titleize %>
+      </span>
+    </div>
+    <div class="bg-white rounded-lg border p-4">
+      <p class="text-xs text-gray-500 mb-1">Contract Period</p>
+      <p class="text-sm font-medium text-gray-900"><%= @vendor.contract_start&.strftime("%b %Y") || '—' %> to <%= @vendor.contract_end&.strftime("%b %Y") || 'Ongoing' %></p>
+    </div>
+    <div class="bg-white rounded-lg border p-4">
+      <p class="text-xs text-gray-500 mb-1">Primary Contact</p>
+      <p class="text-sm font-medium text-gray-900"><%= @vendor.primary_contact_name %></p>
+      <p class="text-xs text-gray-500"><%= @vendor.primary_contact_email %></p>
+    </div>
+  </div>
+
+  <!-- Assessment History -->
+  <div class="bg-white rounded-xl shadow-sm border p-6 mb-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-gray-900">Assessments</h2>
+    </div>
+    <% if @assessments.any? %>
+      <div class="space-y-3">
+        <% @assessments.each do |assessment| %>
+          <div class="border rounded-lg p-4 flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-900"><%= assessment.assessment_type.titleize %> Assessment</p>
+              <p class="text-xs text-gray-500"><%= assessment.assessment_date&.strftime("%b %d, %Y") %></p>
+            </div>
+            <div class="flex items-center gap-3">
+              <% if assessment.risk_score %>
+                <span class="text-sm font-bold text-gray-900">Score: <%= assessment.risk_score %></span>
+              <% end %>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"><%= assessment.status.titleize %></span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-gray-500 text-sm">No assessments yet.</p>
+    <% end %>
+  </div>
+
+  <!-- Quick Assessment -->
+  <div class="bg-white rounded-xl shadow-sm border p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Record Assessment</h2>
+    <%= form_tag(assess_organization_vendor_path(@organization, @vendor), method: :post, class: "grid grid-cols-1 md:grid-cols-3 gap-4") do %>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Assessment Type</label>
+        <%= select_tag :assessment_type, options_for_select([['Periodic', 'periodic'], ['Initial', 'initial'], ['Incident-Driven', 'incident_driven']]), class: "block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Risk Score (1–100)</label>
+        <%= number_field_tag :risk_score, 50, min: 1, max: 100, class: "block w-full rounded-lg border-gray-300 shadow-sm sm:text-sm" %>
+      </div>
+      <div class="flex items-end">
+        <%= submit_tag "Record", class: "px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,88 @@
+{
+    "id": "PRD-011",
+    "title": "Policy Attestation & Training Tracking",
+    "status": "Pending",
+    "priority": "High",
+    "timeline": "Current — Build Now",
+    "rationale": "Policy management is incomplete without employee acknowledgment tracking. Required for ISO, SOC 2, HIPAA, and GDPR. Directly extends the existing Policy Management module (PRD-002).",
+    "modules": [
+        "Policy Distribution",
+        "Attestation Tracking",
+        "Training Completion",
+        "Escalation Engine"
+    ],
+    "user_stories": [
+        {
+            "id": "US-11.1",
+            "story": "As a Compliance Manager, I want to push a policy to all users (or a specific group) for mandatory acknowledgment, so that I can prove employees have read it.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Manager selects a policy and target audience (all users, department, role).",
+                "Each target user receives an in-app notification and email.",
+                "User must click 'I have read and understood this policy' to attest."
+            ]
+        },
+        {
+            "id": "US-11.2",
+            "story": "As a Compliance Manager, I want to see a real-time completion dashboard, so that I know who has and hasn't acknowledged a policy.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Dashboard shows % completion and list of pending users.",
+                "Filterable by department, role, policy.",
+                "Exportable as CSV for audit evidence."
+            ]
+        },
+        {
+            "id": "US-11.3",
+            "story": "As a Compliance Manager, I want the system to automatically escalate to a user's manager after a configurable deadline, so that attestation doesn't stall.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Manager sets a deadline for attestation (e.g., 14 days).",
+                "At 7 days, a reminder is sent.",
+                "At deadline, user's manager is notified.",
+                "Post-deadline, the finding is flagged as overdue."
+            ]
+        },
+        {
+            "id": "US-11.4",
+            "story": "As an Auditor, I want to see a legal record of all policy attestations with timestamps and user identity, so that I can verify compliance during an audit.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Each attestation is immutably logged with user ID, timestamp, IP, and policy version.",
+                "Attestation log is exportable.",
+                "Historical attestations are preserved even if the policy is updated."
+            ]
+        },
+        {
+            "id": "US-11.5",
+            "story": "As a Compliance Manager, I want to track mandatory training completion alongside policy attestation, so that I have a unified view of employee compliance awareness.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Manager can attach a training requirement to a policy.",
+                "System tracks training completion (manual entry or LMS integration).",
+                "Dashboard shows combined attestation + training status."
+            ]
+        }
+    ],
+    "data_model": {
+        "new_models": [
+            "AttestationCampaign (policy_id, target_scope, deadline, status)",
+            "Attestation (campaign_id, user_id, attested_at, ip_address, policy_version)",
+            "TrainingRequirement (policy_id, title, description, due_date)"
+        ],
+        "enums": {
+            "campaign_status": [
+                "draft",
+                "active",
+                "completed",
+                "overdue"
+            ],
+            "target_scope": [
+                "all_users",
+                "department",
+                "role",
+                "custom_list"
+            ]
+        }
+    }
+}

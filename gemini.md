@@ -3,20 +3,26 @@
 This document summarizes the key aspects of the Compliance Tracker project to provide context for development sessions.
 
 ### Project Overview
-The project is a comprehensive, multi-tenant compliance management platform built with Ruby on Rails. It enables organizations to manage their compliance frameworks, requirements, controls, and documents. A major upcoming feature is a sophisticated "Regulatory Change Management Workflow" designed to automate the ingestion, analysis, and implementation of regulatory changes.
+The project is a comprehensive, multi-tenant compliance management platform built with Ruby on Rails. It enables organizations to manage their compliance frameworks, requirements, controls, documents, risks, findings, incidents, obligations, attestations, vendors, and more. The platform features 23 Flipper-gated modules spanning 5 implementation phases, all complete. A sophisticated AI layer powers regulatory intelligence, policy generation, executive reporting, and impact analysis.
 
 ### Core Features
 *   **Multi-Tenancy:** Supports isolated organizations, each with its own hierarchy of departments, teams, and units.
 *   **User & Access Control:** A robust permission system using Devise, Pundit, and Rolify for authentication, authorization, and role-based access control (RBAC). Permissions are granular and scoped to organizations.
 *   **Compliance Management:** Allows creation and management of compliance frameworks, requirements, and controls.
-*   **Document Management:** Features document uploads, versioning, approval workflows, and previews for various file types (PDF, Office, images).
-*   **Risk Assessment:** Functionality for assessing and tracking risks related to compliance controls.
-*   **Provider Management:** A system for managing regulatory bodies or other providers, both globally and per-organization.
-*   **Regulatory Change Workflow (Roadmap):** The next major feature set, which includes:
-    *   Automated ingestion and AI-tagging of new regulations.
-    *   A structured review and decision workflow for stakeholders.
-    *   Task management for implementing regulatory changes.
-    *   Dashboards and reporting for tracking progress.
+*   **Document & Policy Management:** Features document uploads, versioning, approval workflows, policy attestation, and previews.
+*   **Risk Assessment:** Risk register, heatmap, and linking risks to controls.
+*   **Findings & Remediation (CAPA):** Auto-creation of findings, SLA tracking, corrective actions, root cause analysis.
+*   **Control Testing & Assurance:** Test plans, sample-based execution, sign-off workflows, historical trends.
+*   **Obligation Management:** AI-extracted obligations from regulations, conditional triggers (e.g., GDPR 72h).
+*   **Incident & Breach Management:** Incident logging, obligation triggering, auto-finding creation, lessons learned.
+*   **Provider Management:** A system for managing regulatory bodies or other providers.
+*   **Phase 5 — Intelligence & Advanced Features (11 modules):**
+    *   Control Maturity Assessment & Cross-Framework Harmonization
+    *   Workflow Intelligence & Policy Gap Analysis
+    *   Regulatory Impact Simulation & Executive Reporting
+    *   Questionnaire Autofill / RFP Responder
+    *   Vendor TPRM & Automated Evidence Agents
+    *   Continuous Monitoring Dashboard & Jira/Linear/ServiceNow Integration
 
 ### Technical Stack
 *   **Backend:** Ruby on Rails 7.1 (Core Platform), FastAPI / Python 3.12 (Scraping Microservice)
@@ -25,7 +31,7 @@ The project is a comprehensive, multi-tenant compliance management platform buil
 *   **Authentication/Authorization:** Devise, Pundit, Rolify
 *   **Multi-tenancy:** `acts_as_tenant` gem
 *   **Background Jobs:** Sidekiq
-*   **AI & Scraping:** `langchainrb`, `ruby-openai`, `nokogiri`, `httparty` (Rails) | `scrapling`, `litellm`, `playwright`, `browserforge` (Python)
+*   **AI & Scraping:** `langchainrb`, `ruby-openai`, `nokogiri`, `httparty`
 *   **File Handling:** Active Storage, various gems for document processing (`docx`, `roo`, `pdf-reader`)
 *   **Testing:** RSpec, FactoryBot, Capybara
 
@@ -95,7 +101,13 @@ The immediate focus is on building the **Regulatory Change Management Workflow**
 *   **Phase 1: Automated Ingestion and AI-powered processing of regulations. (COMPLETED)**
 *   **Phase 2: Stakeholder Review and Decision Workflow. (COMPLETED)**
 *   **Phase 3: Implementation, Task Management, and Reporting. (COMPLETED)**
-*   **Phase 4:** Advanced Analytics and Integrations.
+*   **Phase 4:** Advanced Analytics and Integrations. **(COMPLETED)**
+*   **Phase 5:** Intelligence & Advanced Features (11 modules across 4 sub-phases). **(COMPLETED 2026-02-18)**
+    *   5A: Control Maturity, Harmonization, Workflow Intelligence, Policy Gap Analysis
+    *   5B: Impact Simulation, Executive Reports, Questionnaire Autofill
+    *   5C: Vendor TPRM, Evidence Agents, Monitoring Dashboard
+    *   5D: Jira/Linear/ServiceNow Integration
+*   **Next: AI Improvement Sprint** — Consolidate and upgrade all 23 AI features. See `project_status/ai_improvement_sprint.md`.
 
 ---
 

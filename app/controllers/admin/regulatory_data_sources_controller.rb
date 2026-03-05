@@ -65,7 +65,7 @@ class Admin::RegulatoryDataSourcesController < ApplicationController
     if request.post?
       sector = params[:sector]
       jurisdiction = params[:jurisdiction]
-      @discovered_sources = SourceDiscoveryAgent.new.call(sector: sector, jurisdiction: jurisdiction)
+      @discovered_sources = Ai::Agents::SourceDiscoveryAgent.new.call(sector: sector, jurisdiction: jurisdiction)
     end
 
     # Renders discover.html.erb by default
@@ -101,7 +101,7 @@ class Admin::RegulatoryDataSourcesController < ApplicationController
     )
     
     begin
-      config = Regulatory::SmartConfiguratorService.new(temp_source).preview
+      config = Ai::SmartConfiguratorService.new(temp_source).preview
       
       if config
         render json: config

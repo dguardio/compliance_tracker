@@ -1,0 +1,145 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+        <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg" style="background: linear-gradient(135deg, #ef4444, #f59e0b);">
+          <i class="fas fa-satellite-dish text-white text-lg"></i>
+        </span>
+        Security Watchtower
+      </h1>
+      <p class="mt-1 text-gray-500">Real-time compliance monitoring across all systems</p>
+    </div>
+  </div>
+
+  <!-- Status Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Findings -->
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+          <i class="fas fa-bug text-red-600"></i>
+        </div>
+        <h3 class="font-medium text-gray-900">Findings</h3>
+      </div>
+      <div class="space-y-2">
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Open</span>
+          <span class="font-bold text-gray-900"><%= @status[:finding_summary][:open] %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Critical</span>
+          <span class="font-bold text-red-600"><%= @status[:finding_summary][:critical] %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Overdue</span>
+          <span class="font-bold text-amber-600"><%= @status[:finding_summary][:overdue] %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Closed (month)</span>
+          <span class="font-bold text-green-600"><%= @status[:finding_summary][:closed_this_month] %></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Evidence Checks -->
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+          <i class="fas fa-robot text-blue-600"></i>
+        </div>
+        <h3 class="font-medium text-gray-900">Evidence Checks</h3>
+      </div>
+      <div class="space-y-2">
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Total</span>
+          <span class="font-bold text-gray-900"><%= @status[:evidence_checks][:total] %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Passing</span>
+          <span class="font-bold text-green-600"><%= @status[:evidence_checks][:passing] %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Failing</span>
+          <span class="font-bold text-red-600"><%= @status[:evidence_checks][:failing] %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Stale</span>
+          <span class="font-bold text-amber-600"><%= @status[:evidence_checks][:stale] %></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vendors -->
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+          <i class="fas fa-handshake text-purple-600"></i>
+        </div>
+        <h3 class="font-medium text-gray-900">Vendors</h3>
+      </div>
+      <div class="space-y-2">
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Total</span>
+          <span class="font-bold text-gray-900"><%= @status[:vendor_alerts][:total] %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Critical tier</span>
+          <span class="font-bold text-red-600"><%= @status[:vendor_alerts][:critical_tier] %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Expiring contracts</span>
+          <span class="font-bold text-amber-600"><%= @status[:vendor_alerts][:contracts_expiring] %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-500">Overdue reviews</span>
+          <span class="font-bold text-amber-600"><%= @status[:vendor_alerts][:overdue_assessments] %></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Framework Health -->
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+          <i class="fas fa-shield-alt text-green-600"></i>
+        </div>
+        <h3 class="font-medium text-gray-900">Frameworks</h3>
+      </div>
+      <div class="space-y-2">
+        <% @status[:framework_health].each do |fw| %>
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-gray-500 truncate"><%= fw[:name] %></span>
+              <span class="font-bold text-gray-900"><%= fw[:coverage] %>%</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-1.5">
+              <div class="h-1.5 rounded-full" style="width: <%= fw[:coverage] %>%; background: var(--primary-color, #6366f1);"></div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity Feed -->
+  <div class="bg-white rounded-xl shadow-sm border p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
+    <% if @status[:recent_activity].any? %>
+      <div class="space-y-3">
+        <% @status[:recent_activity].each do |activity| %>
+          <div class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50">
+            <div class="w-8 h-8 rounded-full bg-<%= activity[:color] %>-100 flex items-center justify-center flex-shrink-0">
+              <i class="<%= activity[:icon] %> text-<%= activity[:color] %>-600 text-sm"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm text-gray-900 truncate"><%= activity[:text] %></p>
+            </div>
+            <span class="text-xs text-gray-400 flex-shrink-0"><%= time_ago_in_words(activity[:time]) %> ago</span>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-gray-500 text-center py-4">No recent activity.</p>
+    <% end %>
+  </div>
+</div>

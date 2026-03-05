@@ -1,0 +1,64 @@
+{
+    "id": "PRD-F05",
+    "title": "Third-Party Risk Management (TPRM)",
+    "status": "Draft",
+    "priority": "High",
+    "timeline": "Future",
+    "rationale": "Most breaches happen through third parties. CISOs need to know which vendors introduce the most regulatory exposure. This is a large new module requiring its own data model, UI, and workflows. Deferred to Future because it does not extend an existing module — it is a net-new pillar.",
+    "modules": [
+        "Vendor Registry",
+        "Risk Tiering",
+        "Vendor Questionnaires",
+        "SOC Report Analysis",
+        "Contract Tracking"
+    ],
+    "user_stories": [
+        {
+            "id": "US-F5.1",
+            "story": "As a Compliance Manager, I want to maintain a vendor registry with risk tiers, so that I can prioritize oversight of high-risk vendors.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "Manager can add vendors with name, category, and tier (Critical, High, Medium, Low).",
+                "Tier is auto-suggested based on data access level and integration type.",
+                "Dashboard shows vendor count by tier."
+            ]
+        },
+        {
+            "id": "US-F5.2",
+            "story": "As a Compliance Manager, I want to send inherent risk questionnaires to vendors and score their responses, so that I can objectively assess their risk.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "Manager can select a questionnaire template.",
+                "System sends the questionnaire to the vendor's contact email.",
+                "Responses are scored and an inherent risk score is calculated."
+            ]
+        },
+        {
+            "id": "US-F5.3",
+            "story": "As a Compliance Manager, I want to upload a vendor's SOC 2 report and have the AI summarize findings, so that I can quickly assess their compliance posture.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "Manager can upload a SOC 2 PDF.",
+                "AI extracts key findings, exceptions, and complementary user entity controls.",
+                "Summary is stored against the vendor record."
+            ]
+        },
+        {
+            "id": "US-F5.4",
+            "story": "As a Compliance Manager, I want to track vendor contract renewal dates and re-assessment schedules, so that assessments stay current.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "Manager can set contract expiry and next assessment date.",
+                "System sends reminders before re-assessment is due.",
+                "Overdue vendor assessments are flagged on dashboard."
+            ]
+        }
+    ],
+    "data_model": {
+        "new_models": [
+            "Vendor (name, category, tier, primary_contact, status)",
+            "VendorAssessment (vendor_id, questionnaire_id, score, assessed_at)",
+            "VendorContract (vendor_id, start_date, end_date, renewal_date)"
+        ]
+    }
+}

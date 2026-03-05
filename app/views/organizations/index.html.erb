@@ -40,7 +40,7 @@
                       <%= link_to organization.name, organization_path(organization), class: "hover:text-indigo-600" %>
                     </h3>
                     <p class="text-sm text-gray-500">
-                      <%= organization.settings['industry'] || 'No industry specified' %>
+                      <%= organization.settings&.dig('industry') || 'No industry specified' %>
                     </p>
                   </div>
                 </div>

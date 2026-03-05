@@ -1,0 +1,150 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <%= link_to "← Back to Organization", organization_path(@organization),
+                class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Findings & Remediation</h1>
+      <p class="mt-1 text-sm text-gray-500">Track compliance findings and corrective actions for <%= @organization.name %></p>
+    </div>
+    <div>
+      <%= link_to "New Finding", new_organization_finding_path(@organization),
+                  class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+    </div>
+  </div>
+
+  <!-- Dashboard Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+    <div class="bg-white overflow-hidden shadow rounded-lg p-4">
+      <dt class="text-xs font-medium text-gray-500 truncate">Total</dt>
+      <dd class="mt-1 text-2xl font-semibold text-gray-900"><%= @stats[:total] %></dd>
+    </div>
+    <div class="bg-white overflow-hidden shadow rounded-lg p-4">
+      <dt class="text-xs font-medium text-gray-500 truncate">Open</dt>
+      <dd class="mt-1 text-2xl font-semibold text-blue-600"><%= @stats[:open] %></dd>
+    </div>
+    <div class="bg-white overflow-hidden shadow rounded-lg p-4">
+      <dt class="text-xs font-medium text-gray-500 truncate">In Progress</dt>
+      <dd class="mt-1 text-2xl font-semibold text-yellow-600"><%= @stats[:in_progress] %></dd>
+    </div>
+    <div class="bg-white overflow-hidden shadow rounded-lg p-4">
+      <dt class="text-xs font-medium text-gray-500 truncate">Overdue</dt>
+      <dd class="mt-1 text-2xl font-semibold text-red-600"><%= @stats[:overdue] %></dd>
+    </div>
+    <div class="bg-white overflow-hidden shadow rounded-lg p-4">
+      <dt class="text-xs font-medium text-gray-500 truncate">Critical</dt>
+      <dd class="mt-1 text-2xl font-semibold text-red-700"><%= @stats[:critical] %></dd>
+    </div>
+    <div class="bg-white overflow-hidden shadow rounded-lg p-4">
+      <dt class="text-xs font-medium text-gray-500 truncate">High</dt>
+      <dd class="mt-1 text-2xl font-semibold text-orange-600"><%= @stats[:high] %></dd>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white shadow rounded-lg p-4 mb-6">
+    <%= form_tag organization_findings_path(@organization), method: :get, class: "flex flex-wrap gap-3 items-end" do %>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Status</label>
+        <%= select_tag :status, options_for_select([["All", ""], ["Open", "open"], ["In Progress", "in_progress"], ["Remediated", "remediated"], ["Closed", "closed"], ["Accepted", "accepted"]], params[:status]),
+                       class: "block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" %>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Severity</label>
+        <%= select_tag :severity, options_for_select([["All", ""], ["Critical", "critical"], ["High", "high"], ["Medium", "medium"], ["Low", "low"]], params[:severity]),
+                       class: "block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" %>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Source</label>
+        <%= select_tag :source, options_for_select([["All", ""], ["Manual", "manual"], ["Control Effectiveness", "control_effectiveness"], ["Evidence Expiration", "evidence_expiration"], ["Audit", "audit"], ["Risk Assessment", "risk_assessment"]], params[:source]),
+                       class: "block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" %>
+      </div>
+      <div>
+        <%= submit_tag "Filter", class: "inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer" %>
+      </div>
+      <% if params[:status].present? || params[:severity].present? || params[:source].present? %>
+        <div>
+          <%= link_to "Clear", organization_findings_path(@organization), class: "text-sm text-indigo-600 hover:text-indigo-800" %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <!-- Findings Table -->
+  <% if @findings.any? %>
+    <div class="overflow-x-auto shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+      <table class="min-w-full divide-y divide-gray-300">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Finding</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Severity</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Status</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Source</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">SLA Deadline</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">Assigned To</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @findings.each do |finding| %>
+            <tr class="<%= 'bg-red-50' if finding.overdue? %>">
+              <td class="px-4 py-4">
+                <div class="text-sm font-medium text-gray-900"><%= finding.title %></div>
+                <% if finding.compliance_control %>
+                  <div class="text-xs text-gray-500"><%= finding.compliance_control.name %></div>
+                <% end %>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap hidden sm:table-cell">
+                <% severity_colors = { 'critical' => 'red', 'high' => 'orange', 'medium' => 'yellow', 'low' => 'green' } %>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= severity_colors[finding.severity] || 'gray' %>-100 text-<%= severity_colors[finding.severity] || 'gray' %>-800">
+                  <%= finding.severity.titleize %>
+                </span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap hidden md:table-cell">
+                <% status_colors = { 'open' => 'blue', 'in_progress' => 'yellow', 'remediated' => 'green', 'closed' => 'gray', 'accepted' => 'purple' } %>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= status_colors[finding.status] || 'gray' %>-100 text-<%= status_colors[finding.status] || 'gray' %>-800">
+                  <%= finding.status.titleize %>
+                </span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 hidden lg:table-cell">
+                <%= finding.source.titleize %>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm hidden lg:table-cell">
+                <% if finding.sla_deadline %>
+                  <span class="<%= finding.overdue? ? 'text-red-600 font-semibold' : 'text-gray-900' %>">
+                    <%= finding.sla_deadline.strftime("%b %d, %Y") %>
+                  </span>
+                  <% if finding.overdue? %>
+                    <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Overdue</span>
+                  <% end %>
+                <% else %>
+                  <span class="text-gray-400">—</span>
+                <% end %>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 hidden xl:table-cell">
+                <%= finding.assigned_to&.full_name || '—' %>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                <%= link_to "View", organization_finding_path(@organization, finding), class: "text-indigo-600 hover:text-indigo-900" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="text-center py-12 bg-white rounded-lg shadow">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <h3 class="mt-2 text-lg font-medium text-gray-900">No findings</h3>
+      <p class="mt-1 text-sm text-gray-500">No compliance findings have been recorded yet.</p>
+      <div class="mt-6">
+        <%= link_to "Create Finding", new_organization_finding_path(@organization),
+                    class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" %>
+      </div>
+    </div>
+  <% end %>
+</div>

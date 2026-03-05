@@ -188,3 +188,5 @@ gem "caxlsx", "~> 4.4"
 gem "caxlsx_rails", "~> 0.6.4"
 
 gem "google_search_results", "~> 2.2"
+
+gem "ruby-readability", "~> 0.7.3"

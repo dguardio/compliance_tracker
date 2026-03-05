@@ -1,0 +1,95 @@
+{
+    "id": "PRD-010",
+    "title": "Incident & Breach Management",
+    "status": "Pending",
+    "priority": "High",
+    "timeline": "Current — Build Now",
+    "rationale": "Closes the loop between Security Ops and Compliance. Risks predict what could happen; incidents track what did happen. This connects incidents to obligations, controls, and regulatory reporting — the full lifecycle. Extends existing Risk Management and integrates with Obligation Management (PRD-009) and Findings (PRD-007).",
+    "modules": [
+        "Incident Logging",
+        "Categorization & Severity",
+        "Regulatory Obligation Triggers",
+        "Post-Incident Reporting",
+        "Root Cause & Lessons Learned"
+    ],
+    "user_stories": [
+        {
+            "id": "US-10.1",
+            "story": "As a Security Analyst, I want to log an incident with category, severity, and affected systems, so that the compliance team has immediate visibility.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "User can create an incident with title, description, category, severity.",
+                "Incident is linked to impacted controls and risks.",
+                "Compliance team is notified immediately."
+            ]
+        },
+        {
+            "id": "US-10.2",
+            "story": "As a Compliance Officer, when an incident is logged, I want the system to automatically identify triggered regulatory obligations (e.g., GDPR 72h breach notification), so that I know exactly what we must report and when.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "System matches incident category to conditional obligations.",
+                "Countdown timer starts for time-sensitive obligations.",
+                "Dashboard shows all triggered obligations with deadlines."
+            ]
+        },
+        {
+            "id": "US-10.3",
+            "story": "As a Compliance Officer, I want to generate a post-incident report that includes timeline, root cause, impact, and corrective actions, so that I can satisfy regulatory reporting requirements.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "System provides a report template pre-filled with incident data.",
+                "Report includes linked controls, obligations triggered, and remediation actions.",
+                "Report is exportable as PDF."
+            ]
+        },
+        {
+            "id": "US-10.4",
+            "story": "As a Risk Manager, I want incidents to automatically create Findings (PRD-007), so that corrective actions are tracked to closure.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "When an incident is closed, a Finding is auto-created for each root cause.",
+                "Finding links back to the originating incident."
+            ]
+        },
+        {
+            "id": "US-10.5",
+            "story": "As a Compliance Manager, I want a 'Lessons Learned' repository linked to incidents, so that the organization can improve over time.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Each closed incident can have a 'Lessons Learned' entry.",
+                "Lessons are searchable and browsable.",
+                "Lessons can be linked to updated controls or policies."
+            ]
+        }
+    ],
+    "data_model": {
+        "new_models": [
+            "Incident (title, description, category, severity, status, reported_by, resolved_at)",
+            "IncidentLink (polymorphic: Control, Risk, Regulation, Obligation)",
+            "LessonLearned (incident_id, description, linked_controls, linked_policies)"
+        ],
+        "enums": {
+            "incident_category": [
+                "security",
+                "privacy",
+                "compliance",
+                "operational",
+                "financial"
+            ],
+            "incident_severity": [
+                "critical",
+                "high",
+                "medium",
+                "low"
+            ],
+            "incident_status": [
+                "reported",
+                "investigating",
+                "contained",
+                "resolved",
+                "closed"
+            ]
+        }
+    }
+}

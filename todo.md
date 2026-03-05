@@ -6,8 +6,13 @@
 *   **Phase 2: Stakeholder Review and Decision Workflow. (COMPLETED)**
 *   **Phase 3: Implementation, Task Management, and Reporting. (COMPLETED)**
 *   **Phase 3.5: Security Hardening & Permissions Refactoring. (COMPLETED)**
-*   **Phase 4: Advanced Analytics and Integrations. (PENDING)**
-*   **Phase 5: Advanced Regulatory Data Ingestion by Sector (Future Refinement)**
+*   **Phase 4: Advanced Analytics and Integrations. (COMPLETED)**
+*   **Phase 5: Intelligence & Advanced Features — 11 modules across 4 sub-phases. (COMPLETED 2026-02-18)**
+    *   5A: Control Maturity, Cross-Framework Harmonization, Workflow Intelligence, Policy Gap Analysis
+    *   5B: Impact Simulation, Executive Reports, Questionnaire Autofill
+    *   5C: Vendor TPRM, Evidence Agents, Monitoring Dashboard
+    *   5D: Jira/Linear/ServiceNow Integration
+*   **Next: AI Improvement Sprint** — Consolidate and upgrade all 23 AI features. See `project_status/ai_improvement_sprint.md`
 
 ---
 

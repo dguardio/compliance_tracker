@@ -1,0 +1,135 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header -->
+  <div class="flex items-end justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Evidence Freshness</h1>
+      <p class="mt-2 text-lg text-gray-500">Monitor evidence expiration and maintain continuous compliance.</p>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+      <div class="text-sm font-medium text-gray-500">Total Tracked</div>
+      <div class="mt-1 text-2xl font-bold text-gray-900"><%= @stats[:total_with_expiry] %></div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-red-200 p-5">
+      <div class="text-sm font-medium text-red-600">Expired</div>
+      <div class="mt-1 text-2xl font-bold text-red-700"><%= @stats[:expired] %></div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-amber-200 p-5">
+      <div class="text-sm font-medium text-amber-600">Expiring Soon</div>
+      <div class="mt-1 text-2xl font-bold text-amber-700"><%= @stats[:expiring_soon] %></div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-green-200 p-5">
+      <div class="text-sm font-medium text-green-600">Healthy</div>
+      <div class="mt-1 text-2xl font-bold text-green-700"><%= @stats[:healthy] %></div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-indigo-200 p-5">
+      <div class="text-sm font-medium text-indigo-600">Open Requests</div>
+      <div class="mt-1 text-2xl font-bold text-indigo-700"><%= @stats[:open_requests] %></div>
+    </div>
+  </div>
+
+  <!-- Expired Evidence -->
+  <% if @expired_documents.any? %>
+    <div class="bg-white rounded-xl shadow-sm border border-red-200 mb-6">
+      <div class="px-6 py-4 border-b border-red-100 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-red-800 flex items-center gap-2">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+          Expired Evidence (<%= @expired_documents.count %>)
+        </h2>
+      </div>
+      <div class="divide-y divide-gray-100">
+        <% @expired_documents.each do |doc| %>
+          <div class="px-6 py-4 flex items-center justify-between hover:bg-red-50 transition-colors">
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-gray-900 truncate"><%= doc.title %></p>
+              <p class="text-xs text-gray-500 mt-1">
+                <% if doc.compliance_control %> Control: <%= doc.compliance_control.name %> · <% end %>
+                Expired: <span class="text-red-600 font-medium"><%= doc.expires_at.strftime("%b %d, %Y") %></span>
+                · Uploaded by: <%= doc.uploaded_by&.full_name %>
+              </p>
+            </div>
+            <div class="flex items-center gap-2 ml-4">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                <%= pluralize(doc.days_until_expiry.abs, "day") %> overdue
+              </span>
+              <%= button_to "Request Refresh", evidence_freshness_request_refresh_path(document_id: doc.id), method: :post, class: "inline-flex items-center px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 transition-colors" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Expiring Soon -->
+  <% if @expiring_soon.any? %>
+    <div class="bg-white rounded-xl shadow-sm border border-amber-200 mb-6">
+      <div class="px-6 py-4 border-b border-amber-100">
+        <h2 class="text-lg font-semibold text-amber-800 flex items-center gap-2">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          Expiring Within 30 Days (<%= @expiring_soon.count %>)
+        </h2>
+      </div>
+      <div class="divide-y divide-gray-100">
+        <% @expiring_soon.each do |doc| %>
+          <div class="px-6 py-4 flex items-center justify-between hover:bg-amber-50 transition-colors">
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-gray-900 truncate"><%= doc.title %></p>
+              <p class="text-xs text-gray-500 mt-1">
+                <% if doc.compliance_control %> Control: <%= doc.compliance_control.name %> · <% end %>
+                Expires: <span class="text-amber-600 font-medium"><%= doc.expires_at.strftime("%b %d, %Y") %></span>
+                · Uploaded by: <%= doc.uploaded_by&.full_name %>
+              </p>
+            </div>
+            <div class="flex items-center gap-2 ml-4">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                <%= pluralize(doc.days_until_expiry, "day") %> left
+              </span>
+              <%= button_to "Request Refresh", evidence_freshness_request_refresh_path(document_id: doc.id), method: :post, class: "inline-flex items-center px-3 py-1.5 bg-amber-600 text-white text-xs font-medium rounded-lg hover:bg-amber-700 transition-colors" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Open Refresh Requests -->
+  <% if @open_refresh_requests.any? %>
+    <div class="bg-white rounded-xl shadow-sm border border-indigo-200 mb-6">
+      <div class="px-6 py-4 border-b border-indigo-100">
+        <h2 class="text-lg font-semibold text-indigo-800 flex items-center gap-2">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M2.985 19.644l3.182-3.182" /></svg>
+          Pending Refresh Requests (<%= @open_refresh_requests.count %>)
+        </h2>
+      </div>
+      <div class="divide-y divide-gray-100">
+        <% @open_refresh_requests.each do |req| %>
+          <div class="px-6 py-4 flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-900"><%= req.document.title %></p>
+              <p class="text-xs text-gray-500 mt-1">
+                Requested by: <%= req.requester.full_name %> · 
+                Reason: <%= req.reason %> · 
+                <%= time_ago_in_words(req.created_at) %> ago
+              </p>
+            </div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+              Pending
+            </span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Empty state -->
+  <% if @expired_documents.empty? && @expiring_soon.empty? && @open_refresh_requests.empty? %>
+    <div class="text-center py-16 bg-green-50 rounded-2xl border border-dashed border-green-300">
+      <svg class="mx-auto h-16 w-16 text-green-400 mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      <h3 class="text-lg font-medium text-green-900 mb-2">All Evidence is Fresh</h3>
+      <p class="text-green-600">No expired or expiring evidence. Your compliance posture is strong.</p>
+    </div>
+  <% end %>
+</div>

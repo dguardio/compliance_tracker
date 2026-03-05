@@ -1,0 +1,55 @@
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Back -->
+  <div class="mb-6">
+    <%= link_to "← Back to Library", regulation_library_index_path, class: "text-sm text-gray-500 hover:text-indigo-600 transition-colors" %>
+  </div>
+
+  <!-- Header -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-6">
+    <div class="flex items-start justify-between">
+      <div class="flex-1">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= @regulation.title %></h1>
+        <div class="flex items-center gap-4 text-sm text-gray-500 mb-4">
+          <% if @regulation.respond_to?(:jurisdiction) && @regulation.jurisdiction.present? %>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <%= @regulation.jurisdiction %>
+            </span>
+          <% end %>
+          <% if @regulation.effective_date.present? %>
+            <span>Effective: <strong><%= @regulation.effective_date.strftime("%B %d, %Y") %></strong></span>
+          <% end %>
+        </div>
+
+        <% if @adopted %>
+          <div class="flex items-center gap-3">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+              ✓ Adopted by your organization
+            </span>
+            <%= button_to "Remove", unadopt_regulation_library_path(@regulation), method: :delete, class: "text-sm text-red-600 hover:text-red-800 underline", form: { data: { turbo_confirm: "Remove this regulation from your organization?" } } %>
+          </div>
+        <% else %>
+          <%= button_to "Adopt This Regulation", adopt_regulation_library_path(@regulation), method: :post, class: "inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <% if @regulation.respond_to?(:summary) && @regulation.summary.present? %>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Summary</h2>
+      <div class="prose max-w-none text-gray-700">
+        <%= simple_format @regulation.summary %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @regulation.respond_to?(:body) && @regulation.body.present? %>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Full Text</h2>
+      <div class="prose max-w-none text-gray-700">
+        <%= simple_format @regulation.body %>
+      </div>
+    </div>
+  <% end %>
+</div>

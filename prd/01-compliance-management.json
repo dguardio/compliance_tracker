@@ -1,0 +1,53 @@
+{
+    "title": "Compliance Management",
+    "status": "Built",
+    "priority": "Critical",
+    "modules": [
+        "Frameworks",
+        "Requirements",
+        "Controls",
+        "Evidence"
+    ],
+    "user_stories": [
+        {
+            "story": "As a Compliance Manager, I want to define Compliance Frameworks (e.g., SOC2, ISO27001), so that I can structure our compliance efforts.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "Manager can create/edit Frameworks.",
+                "Manager can import Frameworks from templates."
+            ]
+        },
+        {
+            "story": "As a Compliance Manager, I want to break down Frameworks into Requirements, so that they are actionable.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "Manager can add Requirements to a Framework.",
+                "Requirements can be nested or grouped."
+            ]
+        },
+        {
+            "story": "As a Compliance Manager, I want to define Controls and link them to Requirements, so that we can demonstrate compliance.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "Manager can create internal Controls.",
+                "Manager can map one Control to multiple Requirements (many-to-many)."
+            ]
+        },
+        {
+            "story": "As an Auditor, I want to request evidence for specific controls, so that I can verify their effectiveness.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "Auditor can create an Evidence Request.",
+                "Assignees are notified to upload evidence."
+            ]
+        },
+        {
+            "story": "As a User, I want to upload documents as evidence, so that I can fulfill audit requests.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "User can upload files (PDF, Docx, etc.) to a Request.",
+                "Documents are versioned and stored securely."
+            ]
+        }
+    ]
+}

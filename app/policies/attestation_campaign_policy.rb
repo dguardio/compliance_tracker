@@ -1,0 +1,2 @@
+class AttestationCampaignPolicy < ApplicationPolicy
+end

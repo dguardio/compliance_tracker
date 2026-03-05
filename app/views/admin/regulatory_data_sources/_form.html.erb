@@ -1,4 +1,4 @@
-<%= form_with(model: [:admin, regulatory_data_source], class: "space-y-6", data: { controller: "regulatory-auto-config" }) do |form| %>
+<%= form_with(model: [:admin, regulatory_data_source], class: "space-y-6", data: { controller: "regulatory-auto-config source-type-toggle" }) do |form| %>
   <% if regulatory_data_source.errors.any? %>
     <%= render Joyful::CardComponent.new(padding: true) do %>
       <div class="space-y-2">
@@ -26,11 +26,14 @@
             type: :select, 
             choices: RegulatoryDataSource.source_types.keys.map { |w| [w.humanize, w] },
             options: { include_blank: 'Select a source type' },
-            html_options: { class: "w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" }
+            html_options: { 
+              class: "w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500",
+              data: { source_type_toggle_target: "selector", action: "change->source-type-toggle#toggle" }
+            }
           ) %>
 
       <!-- Smart Configuration Section -->
-      <div id="smart-config-section" class="bg-blue-50 border border-blue-200 rounded-xl p-4 <%= 'hidden' unless regulatory_data_source.api? %>">
+      <div id="smart-config-section" data-source-type-toggle-target="smartConfig" class="bg-blue-50 border border-blue-200 rounded-xl p-4 <%= 'hidden' unless regulatory_data_source.api? %>">
         <h4 class="text-base font-bold text-blue-900 mb-2 flex items-center gap-2">
           <i class="fas fa-magic"></i> Smart Auto-Configuration
         </h4>
@@ -105,7 +108,7 @@
           ) %>
 
       <!-- Authentication Section -->
-      <div id="auth-settings" class="space-y-6 <%= 'hidden' unless regulatory_data_source.api? %>">
+      <div id="auth-settings" data-source-type-toggle-target="authSettings" class="space-y-6 <%= 'hidden' unless regulatory_data_source.api? %>">
         <div class="border-t border-gray-200 pt-6">
           <h3 class="text-lg font-medium text-gray-900 mb-4">Authentication</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -163,7 +166,7 @@
   <% end %>
 
   <!-- API Settings Section (Manual) -->
-  <div id="api-settings" class="<%= 'hidden' unless regulatory_data_source.api? %>">
+  <div id="api-settings" data-source-type-toggle-target="apiSettings" class="<%= 'hidden' unless regulatory_data_source.api? %>">
     <%= render Joyful::CardComponent.new(title: "Mapping Configuration (Manual)", icon: "code-branch", padding: true) do %>
       <div class="space-y-6">
         <p class="text-sm text-gray-500">Manually map API response keys if auto-configuration is not used.</p>
@@ -203,33 +206,4 @@
           icon: "save"
         ) %>
   </div>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      const sourceTypeSelect = document.querySelector('select[name="regulatory_data_source[source_type]"]');
-      const apiSettings = document.getElementById('api-settings');
-      const authSettings = document.getElementById('auth-settings');
-      const smartConfig = document.getElementById('smart-config-section');
-
-      function toggleApiSettings() {
-        if (!sourceTypeSelect) return;
-        
-        if (sourceTypeSelect.value === 'api') {
-          apiSettings.classList.remove('hidden');
-          authSettings.classList.remove('hidden');
-          smartConfig.classList.remove('hidden');
-        } else {
-          apiSettings.classList.add('hidden');
-          authSettings.classList.add('hidden');
-          smartConfig.classList.add('hidden');
-        }
-      }
-
-      if (sourceTypeSelect) {
-        sourceTypeSelect.addEventListener('change', toggleApiSettings);
-        // Initial check
-        toggleApiSettings();
-      }
-    });
-  </script>
 <% end %>

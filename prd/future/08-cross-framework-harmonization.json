@@ -1,0 +1,45 @@
+{
+    "id": "PRD-F08",
+    "title": "Cross-Framework Harmonization",
+    "status": "Draft",
+    "priority": "Medium",
+    "timeline": "Future",
+    "rationale": "Compliance officers managing multiple frameworks (SOC 2 + ISO 27001 + HIPAA) waste time implementing duplicate controls. This module identifies overlap and suggests unified controls. Deferred because it requires rich framework and control data to produce meaningful results.",
+    "modules": [
+        "Overlap Detection Engine",
+        "Unified Control Suggestions",
+        "Framework Delta Analysis"
+    ],
+    "user_stories": [
+        {
+            "id": "US-F8.1",
+            "story": "As a Compliance Manager, I want to see a matrix showing which controls satisfy requirements across multiple frameworks, so that I can eliminate duplication.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "System generates a cross-reference matrix (Control × Framework).",
+                "Matrix highlights controls that satisfy requirements in 2+ frameworks.",
+                "Matrix highlights framework requirements with no mapped control."
+            ]
+        },
+        {
+            "id": "US-F8.2",
+            "story": "As a Compliance Manager, when I consider adopting a new framework, I want to see the delta (additional controls needed) compared to what I already have, so that I can estimate the effort.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "System compares new framework requirements against existing controls.",
+                "Shows % already covered vs. % gap.",
+                "Gap items can be converted to tasks or findings with one click."
+            ]
+        },
+        {
+            "id": "US-F8.3",
+            "story": "As a Compliance Manager, I want AI to suggest which existing controls can be extended to cover additional framework requirements, so that I can minimize new work.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "AI analyzes control descriptions and requirement text.",
+                "Suggests 'extend control X to also cover requirement Y' recommendations.",
+                "Manager can accept or dismiss suggestions."
+            ]
+        }
+    ]
+}

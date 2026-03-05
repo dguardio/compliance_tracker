@@ -1,5 +1,6 @@
 class RiskDashboardController < ApplicationController
   before_action :authenticate_user!
+  before_action -> { require_feature!(:risk_management) }
   before_action :ensure_user_has_organization
 
   def index

@@ -22,8 +22,8 @@ module Ai
       # 2. Build Prompt
       prompt = build_prompt(profile)
 
-      # 3. Call LLM (Gemini 1.5 Pro for reasoning)
-      response = RubyLLM.chat(model: 'gemini-1.5-pro').ask(prompt)
+      # 3. Call LLM (via Ai::Client for tracing)
+      response = Ai::Client.chat(prompt, task_type: :analysis, agent_name: "ImpactAnalysisAgent")
 
       # 4. Process Result
       process_result(response.content)
@@ -58,7 +58,7 @@ module Ai
         Summary: #{@regulation.description}
         
         **Regulation Text Snippet**:
-        #{@regulation.full_text&.truncate(5000)}
+        #{Ai::ContextManager.truncate(@regulation.full_text, model: 'gemini-1.5-pro', reserve_tokens: 2000)}
 
         **Analysis Instructions**:
         1. Compare the Organization's operations (jurisdictions, data types, industries) with the Regulation's scope.

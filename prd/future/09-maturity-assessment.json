@@ -1,0 +1,44 @@
+{
+    "id": "PRD-F09",
+    "title": "Control Maturity & Capability Assessment",
+    "status": "Draft",
+    "priority": "Low",
+    "timeline": "Future",
+    "rationale": "Risk heatmaps show exposure; maturity scoring shows operational discipline. Important for PE-backed companies, IPO prep, and internal audit reporting. Deferred because it requires Control Testing (PRD-008) and Findings (PRD-007) data to compute meaningful scores.",
+    "modules": [
+        "Maturity Model Definition",
+        "Control Scoring",
+        "Progression Tracking"
+    ],
+    "user_stories": [
+        {
+            "id": "US-F9.1",
+            "story": "As a Compliance Manager, I want each control scored on a maturity scale (Ad-hoc → Optimized), so that I can identify areas needing process improvement.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "Each control has a maturity level: Ad-hoc (1), Repeatable (2), Defined (3), Managed (4), Optimized (5).",
+                "Maturity is computed from: testing frequency, pass rate, evidence freshness, finding count.",
+                "Manual override option for nuanced assessment."
+            ]
+        },
+        {
+            "id": "US-F9.2",
+            "story": "As a CISO, I want to see maturity progression over time, so that I can demonstrate program improvement to the board.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "Dashboard shows maturity trend per control/framework over quarters.",
+                "Exportable as chart for board presentation."
+            ]
+        },
+        {
+            "id": "US-F9.3",
+            "story": "As an Internal Auditor, I want a target maturity level per control, so that I can measure the gap between current and desired state.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "Manager can set target maturity per control.",
+                "Dashboard shows current vs. target gap.",
+                "Controls below target are flagged for improvement."
+            ]
+        }
+    ]
+}

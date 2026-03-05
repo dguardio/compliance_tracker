@@ -1,0 +1,43 @@
+{
+    "id": "PRD-F07",
+    "title": "Regulatory Impact Simulation",
+    "status": "Draft",
+    "priority": "Medium",
+    "timeline": "Future",
+    "rationale": "When a new regulation appears, CISOs need to know: What controls are affected? What policies need updates? What risks increase? This is an advanced AI feature that requires the Obligation Management (PRD-009) and Control Testing (PRD-008) modules to be built first.",
+    "modules": [
+        "Regulation Diff Engine",
+        "Impact Predictor",
+        "Remediation Estimator"
+    ],
+    "user_stories": [
+        {
+            "id": "US-F7.1",
+            "story": "As a Compliance Officer, when a regulation is updated, I want the system to compare the old and new versions and highlight what changed, so that I understand the impact immediately.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "System shows a diff between regulation versions.",
+                "Changed sections are highlighted with AI-generated summary of changes."
+            ]
+        },
+        {
+            "id": "US-F7.2",
+            "story": "As a Compliance Officer, I want the system to predict which of my existing controls, policies, and obligations are impacted by a new regulation, so that I can plan remediation.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "AI scans new regulation text against existing control/policy descriptions.",
+                "Returns a scored list of impacted items (High/Medium/Low impact).",
+                "Creates draft Findings (PRD-007) for high-impact items."
+            ]
+        },
+        {
+            "id": "US-F7.3",
+            "story": "As a CISO, I want an estimated remediation effort (hours/cost) for adopting a new regulation, so that I can budget appropriately.",
+            "status": "Draft",
+            "acceptance_criteria": [
+                "System estimates effort based on number of impacted controls and historical remediation velocity.",
+                "Estimate is displayed alongside the impact report."
+            ]
+        }
+    ]
+}

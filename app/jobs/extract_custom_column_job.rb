@@ -10,7 +10,7 @@ class ExtractCustomColumnJob < ApplicationJob
     processed = 0
     
     Regulation.find_each do |regulation|
-      RegulationExtractionService.new(regulation, custom_column).call
+      Ai::RegulationExtractionService.new(regulation, custom_column).call
       processed += 1
       
       if processed % 10 == 0

@@ -1,0 +1,105 @@
+{
+    "id": "PRD-007",
+    "title": "Findings & Remediation Management (CAPA)",
+    "status": "Pending",
+    "priority": "Critical",
+    "timeline": "Current — Build Now",
+    "rationale": "Transforms the platform from an evidence repository into an operational compliance system. Directly extends existing Risk, Controls, and Evidence modules.",
+    "modules": [
+        "Findings Register",
+        "Corrective Action Plans",
+        "SLA Tracking",
+        "Auto-Generation from Control Failures"
+    ],
+    "user_stories": [
+        {
+            "id": "US-7.1",
+            "story": "As a Compliance Manager, when a control fails, I want a remediation ticket (Finding) automatically created and assigned, so that I don't have to manually chase engineering.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "System auto-creates a Finding when an Evidence Agent returns 'Fail'.",
+                "System auto-creates a Finding when evidence expires.",
+                "System auto-creates a Finding when an auditor flags a deficiency.",
+                "Finding is linked to the originating Control, Risk, and Evidence."
+            ]
+        },
+        {
+            "id": "US-7.2",
+            "story": "As a Compliance Manager, I want to assign a remediation owner and set an SLA deadline on a Finding, so that accountability is clear.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Manager can assign a user as the remediation owner.",
+                "Manager can set a due date (SLA) for the finding.",
+                "Overdue findings are visually flagged on dashboards.",
+                "Assignee receives notification upon assignment."
+            ]
+        },
+        {
+            "id": "US-7.3",
+            "story": "As a Remediation Owner, I want to document my corrective action plan and attach evidence of the fix, so that the finding can be validated and closed.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Owner can add a description of the corrective action taken.",
+                "Owner can upload evidence of remediation.",
+                "Owner can submit the finding for verification."
+            ]
+        },
+        {
+            "id": "US-7.4",
+            "story": "As a Compliance Manager, I want findings to auto-close when the associated evidence passes again, so that resolved issues don't require manual closure.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "When a linked Evidence Agent next returns 'Pass', the Finding is auto-resolved.",
+                "An audit log entry records the auto-closure with timestamp and evidence reference."
+            ]
+        },
+        {
+            "id": "US-7.5",
+            "story": "As a Compliance Manager, I want to track root causes of findings, so that I can identify systemic issues.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Manager can select a root cause category (Process, People, Technology, Policy).",
+                "Dashboard shows root cause distribution across all findings."
+            ]
+        },
+        {
+            "id": "US-7.6",
+            "story": "As an Org Admin, I want to integrate findings with our project management tool (Jira/Linear/ServiceNow), so that engineering gets tickets in their existing workflow.",
+            "status": "Pending",
+            "acceptance_criteria": [
+                "Admin can configure a Jira/Linear integration.",
+                "When a Finding is created, a corresponding ticket is created in the external tool.",
+                "Status syncs bidirectionally (external close → Finding resolves)."
+            ]
+        }
+    ],
+    "data_model": {
+        "new_models": [
+            "Finding (status, severity, root_cause, sla_date, finding_type)",
+            "CorrectiveAction (description, evidence, submitted_at)",
+            "FindingLink (polymorphic: Control, Risk, Evidence, Regulation)"
+        ],
+        "enums": {
+            "finding_status": [
+                "open",
+                "in_progress",
+                "pending_verification",
+                "closed",
+                "overdue"
+            ],
+            "finding_type": [
+                "control_failure",
+                "evidence_expiry",
+                "audit_deficiency",
+                "policy_outdated"
+            ],
+            "root_cause": [
+                "process",
+                "people",
+                "technology",
+                "policy",
+                "third_party"
+            ]
+        }
+    }
+}

@@ -1,0 +1,100 @@
+<%= form_with(model: [@organization, policy], class: "space-y-6") do |form| %>
+  <% if policy.errors.any? %>
+    <%= render Joyful::CardComponent.new(padding: true) do %>
+      <div class="space-y-2">
+        <h2 class="text-lg font-bold text-red-700 flex items-center gap-2">
+          <i class="fas fa-exclamation-circle"></i>
+          <%= pluralize(policy.errors.count, "error") %> prohibited this policy from being saved:
+        </h2>
+        <ul class="list-disc pl-5 text-red-600">
+          <% policy.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  <% end %>
+
+  <%= render Joyful::CardComponent.new(title: "Policy Details", icon: "file-contract", padding: true) do %>
+    <div class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <%= render Joyful::InputComponent.new(
+              form: form, 
+              method: :title, 
+              label: "Title", 
+              placeholder: "e.g., Data Privacy Policy",
+              class: "col-span-1 md:col-span-2"
+            ) %>
+
+        <%= render Joyful::InputComponent.new(
+              form: form, 
+              method: :status, 
+              label: "Status", 
+              type: :select,
+              choices: Policy.statuses.keys.map { |s| [s.humanize, s] },
+              options: {},
+              html_options: { class: "w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" }
+            ) %>
+
+        <%= render Joyful::InputComponent.new(
+              form: form, 
+              method: :effective_date, 
+              label: "Effective Date", 
+              type: :date_field
+            ) %>
+            
+        <%= render Joyful::InputComponent.new(
+              form: form, 
+              method: :description, 
+              label: "Description", 
+              type: :text_area,
+              rows: 3,
+              placeholder: "Brief summary of the policy's purpose.",
+              class: "col-span-1 md:col-span-2"
+            ) %>
+      </div>
+
+      <div class="space-y-1">
+        <%= form.label :file, "Upload Policy Document (PDF or Word)", class: "block text-sm font-medium leading-6 text-gray-900" %>
+        <div class="mt-2 flex justify-center rounded-xl border border-dashed border-gray-300 px-6 py-10 hover:bg-gray-50 transition-colors">
+          <div class="text-center">
+            <i class="fas fa-cloud-upload-alt text-4xl text-gray-300 mb-3"></i>
+            <div class="mt-4 flex text-sm leading-6 text-gray-600 justify-center">
+              <label for="policy_file" class="relative cursor-pointer rounded-md bg-white font-semibold text-primary-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2 hover:text-primary-500">
+                <span>Upload a file</span>
+                <%= form.file_field :file, accept: ".pdf,.docx", class: "sr-only" %>
+              </label>
+              <p class="pl-1">or drag and drop</p>
+            </div>
+            <p class="text-xs leading-5 text-gray-600">PDF or DOCX up to 10MB</p>
+          </div>
+        </div>
+        <p class="mt-2 text-sm text-gray-500">Uploading a file will automatically extract text to the content area below.</p>
+      </div>
+    </div>
+  <% end %>
+
+  <%= render Joyful::CardComponent.new(title: "Policy Content", icon: "align-left", padding: true) do %>
+    <div class="space-y-1">
+      <%= form.label :content, class: "block text-sm font-medium leading-6 text-gray-900" %>
+      <div class="prose max-w-none">
+        <%= form.rich_text_area :content, class: "block w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 min-h-[300px]" %>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="flex justify-end gap-3 pt-4">
+    <%= render Joyful::ButtonComponent.new(
+          text: "Cancel",
+          variant: :secondary,
+          path: organization_policies_path(@organization)
+        ) %>
+    
+    <%= render Joyful::ButtonComponent.new(
+          text: "Save Policy",
+          type: :submit,
+          variant: :primary,
+          icon: "save"
+        ) %>
+  </div>
+<% end %>

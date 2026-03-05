@@ -18,12 +18,21 @@
 
         <%= render Joyful::InputComponent.new(
               form: f, 
+              method: :organization_name, 
+              label: "Company Name", 
+              placeholder: "Acme Corp",
+              required: true,
+              type: :text_field,
+              autofocus: true
+            ) %>
+
+        <%= render Joyful::InputComponent.new(
+              form: f, 
               method: :email, 
               label: "Email Address", 
               placeholder: "you@example.com",
               required: true,
               type: :email_field,
-              autofocus: true,
               autocomplete: "email"
             ) %>
 

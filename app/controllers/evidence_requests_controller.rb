@@ -1,5 +1,6 @@
 class EvidenceRequestsController < ApplicationController
   before_action :authenticate_user!
+  before_action -> { require_feature!(:compliance_management) }
   before_action :set_organization
   before_action :set_evidence_request, only: %i[show edit update destroy]
 

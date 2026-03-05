@@ -1,0 +1,58 @@
+{
+    "id": "PRD-002",
+    "title": "Questionnaire Autofill (RFP Responder)",
+    "status": "Draft",
+    "summary": "An intelligent agent that uses RAG (Retrieval-Augmented Generation) to answer security questionnaires (Excel, CSV) using the organization's existing Policy and Control data.",
+    "goals": [
+        "Reduce time spent on vendor security questionnaires by 90%.",
+        "Ensure consistent answers across different customers.",
+        "Leverage existing compliance data as the 'source of truth'."
+    ],
+    "user_stories": [
+        {
+            "id": "US-2.1",
+            "role": "Sales Engineer",
+            "action": "upload a security questionnaire CSV",
+            "outcome": "the system populates the 'Answer' column with high-confidence responses based on our live policies."
+        },
+        {
+            "id": "US-2.2",
+            "role": "Compliance Officer",
+            "action": "review AI-generated answers",
+            "outcome": "edit them if necessary and approve them, adding the final approved answer to the knowledge base for future use."
+        },
+        {
+            "id": "US-2.3",
+            "role": "System",
+            "action": "encounter a new question",
+            "outcome": "search specific policy PDF content to find the nuance required."
+        }
+    ],
+    "technical_spec": {
+        "ai_logic": {
+            "model": "Gemini 1.5 Pro (large context window)",
+            "technique": "RAG over Vector Database (pgvector)",
+            "sources": [
+                "Policies",
+                "Controls",
+                "Previous Questionnaire Answers"
+            ]
+        },
+        "file_processing": {
+            "input_formats": [
+                "csv",
+                "xlsx"
+            ],
+            "output_formats": [
+                "csv",
+                "xlsx"
+            ]
+        }
+    },
+    "acceptance_criteria": [
+        "System parses uploaded Excel/CSV headers correctly.",
+        "For each question, the system retrieves relevant chunks from vector DB.",
+        "Generated answers reference the specific Policy they are derived from.",
+        "User can export the completed file."
+    ]
+}

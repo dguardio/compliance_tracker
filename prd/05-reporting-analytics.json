@@ -1,0 +1,36 @@
+{
+    "title": "Reporting & Analytics",
+    "status": "Mixed",
+    "priority": "Medium",
+    "modules": [
+        "Compliance Dashboard",
+        "Exporting"
+    ],
+    "user_stories": [
+        {
+            "story": "As an Executive, I want a high-level Compliance Dashboard, so that I can see our overall standing at a glance.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "Dashboard shows overall compliance score.",
+                "Dashboard shows breakdown by Framework.",
+                "Dashboard highlights critical risks and overdue tasks."
+            ]
+        },
+        {
+            "story": "As an Auditor, I want to export compliance data (CSV/PDF), so that I can review it offline or in other tools.",
+            "status": "Pending MVP",
+            "acceptance_criteria": [
+                "User can export lists of Requirements/Controls to CSV.",
+                "User can generate a 'Compliance Statement' PDF."
+            ]
+        },
+        {
+            "story": "As a Compliance Manager, I want to utilize AI to summarize complex regulations, so that I can understand them quickly.",
+            "status": "Completed",
+            "acceptance_criteria": [
+                "User can view AI-generated summaries of regulation text.",
+                "Summaries highlight key obligations."
+            ]
+        }
+    ]
+}

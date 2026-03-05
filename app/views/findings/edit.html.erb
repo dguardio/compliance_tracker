@@ -1,0 +1,11 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <%= link_to "← Back to Finding", organization_finding_path(@organization, @finding),
+                class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+
+  <div class="bg-white shadow rounded-lg p-6">
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">Edit Finding</h1>
+    <%= render 'form' %>
+  </div>
+</div>

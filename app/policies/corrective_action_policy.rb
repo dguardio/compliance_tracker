@@ -1,0 +1,2 @@
+class CorrectiveActionPolicy < ApplicationPolicy
+end

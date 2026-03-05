@@ -13,7 +13,7 @@ class Admin::OrganizationRegulationsController < ApplicationController
     
     if params[:smart_search] == '1' && search_params[:title_cont].present?
       original_term = search_params[:title_cont]
-      expanded_terms = AiSearchService.expand_query(original_term)
+      expanded_terms = Ai::SearchService.expand_query(original_term)
       
       # If we got expanded terms, we search for ANY of them OR the original term
       if expanded_terms.any?

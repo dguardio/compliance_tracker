@@ -1,4 +1,5 @@
 class ComplianceFrameworksController < ApplicationController
+  before_action -> { require_feature!(:compliance_management) }
   before_action :set_organization
   before_action :set_compliance_framework, only: %i[show edit update destroy]
   before_action :authorize_compliance_framework

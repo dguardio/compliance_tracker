@@ -30,7 +30,7 @@ class RegulatoryDataSource < ApplicationRecord
   end
 
   def auto_configure!
-    Regulatory::SmartConfiguratorService.new(self).call
+    Ai::SmartConfiguratorService.new(self).call
   end
 
   def external_scraper?

@@ -1,0 +1,2 @@
+class FindingPolicy < ApplicationPolicy
+end

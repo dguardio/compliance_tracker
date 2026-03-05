@@ -1,0 +1,78 @@
+<%= form_with model: @finding, url: @finding.persisted? ? organization_finding_path(@organization, @finding) : organization_findings_path(@organization), class: "space-y-6" do |f| %>
+  <% if @finding.errors.any? %>
+    <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded">
+      <div class="flex">
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800"><%= pluralize(@finding.errors.count, "error") %> prevented this finding from being saved:</h3>
+          <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
+            <% @finding.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="md:col-span-2">
+      <%= f.label :title, class: "block text-sm font-medium text-gray-700" %>
+      <%= f.text_field :title, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", required: true %>
+    </div>
+
+    <div class="md:col-span-2">
+      <%= f.label :description, class: "block text-sm font-medium text-gray-700" %>
+      <%= f.text_area :description, rows: 4, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+    </div>
+
+    <div>
+      <%= f.label :source, class: "block text-sm font-medium text-gray-700" %>
+      <%= f.select :source, Finding.sources.keys.map { |k| [k.titleize, k] }, {}, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+    </div>
+
+    <div>
+      <%= f.label :severity, class: "block text-sm font-medium text-gray-700" %>
+      <%= f.select :severity, Finding.severities.keys.map { |k| [k.titleize, k] }, {}, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+    </div>
+
+    <div>
+      <%= f.label :status, class: "block text-sm font-medium text-gray-700" %>
+      <%= f.select :status, Finding.statuses.keys.map { |k| [k.titleize, k] }, {}, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+    </div>
+
+    <div>
+      <%= f.label :root_cause, class: "block text-sm font-medium text-gray-700" %>
+      <%= f.select :root_cause, Finding.root_causes.keys.map { |k| [k.titleize, k] }, { include_blank: "Select root cause" }, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+    </div>
+
+    <div>
+      <%= f.label :compliance_framework_id, "Framework", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.select :compliance_framework_id, @organization.compliance_frameworks.map { |fw| [fw.name, fw.id] }, { include_blank: "Select framework" }, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+    </div>
+
+    <div>
+      <%= f.label :assigned_to_id, "Assign To", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.select :assigned_to_id, @organization.users.sort_by { |u| u.first_name.to_s }.map { |u| [u.full_name, u.id] }, { include_blank: "Unassigned" }, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+    </div>
+
+    <div>
+      <%= f.label :sla_deadline, class: "block text-sm font-medium text-gray-700" %>
+      <%= f.datetime_field :sla_deadline, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+      <p class="mt-1 text-xs text-gray-500">Leave blank for auto-calculation based on severity</p>
+    </div>
+
+    <% if @finding.persisted? %>
+      <div class="md:col-span-2">
+        <%= f.label :resolution_notes, class: "block text-sm font-medium text-gray-700" %>
+        <%= f.text_area :resolution_notes, rows: 2, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="flex justify-end space-x-3 pt-4 border-t">
+    <%= link_to "Cancel", @finding.persisted? ? organization_finding_path(@organization, @finding) : organization_findings_path(@organization),
+                class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
+    <%= f.submit @finding.persisted? ? "Update Finding" : "Create Finding",
+                 class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer" %>
+  </div>
+<% end %>

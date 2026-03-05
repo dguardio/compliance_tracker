@@ -5,6 +5,7 @@ class Policy < ApplicationRecord
   
   # Associations
   has_many :policy_links, dependent: :destroy
+  has_many :attestation_campaigns, dependent: :destroy
   has_many :regulations, through: :policy_links, source: :linkable, source_type: 'Regulation'
   has_many :compliance_controls, through: :policy_links, source: :linkable, source_type: 'ComplianceControl'
   has_many :risk_assessments, through: :policy_links, source: :linkable, source_type: 'RiskAssessment'
