@@ -61,6 +61,18 @@ sudo yum install -y poppler-utils tesseract tesseract-langpack-eng libreoffice g
 
 Visit `http://localhost:3000` to access the application.
 
+## Local Python Scraper Mock
+
+To test the Scrapling integration locally, run the Python Mock FastAPI service:
+
+```bash
+cd scraper_service
+pip install -r requirements.txt
+uvicorn main:app --port 8000 --reload
+```
+
+This will run a background mock service on port 8000 that the `RegulatoryScraperService` can dispatch to.
+
 ## License
 
 This project is licensed under the MIT License.
