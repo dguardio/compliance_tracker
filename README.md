@@ -67,6 +67,8 @@ To test the Scrapling integration locally, run the Python Mock FastAPI service:
 
 ```bash
 cd scraper_service
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --port 8000 --reload
 ```
