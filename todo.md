@@ -34,10 +34,10 @@ This plan outlines a future refinement to the regulatory data ingestion process,
     *   Instead of relying on a specific CSS selector, the scraper now dispatches to an external Python microservice (`scrapling` + `litellm`) that uses an LLM to analyze the structure of a webpage, find links, navigate autonomously, and extract the relevant content.
     *   The scraper is now able to handle a wider variety of website layouts and structures without needing to be reconfigured for each source.
 
-2.  **Multi-Modal Data Ingestion:**
-    *   Extend the scraper to handle different types of content, including PDFs, Word documents, and other common formats.
-    *   Integrate with document processing libraries and services to extract text and metadata from these files.
-    *   For sources that provide APIs, develop a flexible API client that can be configured to work with different API specifications.
+2.  **Multi-Modal Data Ingestion: (COMPLETED)**
+    *   Extended the scraper to handle different types of content, including PDFs, Word documents, and HTML.
+    *   Integrated with the Python microservice to process these formats over the wire.
+    *   For sources that provide APIs (like Regulations.gov), the platform seamlessly relies on the `RegulatoryDataSource` API integration feature, reducing the need for hand-coded specific API clients per source.
 
 **Sub-Phase 3: AI-Powered Processing and Enrichment**
 

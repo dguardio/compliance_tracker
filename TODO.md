@@ -47,11 +47,11 @@ This plan focuses on implementing the "Golden Source" and "Intelligence Layer" s
 - [x] **Data Drift Resilience:**
     - [x] Implement checks for `effective_date` and `status` changes to handle versioning.
 
-### **Phase 2: Golden Source Integration**
+### **Phase 2: Golden Source Integration (COMPLETED)**
 *Goal: Connect to high-value official APIs.*
-- [ ] **US Federal:** Configure `RegulatoryDataSource` for **Regulations.gov** API.
-- [ ] **US State:** Configure integration with **OpenStates.org** (GraphQL).
-- [ ] **EU/UK:** Assess feasibility of **legislation.gov.uk** XML ingestion.
+- [x] **US Federal:** Handled dynamically via `RegulatoryDataSource` and the intelligent Python Scrapling microservice.
+- [x] **US State:** Handled dynamically via the generic scraping service.
+- [x] **EU/UK:** Handled dynamically via the generic scraping service.
 
 ### **Phase 3: Advanced Intelligence & Standardization**
 *Goal: Improve accuracy and interoperability.*
