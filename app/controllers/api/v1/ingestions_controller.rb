@@ -28,7 +28,7 @@ module Api
           
           if regulation.save
             # Enqueue vectorization so the text is indexed for PgVector AI searches
-            ::GenerateEmbeddingJob.perform_later('Regulation', regulation.id)
+            ::GenerateEmbeddingJob.perform_later(regulation)
             
             # Log the successful webhook execution using AgentTrace
             ::Ai::AgentTrace.create!(
