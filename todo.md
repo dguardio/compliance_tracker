@@ -29,10 +29,10 @@ This plan outlines a future refinement to the regulatory data ingestion process,
 
 **Sub-Phase 2: Intelligent and Adaptive Data Ingestion**
 
-1.  **Generic Scraper with Adaptive Parsing:**
-    *   Refactor the `RegulatoryScraperService` to be more generic and adaptive.
-    *   Instead of relying on a specific CSS selector, the scraper would use an LLM to analyze the structure of a webpage and identify the relevant content to extract (e.g., the main body of a regulation, its title, publication date, etc.).
-    *   The scraper would be able to handle a wider variety of website layouts and structures without needing to be reconfigured for each source.
+1.  **Generic Scraper with Adaptive Parsing: (COMPLETED)**
+    *   Refactored the `RegulatoryScraperService` to be more generic and adaptive.
+    *   Instead of relying on a specific CSS selector, the scraper now dispatches to an external Python microservice (`scrapling` + `litellm`) that uses an LLM to analyze the structure of a webpage, find links, navigate autonomously, and extract the relevant content.
+    *   The scraper is now able to handle a wider variety of website layouts and structures without needing to be reconfigured for each source.
 
 2.  **Multi-Modal Data Ingestion:**
     *   Extend the scraper to handle different types of content, including PDFs, Word documents, and other common formats.

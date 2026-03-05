@@ -58,10 +58,10 @@ This plan focuses on implementing the "Golden Source" and "Intelligence Layer" s
 - [ ] **Legal-BERT Integration:** Explore fine-tuning BERT models for better classification of "Risk" and "Topic".
 - [ ] **Akoma Ntoso Mapping:** Map internal data models to LegalDocML standards.
 
-### **Phase 4: Commercial Expansion (Future)**
-*Goal: Scale global coverage.*
+### Phase 4: Commercial Expansion & Extensibility
+*Goal: Scale global coverage and handle complex scrapers.*
+- [x] **Juriscraper / Python Extractor:** Built an external Python LLM web crawler using `scrapling` and `litellm` that communicates with Rails via webhooks for bypassing anti-bot measures and navigating complex multi-page regulation repositories.
 - [ ] **vLex Integration:** Evaluate licensing **vLex Iceberg API** for global jurisdiction coverage.
-- [ ] **Juriscraper:** Consider introducing Python/Juriscraper for complex non-API sources.
 
 
 ---

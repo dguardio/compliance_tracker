@@ -19,13 +19,13 @@ The project is a comprehensive, multi-tenant compliance management platform buil
     *   Dashboards and reporting for tracking progress.
 
 ### Technical Stack
-*   **Backend:** Ruby on Rails 7.1
-*   **Database:** PostgreSQL (with `pgvector` for AI features)
+*   **Backend:** Ruby on Rails 7.1 (Core Platform), FastAPI / Python 3.12 (Scraping Microservice)
+*   **Database:** PostgreSQL (with `pgvector` for AI features), SQLite (Scraper job queue)
 *   **Frontend:** Hotwire (Turbo, Stimulus), Tailwind CSS, ViewComponent
 *   **Authentication/Authorization:** Devise, Pundit, Rolify
 *   **Multi-tenancy:** `acts_as_tenant` gem
 *   **Background Jobs:** Sidekiq
-*   **AI & Scraping:** `langchainrb`, `ruby-openai`, `nokogiri`, `httparty`
+*   **AI & Scraping:** `langchainrb`, `ruby-openai`, `nokogiri`, `httparty` (Rails) | `scrapling`, `litellm`, `playwright`, `browserforge` (Python)
 *   **File Handling:** Active Storage, various gems for document processing (`docx`, `roo`, `pdf-reader`)
 *   **Testing:** RSpec, FactoryBot, Capybara
 
@@ -42,9 +42,10 @@ The project is a comprehensive, multi-tenant compliance management platform buil
 *   **`RegulatoryScraperService`**: This service has been refactored to be driven by the `RegulatoryDataSource` model.
 *   **Configurable Sources**: The engine iterates through enabled data sources, allowing for flexible and configurable ingestion.
 *   **Multiple Strategies**: It supports different `source_type`s, including:
-    *   `web_scrape`: Can use either a specific CSS selector or an LLM for more robust link extraction, configured via the data source's `settings`.
+    *   `web_scrape`: Can use either a specific CSS selector, an LLM for robust link extraction locally, or **Dispatch to the External Python Scrapling Microservice**.
+    *   `external_scrapling`: **Implemented.** An advanced LLM-powered Python crawler (`scrapling` + `litellm`) that bypasses anti-bot protections, autonomously navigates deep link structures via AI, and posts JSON data back to a Rails webhook endpoint asynchronously.
     *   `rss`: Parses RSS feeds to find new regulation links.
-    *   `api`: **Implemented.** Supports generic JSON API ingestion with configurable field mapping and pagination via `RegulatoryDataSource` settings.
+    *   `api`: Supports generic JSON API ingestion with configurable field mapping and pagination via `RegulatoryDataSource` settings.
 *   **Admin Interface**: A new CRUD interface at `/admin/regulatory_data_sources` allows administrators to manage these configurations. It is accessible via a new "Admin" dropdown in the main navigation, which is only visible to super admins.
 
 ### AI Enrichment (formerly "Cube Tagging")
