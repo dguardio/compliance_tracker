@@ -83,7 +83,7 @@ module OrganizationBrandingHelper
   end
 
   def organization_welcome_message
-    current_user.organization&.welcome_message || "Welcome to #{current_user.organization&.name || 'Compliance Tracker'}"
+    current_user.organization&.welcome_message || "Welcome to #{current_user.organization&.name || 'ComplyFlow'}"
   end
 
   def organization_timezone

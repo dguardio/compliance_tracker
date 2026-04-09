@@ -21,6 +21,7 @@ Every company operating in regulated industries (finance, healthcare, insurance,
 ### How ComplyFlow Fixes It
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#1a1a1a', 'primaryBorderColor': '#333333', 'lineColor': '#333333', 'secondaryColor': '#f5f5f5', 'tertiaryColor': '#e8e8e8', 'background': '#ffffff', 'mainBkg': '#ffffff', 'nodeBorder': '#333333', 'clusterBkg': '#fafafa', 'clusterBorder': '#999999', 'titleColor': '#1a1a1a', 'edgeLabelBackground': '#ffffff'}}}%%
 graph LR
     A["1️⃣ DISCOVER<br/>Automatically finds<br/>new regulations"] --> B["2️⃣ UNDERSTAND<br/>AI reads & summarizes<br/>what's required"]
     B --> C["3️⃣ ASSIGN<br/>Routes tasks to<br/>the right teams"]
@@ -30,13 +31,13 @@ graph LR
     F --> G["7️⃣ MONITOR<br/>Dashboards show<br/>real-time status"]
     G --> A
 
-    style A fill:#1a73e8,color:#fff
-    style B fill:#7c3aed,color:#fff
-    style C fill:#059669,color:#fff
-    style D fill:#d97706,color:#fff
-    style E fill:#dc2626,color:#fff
-    style F fill:#2563eb,color:#fff
-    style G fill:#0891b2,color:#fff
+    style A fill:#e0e0e0,color:#1a1a1a,stroke:#333333,stroke-width:2px
+    style B fill:#c8c8c8,color:#1a1a1a,stroke:#333333,stroke-width:2px
+    style C fill:#e0e0e0,color:#1a1a1a,stroke:#333333,stroke-width:2px
+    style D fill:#c8c8c8,color:#1a1a1a,stroke:#333333,stroke-width:2px
+    style E fill:#e0e0e0,color:#1a1a1a,stroke:#333333,stroke-width:2px
+    style F fill:#c8c8c8,color:#1a1a1a,stroke:#333333,stroke-width:2px
+    style G fill:#e0e0e0,color:#1a1a1a,stroke:#333333,stroke-width:2px
 ```
 
 | Without ComplyFlow | With ComplyFlow |
@@ -88,6 +89,7 @@ graph LR
 ### Platform Architecture
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#1a1a1a', 'primaryBorderColor': '#333333', 'lineColor': '#333333', 'secondaryColor': '#f5f5f5', 'tertiaryColor': '#e8e8e8', 'background': '#ffffff', 'mainBkg': '#ffffff', 'nodeBorder': '#333333', 'clusterBkg': '#fafafa', 'clusterBorder': '#999999', 'titleColor': '#1a1a1a', 'edgeLabelBackground': '#ffffff'}}}%%
 graph TB
     subgraph External["🌐 External Sources"]
         GOV["Government APIs<br/>(SEC, OCC, regulations.gov)"]
@@ -148,6 +150,7 @@ graph TB
 ### Request & Data Flow
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#1a1a1a', 'primaryBorderColor': '#333333', 'lineColor': '#333333', 'secondaryColor': '#f5f5f5', 'tertiaryColor': '#e8e8e8', 'background': '#ffffff', 'mainBkg': '#ffffff', 'nodeBorder': '#333333', 'actorBkg': '#f5f5f5', 'actorBorder': '#333333', 'actorTextColor': '#1a1a1a', 'actorLineColor': '#333333', 'signalColor': '#333333', 'signalTextColor': '#1a1a1a', 'sequenceNumberColor': '#1a1a1a', 'noteBkgColor': '#f0f0f0', 'noteBorderColor': '#333333', 'noteTextColor': '#1a1a1a', 'activationBkgColor': '#e8e8e8', 'activationBorderColor': '#333333'}}}%%
 sequenceDiagram
     participant SRC as 🌐 Regulatory Source
     participant SCR as 🐍 Scraper Service
@@ -183,6 +186,7 @@ sequenceDiagram
 ### Core Module Architecture
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#1a1a1a', 'primaryBorderColor': '#333333', 'lineColor': '#333333', 'secondaryColor': '#f5f5f5', 'tertiaryColor': '#e8e8e8', 'background': '#ffffff', 'mainBkg': '#ffffff', 'nodeBorder': '#333333', 'clusterBkg': '#fafafa', 'clusterBorder': '#999999', 'titleColor': '#1a1a1a', 'edgeLabelBackground': '#ffffff'}}}%%
 graph TB
     subgraph Core["🏗️ Core Platform"]
         MT["Multi-Tenancy<br/>(Organizations, Depts, Teams)"]
@@ -242,6 +246,7 @@ graph TB
 #### Source Strategy: "Golden Sources First"
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#1a1a1a', 'primaryBorderColor': '#333333', 'lineColor': '#333333', 'secondaryColor': '#f5f5f5', 'tertiaryColor': '#e8e8e8', 'background': '#ffffff', 'mainBkg': '#ffffff', 'nodeBorder': '#333333', 'clusterBkg': '#fafafa', 'clusterBorder': '#999999', 'titleColor': '#1a1a1a', 'edgeLabelBackground': '#ffffff'}}}%%
 graph TB
     subgraph Tier1["Tier 1: Official APIs (Preferred)"]
         SEC["SEC EDGAR API"]
@@ -287,6 +292,7 @@ Each `RegulatoryDataSource` record defines:
 ### AI Intelligence Layer
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#1a1a1a', 'primaryBorderColor': '#333333', 'lineColor': '#333333', 'secondaryColor': '#f5f5f5', 'tertiaryColor': '#e8e8e8', 'background': '#ffffff', 'mainBkg': '#ffffff', 'nodeBorder': '#333333', 'clusterBkg': '#fafafa', 'clusterBorder': '#999999', 'titleColor': '#1a1a1a', 'edgeLabelBackground': '#ffffff'}}}%%
 graph LR
     subgraph Core_AI["Core AI Infrastructure"]
         CLIENT["Ai::Client<br/>(Centralized wrapper)"]
@@ -333,6 +339,7 @@ graph LR
 ### Multi-Tenancy & Access Control
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', 'primaryTextColor': '#1a1a1a', 'primaryBorderColor': '#333333', 'lineColor': '#333333', 'secondaryColor': '#f5f5f5', 'tertiaryColor': '#e8e8e8', 'background': '#ffffff', 'mainBkg': '#ffffff', 'nodeBorder': '#333333', 'clusterBkg': '#fafafa', 'clusterBorder': '#999999', 'titleColor': '#1a1a1a', 'edgeLabelBackground': '#ffffff'}}}%%
 graph TB
     subgraph Tenant["Organization (Tenant Boundary)"]
         ORG["🏢 Organization<br/>(Branding, Profile, Settings)"]

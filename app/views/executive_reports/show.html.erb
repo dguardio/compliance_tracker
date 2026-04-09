@@ -24,7 +24,7 @@
   <!-- Metrics Grid -->
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
     <div class="bg-white rounded-lg border p-4 text-center">
-      <p class="text-3xl font-bold" style="color: var(--primary-color, #6366f1);"><%= @report.metric('compliance_score') %>%</p>
+      <p class="text-3xl font-bold" style="color: var(--primary-color, #6366f1);"><%= @report.metric('compliance_score') || 0 %>%</p>
       <p class="text-xs text-gray-500">Compliance Score</p>
     </div>
     <div class="bg-white rounded-lg border p-4 text-center">

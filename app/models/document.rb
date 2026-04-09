@@ -23,7 +23,7 @@ class Document < ApplicationRecord
 
   # Active Storage for file attachments
   has_many :versions, class_name: 'DocumentVersion', dependent: :destroy
-  has_many_attached :files
+  has_one_attached :file
 
   # Validations
   validates :title, presence: true

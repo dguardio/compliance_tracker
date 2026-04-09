@@ -46,6 +46,9 @@ application.register("hello", HelloController)
 import KanbanController from "./kanban_controller"
 application.register("kanban", KanbanController)
 
+import LoaderController from "./loader_controller"
+application.register("loader", LoaderController)
+
 import ModalController from "./modal_controller"
 application.register("modal", ModalController)
 

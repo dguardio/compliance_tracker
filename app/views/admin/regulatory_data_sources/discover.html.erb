@@ -7,7 +7,7 @@
     <h2 class="text-xl font-semibold text-gray-900 mb-4">Discover with AI</h2>
     <p class="text-sm text-gray-600 mb-6">Enter a sector and jurisdiction to let the AI discover potential new data sources.</p>
     
-    <%= form_with url: discover_admin_regulatory_data_sources_path, method: :post, class: "space-y-4", data: { turbo: false } do |form| %>
+    <%= form_with url: discover_admin_regulatory_data_sources_path, method: :post, class: "space-y-4", data: { turbo_frame: "discovered_sources", controller: "loader", action: "submit->loader#show" } do |form| %>
       <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
         <div class="sm:col-span-3">
           <%= label_tag :sector, "Sector", class: "block text-sm font-medium text-gray-700" %>
@@ -25,42 +25,44 @@
       </div>
 
       <div class="flex justify-end">
-        <%= form.submit "Discover Sources", class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        <%= form.submit "Discover Sources", class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500", data: { disable_with: "Discovering..." } %>
       </div>
     <% end %>
   </div>
 
-  <% if @discovered_sources.present? %>
-    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-      <h2 class="text-xl font-semibold text-gray-900 p-6">Discovered Sources</h2>
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source Type</th>
-            <th scope="col" class="relative px-6 py-3">
-              <span class="sr-only">Actions</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <% @discovered_sources.each do |source| %>
+  <%= turbo_frame_tag "discovered_sources" do %>
+    <% if @discovered_sources.present? %>
+      <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <h2 class="text-xl font-semibold text-gray-900 p-6">Discovered Sources</h2>
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
             <tr>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= source['name'] %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= link_to source['url'], source['url'], target: "_blank", class: "text-indigo-600 hover:text-indigo-900" %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= source['source_type'] %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <%= link_to 'Create', new_admin_regulatory_data_source_path(name: source['name'], url: source['url'], source_type: source['source_type']), class: "text-indigo-600 hover:text-indigo-900" %>
-              </td>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source Type</th>
+              <th scope="col" class="relative px-6 py-3">
+                <span class="sr-only">Actions</span>
+              </th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-  <% elsif request.post? %>
-    <div class="bg-white shadow sm:rounded-lg p-6">
-      <p class="text-center text-gray-500">No sources were found for the given sector and jurisdiction.</p>
-    </div>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% @discovered_sources.each do |source| %>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= source[:name] %></td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= link_to source[:url], source[:url], target: "_blank", class: "text-indigo-600 hover:text-indigo-900" %></td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= source[:source_type] %></td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <%= link_to 'Create', new_admin_regulatory_data_source_path(name: source[:name], url: source[:url], source_type: source[:source_type]), class: "text-indigo-600 hover:text-indigo-900", data: { turbo: false } %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% elsif request.post? %>
+      <div class="bg-white shadow sm:rounded-lg p-6">
+        <p class="text-center text-gray-500">No sources were found for the given sector and jurisdiction.</p>
+      </div>
+    <% end %>
   <% end %>
 </div>

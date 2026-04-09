@@ -166,6 +166,8 @@
           <% if feature_enabled?(:questionnaire_autofill) %>
             <%= link_to "Questionnaire Autofill", organization_questionnaire_index_path(current_user.organization), class: "block px-3 py-2 -mx-3 rounded-lg text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors font-medium" %>
           <% end %>
+          <!-- Active Tables Link Added Here -->
+          <%= link_to "Active Tables", admin_compliance_tables_path, class: "block px-3 py-2 -mx-3 rounded-lg text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors font-medium" %>
         </div>
       </div>
 

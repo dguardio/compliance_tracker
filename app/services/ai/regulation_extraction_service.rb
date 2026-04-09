@@ -32,7 +32,9 @@ module Ai
   private
 
   def extract_with_llm
-    full_text = @regulation.full_text['extracted_content'] || ''
+    text_data = @regulation.full_text || {}
+    full_text = text_data['extracted_content'] || text_data['main'] || text_data.to_s
+    full_text = '' if full_text.blank?
     
     prompt = build_prompt(full_text)
     

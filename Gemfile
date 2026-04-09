@@ -180,8 +180,7 @@ group :test do
   gem 'simplecov-lcov', require: false
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem 'capybara', '~> 3.39'
-  gem 'selenium-webdriver', '~> 4.10'
-  gem 'webdrivers', '~> 5.3'
+  gem 'selenium-webdriver', '~> 4.27'
 end
 
 gem "caxlsx", "~> 4.4"

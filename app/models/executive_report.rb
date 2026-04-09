@@ -17,6 +17,6 @@ class ExecutiveReport < ApplicationRecord
   end
 
   def metric(key)
-    metrics&.dig(key.to_s) || 0
+    metrics&.dig(key.to_s)
   end
 end
